@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<!-- 자동 생성: tools/make_screw_asset.py
+     나사산 형상 없이 mimic 조인트로 나사 운동을 구속한다.
+     cap_lift(prismatic) 가 cap_spin(revolute) 을 배율 3.183099e-03 m/rad 로 따라간다. -->
+<robot name="tumbler">
+  <link name="body">
+    <visual>
+      <geometry><mesh filename="meshes/body_visual.obj"/></geometry>
+    </visual>
+    <collision>
+      <geometry><mesh filename="meshes/body_collision.obj"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="0.3"/>
+      <origin xyz="0.020946 0.000643 0.134835"/>
+      <inertia ixx="0.00167630" iyy="0.00206606" izz="0.00082941" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+
+  <!-- 회전 자유도. 뚜껑을 푸는 방향이 +.
+       상한(182도)은 나사 끝(180도)보다 2도 여유를 둔다. 둘을 같게 두면
+       PhysX 가 하드 스톱에 정확히 수렴하지 않아 각도가 177~178 에서
+       멈추고, 거기 걸린 해제 판정이 영영 성립하지 않는다.
+       type 은 반드시 revolute + 유한 limit 이어야 한다. continuous 로 두면 PhysX 가
+       "needs a finite limit set to be used by the mimic joint feature" 로 거부한다. -->
+  <link name="cap_spinner">
+    <inertial>
+      <mass value="1e-4"/>
+      <inertia ixx="1e-8" iyy="1e-8" izz="1e-8" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <joint name="cap_spin" type="revolute">
+    <parent link="body"/>
+    <child link="cap_spinner"/>
+    <origin xyz="0 0 0.225000"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-0.020000" upper="3.176499" effort="50.0" velocity="20.0"/>
+    <dynamics damping="0.001" friction="0.0"/>
+  </joint>
+
+  <!-- 축방향 자유도. 나사 구간(0~0.01 m)에서는 회전을 따라가고,
+       그 뒤 0.12 m 는 뚜껑을 들어내는 자유 행정이다.
+       Isaac Gym 은 mimic 을 무시하므로 tools/screw_coupling.py 가 대신 구동한다. -->
+  <joint name="cap_lift" type="prismatic">
+    <parent link="cap_spinner"/>
+    <child link="cap"/>
+    <origin xyz="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="0.0" upper="0.13" effort="100.0" velocity="5.0"/>
+    <mimic joint="cap_spin" multiplier="3.18309886e-03" offset="0.0"/>
+  </joint>
+
+  <link name="cap">
+    <visual>
+      <geometry><mesh filename="meshes/cap_visual.obj"/></geometry>
+    </visual>
+    <collision>
+      <geometry><mesh filename="meshes/cap_collision.obj"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="0.05"/>
+      <origin xyz="-0.000048 0.000284 0.015506"/>
+      <inertia ixx="0.00004334" iyy="0.00004411" izz="0.00008291" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+
+  <!-- 매끈한 원통이라 그대로는 미끄럽다. 나사산 대신 마찰로 그립을 만든다. -->
+  <gazebo reference="cap"><mu1>2.0</mu1><mu2>2.0</mu2></gazebo>
+  <gazebo reference="body"><mu1>2.0</mu1><mu2>2.0</mu2></gazebo>
+</robot>

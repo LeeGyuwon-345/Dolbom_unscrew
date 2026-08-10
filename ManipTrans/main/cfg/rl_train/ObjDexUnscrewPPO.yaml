@@ -1,0 +1,102 @@
+params:
+  seed: ${...seed}
+  algo:
+    name: ppo
+
+  # 논문 ObjDex 단일정책(non-residual). ResDexHand env(dexhandmanip_sh) 재사용.
+  model:
+    name: ${is_sep_model:${....bimanual_mode},my_continuous_a2c_logstd}
+
+  network:
+    name: ${is_sep_model:${....bimanual_mode},dict_obs_actor_critic}
+    separate: False
+
+    space:
+      continuous:
+        mu_activation: None
+        sigma_activation: None
+        mu_init:
+          name: default
+        sigma_init:
+          name: const_initializer
+          val: 0
+        fixed_sigma: True
+
+    dict_feature_encoder:
+      _target_: lib.nn.features.SimpleFeatureFusion
+      extractors:
+        # ResDexHand env obs dims (objcentric): priv=ndof+13+5*4+3+1, prop=13+ndof*3, target=23+23+nbody+128
+        privileged:
+          _target_: lib.nn.features.Identity
+          input_dim: ${is_united_model:${.......bimanual_mode},${.......side},${eval:'${ndof:${.....dexhand}}+13+5*4+3+1'}}
+        proprioception:
+          _target_: lib.nn.features.Identity
+          input_dim: ${is_united_model:${.......bimanual_mode},${.......side},${eval:'13+${ndof:${.....dexhand}}*3'}}
+        # CAP_GRASP_PHASE_DIM: cap grasp 모드에서 target 뒤에 붙는 phase 블록
+        # (t/T, sin, cos, gravity_scale, 중력까지 남은시간, hold 진척도) = 6.
+        # env(dexhandmanip_sh)도 같은 환경변수를 읽으므로 양쪽이 항상 일치한다.
+        # 설정하지 않으면 0 → 기존 동작 그대로.
+        target:
+          _target_: lib.nn.features.Identity
+          input_dim: ${is_united_model:${.......bimanual_mode},${.......side},${eval:'3+3+3+4+4+3+3+3+3+3+4+4+3+3+${nbody:${.....dexhand}}+128+${oc.env:CAP_GRASP_PHASE_DIM,0}'}}
+      hidden_depth: 3
+      hidden_dim: 512
+      output_dim: 256
+      activation: "swish"
+      add_input_activation: false
+      add_output_activation: false
+
+    mlp:
+      units: [256, 512, 128, 64]
+      activation: elu
+      d2rl: False
+
+      initializer:
+        name: default
+      regularizer:
+        name: None
+
+  load_checkpoint: ${if:${...checkpoint},True,False}
+  load_path: ${...checkpoint}
+  dexhand: ${...dexhand}
+
+  config:
+    name: ${resolve_default:ObjDexUnscrew,${....experiment}}
+    full_experiment_name: ${.name}
+    env_name: rlgpu
+    multi_gpu: ${....multi_gpu}
+    ppo: True
+    mixed_precision: False
+    normalize_input: True
+    normalize_input_excluded_keys: []
+    normalize_value: True
+    use_pid_control: ${....usePIDControl}
+    value_bootstrap: True
+    num_actors: ${....task.env.numEnvs}
+    reward_shaper:
+      scale_value: 1.0
+    normalize_advantage: True
+    gamma: 0.99
+    tau: 0.95
+    learning_rate: ${resolve_default:5e-4,${....learning_rate}}
+    lr_schedule: adaptive
+    schedule_type: standard
+    kl_threshold: 0.008
+    score_to_win: 10000
+    max_epochs: ${resolve_default:10000,${....max_iterations}}
+    early_stop_epochs: ${resolve_default:100000,${....early_stop_epochs}}
+    save_best_after: 10
+    save_frequency: 200
+    print_stats: True
+    grad_norm: 1.0
+    entropy_coef: 0.0
+    truncate_grads: True
+    e_clip: 0.2
+    horizon_length: 32
+    minibatch_size: 1024
+    mini_epochs: 5
+    critic_coef: 4
+    clip_value: True
+    seq_len: 4
+    bounds_loss_coef: 0.0001
+    use_soft_clamp: True

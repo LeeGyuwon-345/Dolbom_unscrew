@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<!-- Static pedestal that supports the cap for the lift-based grasp task.
+
+     The cap link origin is its bottom face and sits at table_surface_z + 0.225,
+     matching the cap_spin joint origin in tumbler/tumbler.urdf. This pedestal
+     therefore stands 0.225 m tall with its base on the table surface.
+
+     Radius 0.052 m matches CAP_RADIUS (wrist_init.py): the cap is fully
+     supported and stays put (measured knock-off 0.1% with a policy trained on
+     this geometry). The cap's 31 mm side wall sits above the pedestal top and
+     is what the fingers grip.
+
+     Fingers that overshoot past the 31 mm cap land on the pedestal instead --
+     78% of physically-contacting fingers are on the support rather than the
+     cap. Narrowing to 30 mm to give clearance was tried and made things worse
+     (wasted contacts 81%, knock-off 74%): the trained policy relies on the
+     wide support, and a narrow stem lets the cap tip over. If this is revisited,
+     retrain from scratch on the new geometry rather than swapping it under a
+     trained policy. The tumbler body cannot be used for this: it flares out to
+     r = 0.096 m and rises to z = 0.239, burying the lower 14 mm of the cap. -->
+<robot name="pedestal">
+  <link name="pedestal">
+    <visual>
+      <origin xyz="0 0 0.1125" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.052" length="0.225"/></geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.1125" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.052" length="0.225"/></geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0.1125" rpy="0 0 0"/>
+      <mass value="10.0"/>
+      <inertia ixx="0.045" iyy="0.045" izz="0.0045" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+</robot>

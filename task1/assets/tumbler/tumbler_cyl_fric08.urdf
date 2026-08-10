@@ -1,0 +1,126 @@
+<?xml version="1.0"?>
+<!-- tumbler.urdf 의 6자유도 판.
+     캡을 body 에 cap_spin(z회전) + cap_lift(z이동) + 여분 4개(cap_tx/ty 수평,
+     cap_rx/ry 기울임) 사슬로 연결한다. 잠긴 동안 여분 4개는 screw_coupling 이
+     강성 위치 드라이브로 0 에 고정하므로 기존 2자유도 판과 같은 거동이고,
+     해제(180도) 순간 드라이브를 꺼서 캡이 완전 자유 강체처럼 움직인다
+     (기울고, 미끄러지고, 계속 돈다). 2자유도 판은 해제 후에도 z 회전+상승만
+     가능해서 손이 캡을 기울이거나 옆으로 빼낼 수 없었다.
+     cap_spin 상한은 나사끝(180도)+2도 여유 (tumbler.urdf 의 주석 참조).
+     해제 시 spin 한계 확장은 screw_coupling.release_bound() 가 담당한다. -->
+<!-- make_cyl_tumbler.py 생성: cap r=50.2/h=30.0mm, body R=50.0/H=239.4mm, 64각 -->
+<!-- spin friction 0.800 Nm -->
+<robot name="tumbler">
+  <link name="body">
+    <visual>
+      <geometry><mesh filename="meshes/tumbler_cyl_fric08_body.obj"/></geometry>
+    </visual>
+    <collision>
+      <geometry><mesh filename="meshes/tumbler_cyl_fric08_body.obj"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="0.3"/>
+      <origin xyz="0.020946 0.000643 0.134835"/>
+      <inertia ixx="0.00167630" iyy="0.00206606" izz="0.00082941" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+
+  <link name="cap_spinner">
+    <inertial>
+      <mass value="1e-4"/>
+      <inertia ixx="1e-8" iyy="1e-8" izz="1e-8" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <joint name="cap_spin" type="revolute">
+    <parent link="body"/>
+    <child link="cap_spinner"/>
+    <origin xyz="0 0 0.225000"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-0.020000" upper="3.176499" effort="50.0" velocity="20.0"/>
+    <dynamics damping="0.001" friction="0.800"/>
+  </joint>
+
+  <link name="cap_lifter">
+    <inertial>
+      <mass value="1e-4"/>
+      <inertia ixx="1e-8" iyy="1e-8" izz="1e-8" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <joint name="cap_lift" type="prismatic">
+    <parent link="cap_spinner"/>
+    <child link="cap_lifter"/>
+    <origin xyz="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="0.0" upper="0.13" effort="100.0" velocity="5.0"/>
+    <mimic joint="cap_spin" multiplier="3.18309886e-03" offset="0.0"/>
+  </joint>
+
+  <!-- 여분 4자유도. 잠긴 동안 screw_coupling 이 강성 드라이브로 0 고정. -->
+  <link name="cap_fx">
+    <inertial>
+      <mass value="1e-4"/>
+      <inertia ixx="1e-8" iyy="1e-8" izz="1e-8" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <joint name="cap_tx" type="prismatic">
+    <parent link="cap_lifter"/>
+    <child link="cap_fx"/>
+    <origin xyz="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-0.5" upper="0.5" effort="100.0" velocity="5.0"/>
+  </joint>
+
+  <link name="cap_fy">
+    <inertial>
+      <mass value="1e-4"/>
+      <inertia ixx="1e-8" iyy="1e-8" izz="1e-8" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <joint name="cap_ty" type="prismatic">
+    <parent link="cap_fx"/>
+    <child link="cap_fy"/>
+    <origin xyz="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-0.5" upper="0.5" effort="100.0" velocity="5.0"/>
+  </joint>
+
+  <link name="cap_frx">
+    <inertial>
+      <mass value="1e-4"/>
+      <inertia ixx="1e-8" iyy="1e-8" izz="1e-8" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <joint name="cap_rx" type="revolute">
+    <parent link="cap_fy"/>
+    <child link="cap_frx"/>
+    <origin xyz="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-3.1416" upper="3.1416" effort="50.0" velocity="20.0"/>
+  </joint>
+
+  <joint name="cap_ry" type="revolute">
+    <parent link="cap_frx"/>
+    <child link="cap"/>
+    <origin xyz="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-3.1416" upper="3.1416" effort="50.0" velocity="20.0"/>
+  </joint>
+
+  <link name="cap">
+    <visual>
+      <geometry><mesh filename="meshes/tumbler_cyl_fric08_cap.obj"/></geometry>
+    </visual>
+    <collision>
+      <geometry><mesh filename="meshes/tumbler_cyl_fric08_cap.obj"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="0.050"/>
+      <origin xyz="0 0 0.015000"/>
+      <inertia ixx="0.00003525" iyy="0.00003525" izz="0.00006300" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+
+  <!-- 매끈한 원통이라 그대로는 미끄럽다. 나사산 대신 마찰로 그립을 만든다. -->
+  <gazebo reference="cap"><mu1>2.0</mu1><mu2>2.0</mu2></gazebo>
+  <gazebo reference="body"><mu1>2.0</mu1><mu2>2.0</mu2></gazebo>
+</robot>

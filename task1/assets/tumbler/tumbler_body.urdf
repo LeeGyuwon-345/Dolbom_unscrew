@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!-- 자동 생성: tools/make_screw_asset.py (tumbler.urdf 와 같은 메시/좌표계)
+     나사 구속 없는 정적 지지체. 캡은 별도 자산으로 이 위에 놓인다.
+     주의: 축대칭이 아니다. 손잡이가 한쪽으로 뻗어 있고(x 97mm 까지),
+     상단 칼라가 캡 옆면 아래쪽을 가린다. 손목 prior 는 이 형상을 모른다. -->
+<robot name="tumbler_body">
+  <link name="body">
+    <visual>
+      <geometry><mesh filename="meshes/body_visual.obj"/></geometry>
+    </visual>
+    <collision>
+      <geometry><mesh filename="meshes/body_collision.obj"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="0.30"/>
+      <origin xyz="0.020946 0.000643 0.134835"/>
+      <inertia ixx="0.00167630" iyy="0.00206606" izz="0.00082941" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <gazebo reference="body"><mu1>2.0</mu1><mu2>2.0</mu2></gazebo>
+</robot>

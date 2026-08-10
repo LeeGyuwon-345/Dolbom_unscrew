@@ -1,0 +1,5236 @@
+from __future__ import annotations
+
+import os
+import random
+import sys
+from enum import Enum
+from itertools import cycle
+from pathlib import Path
+from time import time
+from typing import Dict, List, Tuple
+
+import numpy as np
+import torch
+from ...utils import torch_jit_utils as torch_jit_utils
+from bps_torch.bps import bps_torch
+from gym import spaces
+from isaacgym import gymapi, gymtorch
+from isaacgym.torch_utils import normalize_angle, quat_conjugate, quat_mul
+import math
+from maniptrans_envs.lib.envs.dexhands.factory import DexHandFactory
+from main.dataset.factory import ManipDataFactory
+
+from main.dataset.oakink2_dataset_dexhand_rh import OakInk2DatasetDexHandRH
+from main.dataset.oakink2_dataset_dexhand_lh import OakInk2DatasetDexHandLH
+from main.dataset.oakink2_dataset_utils import oakink2_obj_scale, oakink2_obj_mass
+from main.dataset.transform import aa_to_quat, aa_to_rotmat, quat_to_aa, quat_to_rotmat, rotmat_to_aa, rotmat_to_quat, rot6d_to_aa
+from torch import Tensor
+from tqdm import tqdm
+from ...asset_root import ASSET_ROOT
+
+
+from ..core.config import ROBOT_HEIGHT, config
+from ...envs.core.sim_config import sim_config
+from ...envs.core.vec_task import VecTask
+from ...utils.pose_utils import get_mat
+
+
+def soft_clamp(x, lower, upper):
+    return lower + torch.sigmoid(4 / (upper - lower) * (x - (lower + upper) / 2)) * (upper - lower)
+
+
+class DexHandManipRHEnv(VecTask):
+
+    side = "right"
+
+    def __init__(
+        self,
+        cfg,
+        *,
+        rl_device: int = 0,
+        sim_device: int = 0,
+        graphics_device_id: int = 0,
+        display: bool = False,
+        record: bool = False,
+        headless: bool = True,
+    ):
+        self._record = record
+        self.cfg = cfg
+
+        use_quat_rot = self.use_quat_rot = self.cfg["env"]["useQuatRot"]
+        self.max_episode_length = self.cfg["env"]["episodeLength"]
+        self.action_scale = self.cfg["env"]["actionScale"]
+        self.aggregate_mode = self.cfg["env"]["aggregateMode"]
+        self.training = self.cfg["env"]["training"]
+
+        # ===== Trajectory-input dropout curriculum + tracking-reward annealing =====
+        # 모두 config로 켜고 끔. config 없으면 완전 비활성(기존 학습과 backward-compatible).
+        _td = dict(self.cfg["env"].get("trajectory_dropout", {}) or {})
+        self.traj_dropout_enabled = bool(_td.get("enabled", False))
+        self.traj_dropout_mode = str(_td.get("mode", "stage2_only_dropout"))  # stage2_only_dropout | full_trajectory_free
+        self.traj_dropout_schedule = str(_td.get("schedule", "linear"))       # linear | cosine | constant
+        self.traj_dropout_start = float(_td.get("start_progress", 0.2))
+        self.traj_dropout_end = float(_td.get("end_progress", 0.6))
+        self.traj_dropout_final_p = float(_td.get("final_probability", 1.0))
+        self.traj_mask_scope = str(_td.get("mask_scope", "episode"))
+        self.traj_append_flag = bool(_td.get("append_availability_flag", False))
+        _pg = dict(_td.get("performance_gate", {}) or {})
+        self.traj_gate_enabled = bool(_pg.get("enabled", False))
+        self.traj_gate_thresh = float(_pg.get("success_threshold", 0.7))
+
+        _ta = dict(self.cfg["env"].get("trajectory_tracking_annealing", {}) or {})
+        self.track_anneal_enabled = bool(_ta.get("enabled", False))
+        self.track_anneal_schedule = str(_ta.get("schedule", "linear"))
+        self.track_anneal_start = float(_ta.get("start_progress", 0.3))
+        self.track_anneal_end = float(_ta.get("end_progress", 0.7))
+        self.track_anneal_final = float(_ta.get("final_scale", 0.0))
+
+        self.use_normalized_phase = bool(
+            dict(self.cfg["env"].get("observation", {}) or {}).get("use_normalized_phase", False)
+        )
+        # eval/play 모드용 강제 dropout 확률 (set_train_info가 안 불리므로). -1이면 curriculum 사용.
+        self.traj_force_prob = float(_td.get("force_probability", -1.0))
+        # 런타임 curriculum 상태 (set_train_info로 갱신). 진행률 progress ∈ [0,1].
+        self._curriculum_progress = 0.0
+        self.trajectory_dropout_probability = self.traj_force_prob if self.traj_force_prob >= 0.0 else 0.0
+        self.tracking_reward_scale = 1.0
+        self._last_success_rate = 1.0  # performance-gate용 (외부에서 갱신 가능)
+        self.trajectory_available = None  # (num_envs,1) — allocate_buffers 이후 할당
+
+        if not hasattr(self, "dexhand"):
+            self.dexhand = DexHandFactory.create_hand(self.cfg["env"]["dexhand"], "right")
+
+        self.use_pid_control = self.cfg["env"]["usePIDControl"]
+        # B방식: 손 imitation 타겟을 MANO 대신 리타겟 결과(opt_*)로. 환경변수 IMITATE_RETARGET=1
+        # (물체 궤적은 그대로 두고 손 타겟만 교체 → B base와 정합)
+        self.imitate_retarget = bool(int(os.environ.get("IMITATE_RETARGET", "0")))
+        # 회전만 학습: 텀블러 몸체 제거 + 뚜껑 위치 고정(회전만) + 궤적을 돌리는 구간까지만(CAP_TRIM_LEN)
+        self.cap_rot_only = bool(int(os.environ.get("CAP_ROT_ONLY", "0")))
+        self.cap_trim_len = int(os.environ.get("CAP_TRIM_LEN", "0"))
+        self._cap_lock_pos = None
+        self._cap_screw_axis = None  # (E,3) 나사축(gym), 1-DOF 회전 구속용
+        self._cap_local_z = None     # (E,3) 뚜껑 로컬 원반 normal = [0,0,1]
+        # cap-only grasp RL: wrist_init pose + fingertip contact/hold reward.
+        self.cap_grasp_mode = bool(int(os.environ.get("CAP_GRASP_MODE", "0")))
+        self.cap_grasp_reward_fn = None
+        self.cap_grasp_gravity_scale_fn = None
+        self.cap_grasp_sample_wrist_init = None
+        self.cap_grasp_sample_wrist_mcp_reachable = None
+        self.cap_grasp_palm_local = None
+        self.cap_grasp_cfg = None
+        self.cap_grasp_urdf = os.environ.get(
+            "CAP_GRASP_URDF",
+            "/home/leegyuwon/Documents/task1/assets/cap_only/cap_only.urdf",
+        )
+        self.cap_grasp_tools_dir = os.environ.get("CAP_GRASP_TOOLS_DIR", "/home/leegyuwon/Documents/task1/tools")
+        # Lift formulation: the cap rests on a static pedestal under real
+        # gravity and the wrist is commanded upward; success = the cap came up.
+        # Replaces the pinned floating cap, whose pin absorbed one-sided pushes
+        # and then ejected the cap the moment it released.
+        self.cap_grasp_pedestal = bool(int(os.environ.get("CAP_GRASP_PEDESTAL", "0")))
+        # CAP_GRASP_TUMBLER_BODY=1 swaps the cylindrical stand-in for the real
+        # tumbler body. It is NOT a drop-in: the body is not axisymmetric (a
+        # handle reaches to r=98 mm over azimuth -10..+6 deg, z 117..239 mm) and
+        # its top collar (z 225..239 mm, r up to 68 mm) shrouds the cap's lower
+        # half. Exposed cap wall drops from the pedestal's full 27.9 mm to
+        # 13.5 mm -- about one and a half finger widths at r_finger = 9 mm.
+        self.cap_grasp_tumbler_body = bool(int(os.environ.get("CAP_GRASP_TUMBLER_BODY", "0")))
+        # CAP_GRASP_TUMBLER=1 loads body+screw+cap as ONE articulation instead of a
+        # free cap resting on a separate support. The split setup cannot work here:
+        # the solid-hull cap spawns up to 4.9 mm inside the body's inner wall and
+        # PhysX ejects it at 0.43 m/s before the first step. Real threads hold the
+        # cap on axis, so the joint does it and cap<->body mesh contact is filtered
+        # off (same as check_screw_gym.py).
+        self.cap_grasp_tumbler = bool(int(os.environ.get("CAP_GRASP_TUMBLER", "0")))
+        self.cap_grasp_tumbler_urdf = os.environ.get(
+            "CAP_GRASP_TUMBLER_URDF", "/home/leegyuwon/Documents/task1/assets/tumbler/tumbler.urdf"
+        )
+        self.cap_grasp_screw = None
+        self.cap_grasp_stable_timer = None
+        self._cap_body_state = None
+        self._palm_local_w = None
+        self.cap_wrist_clamp_radius = float(os.environ.get("CAP_WRIST_CLAMP_R", "0.25"))
+        self.cap_wrist_max_lin_vel = float(os.environ.get("CAP_WRIST_MAX_LIN_VEL", "2.0"))
+        self.cap_wrist_max_ang_vel = float(os.environ.get("CAP_WRIST_MAX_ANG_VEL", "10.0"))
+        self.cap_wrist_palm_max_rad = math.radians(float(os.environ.get("CAP_WRIST_PALM_MAX", "40")))
+        self.cap_diag_every = int(os.environ.get("CAP_DIAG_EVERY", "0"))
+        self._diag_acc = None
+        self._diag_n = 0
+        _default_support = (
+            "/home/leegyuwon/Documents/task1/assets/tumbler/tumbler_body.urdf"
+            if self.cap_grasp_tumbler_body
+            else "/home/leegyuwon/Documents/task1/assets/pedestal/pedestal.urdf"
+        )
+        self.cap_grasp_pedestal_urdf = os.environ.get("CAP_GRASP_PEDESTAL_URDF", _default_support)
+        self.cap_grasp_lift_height = float(os.environ.get("CAP_LIFT_HEIGHT", "0.060"))
+        self.cap_grasp_lift_start = float(os.environ.get("CAP_LIFT_START", "1.5"))
+        self.cap_grasp_lift_time = float(os.environ.get("CAP_LIFT_TIME", "1.0"))
+        self.cap_grasp_cap_z = float(os.environ.get("CAP_GRASP_CAP_Z", "0.225"))
+        self.cap_grasp_lock_wrist = bool(int(os.environ.get("CAP_GRASP_LOCK_WRIST", "0")))
+        self.cap_grasp_lock_cap_before_gravity = bool(
+            int(os.environ.get("CAP_GRASP_LOCK_CAP_BEFORE_GRAVITY", "1"))
+        )
+        self.cap_grasp_cap_lock_mode = os.environ.get("CAP_GRASP_CAP_LOCK_MODE", "teleport").strip().lower()
+        # Servo-mode pin gains. These MUST stay numerically stable at the
+        # control rate: for the 0.05 kg cap at dt=1/60, omega_n = sqrt(kp/m)
+        # and stability needs omega_n*dt << 1, i.e. kp well under ~50 N/m.
+        # Raising kp to 2000 (omega_n*dt = 3.3) turns the pin into a catapult:
+        # measured cap_speed at release 6.1 m/s vs 0.98 for teleport, contact
+        # forces up to 1e8 N, and episode reward -219 vs +181. If the servo is
+        # too soft to hold the cap for a given stage, use teleport rather than
+        # stiffening these.
+        self.cap_grasp_cap_lock_pos_kp = float(os.environ.get("CAP_CAP_LOCK_POS_KP", "3.0"))
+        self.cap_grasp_cap_lock_pos_kd = float(os.environ.get("CAP_CAP_LOCK_POS_KD", "12.0"))
+        self.cap_grasp_cap_lock_rot_kp = float(os.environ.get("CAP_CAP_LOCK_ROT_KP", "0.0"))
+        self.cap_grasp_cap_lock_rot_kd = float(os.environ.get("CAP_CAP_LOCK_ROT_KD", "0.2"))
+        self.cap_grasp_cap_lock_max_force = float(os.environ.get("CAP_CAP_LOCK_MAX_FORCE", "0.15"))
+        self.cap_grasp_cap_lock_max_torque = float(os.environ.get("CAP_CAP_LOCK_MAX_TORQUE", "0.005"))
+        self.cap_grasp_resample_wrist_on_reset = bool(
+            int(os.environ.get("CAP_GRASP_RESAMPLE_WRIST_ON_RESET", "1"))
+        )
+        palm_down_env = os.environ.get("CAP_PALM_DOWN_MAX_DEG", "20")
+        self.cap_grasp_palm_down_max_deg = (
+            None
+            if palm_down_env.strip().lower() in {"", "none", "off", "-1"}
+            else float(palm_down_env)
+        )
+        top_down_default = self.cap_grasp_palm_down_max_deg is not None
+        self.cap_grasp_wrist_z_range = (
+            float(os.environ.get("CAP_WRIST_Z_MIN", "0.040" if top_down_default else "0.040")),
+            float(os.environ.get("CAP_WRIST_Z_MAX", "0.095" if top_down_default else "0.095")),
+        )
+        self.cap_grasp_wrist_r_range = (
+            float(os.environ.get("CAP_WRIST_R_MIN", "0.045" if top_down_default else "0.045")),
+            float(os.environ.get("CAP_WRIST_R_MAX", "0.075" if top_down_default else "0.075")),
+        )
+        self.cap_grasp_wrist_sampler = os.environ.get("CAP_GRASP_WRIST_SAMPLER", "mcp_reachable")
+        # "topdown" sampler: horizontal offset from the cap axis, height above
+        # the cap bottom, and how far the palm may tilt off straight-down.
+        self.cap_topdown_r_max = float(os.environ.get("CAP_TOPDOWN_R_MAX", "0.020"))
+        self.cap_topdown_z_range = (
+            float(os.environ.get("CAP_TOPDOWN_Z_MIN", "0.020")),
+            float(os.environ.get("CAP_TOPDOWN_Z_MAX", "0.100")),
+        )
+        # Height measured from the cap's TOP face, not its bottom: the top is the surface the hand has to clear, while the cap frame's origin is at
+        # its bottom. CAP_TOPDOWN_Z_FROM_TOP=0 restores the old bottom datum.
+        self.cap_topdown_z_from_top = bool(int(os.environ.get("CAP_TOPDOWN_Z_FROM_TOP", "1")))
+        self.cap_topdown_tilt_deg = float(os.environ.get("CAP_TOPDOWN_TILT_DEG", "10"))
+        self.cap_contact_tip_only = bool(int(os.environ.get("CAP_CONTACT_TIP_ONLY", "1")))
+        # Yaw window, degrees, default the full circle.
+        #
+        # Worth restricting because the turn a given episode can produce is set
+        # by where it starts. The tumbler is a fixed base at one orientation, so
+        # its handle is always at world -8..+13 deg, and the trained policy ends
+        # every episode with the thumb at 161 deg (measured across 512 envs with
+        # random starting yaw: interquartile range 159-162). The hand grips near
+        # the yaw it arrived at and rotates to that stop, so the available turn
+        # is 161 deg minus the starting azimuth -- and an episode that starts
+        # near 161 has none. A quarter of envs sat at -1 deg for the whole run.
+        self.cap_topdown_yaw_range = (
+            math.radians(float(os.environ.get("CAP_TOPDOWN_YAW_MIN", "0"))),
+            math.radians(float(os.environ.get("CAP_TOPDOWN_YAW_MAX", "360"))),
+        )
+        self.cap_grasp_require_cap_center_in_zero_triangle = bool(
+            int(os.environ.get("CAP_REQUIRE_CAP_CENTER_IN_ZERO_TRIANGLE", "1"))
+        )
+        self.cap_grasp_reach_contact_margin = float(os.environ.get("CAP_REACH_CONTACT_MARGIN", "0.020"))
+        self.cap_grasp_reach_min_fingers = int(os.environ.get("CAP_REACH_MIN_FINGERS", "2"))
+        self.cap_grasp_reach_require_thumb = bool(int(os.environ.get("CAP_REACH_REQUIRE_THUMB", "1")))
+        self.cap_grasp_thumb_reach_margin = float(os.environ.get("CAP_THUMB_REACH_MARGIN", "0.025"))
+        thumb_mcp_env = os.environ.get("CAP_THUMB_MCP_OUTSIDE_MARGIN", "none").strip().lower()
+        self.cap_grasp_thumb_mcp_outside_margin = (
+            None
+            if thumb_mcp_env in {"", "none", "off", "-1"}
+            else float(thumb_mcp_env)
+        )
+        # Reachability alone admits poses where thumb and fingers all press the
+        # same side of the rim, which cannot lift a 104 mm disc. Requiring a
+        # minimum thumb<->finger azimuth separation about the cap axis filters
+        # for graspability, not just reachability. Measured on the current
+        # prior: 35.6% of raw samples already clear 90 deg, and the rejection
+        # sampler still reaches 100% yield at that threshold.
+        opposition_env = os.environ.get("CAP_OPPOSITION_MIN_DEG", "none").strip().lower()
+        self.cap_grasp_opposition_min_deg = (
+            None if opposition_env in ("", "none", "off") else float(opposition_env)
+        )
+        self.cap_grasp_reject_palm_collision = bool(int(os.environ.get("CAP_REJECT_PALM_COLLISION", "1")))
+        self.cap_grasp_palm_collision_margin = float(os.environ.get("CAP_PALM_COLLISION_MARGIN", "0.002"))
+        self.cap_grasp_thumb_opposition_steps = int(os.environ.get("CAP_THUMB_REACH_OPPOSITION_STEPS", "7"))
+        self.cap_grasp_thumb_flex_steps = int(os.environ.get("CAP_THUMB_REACH_FLEX_STEPS", "11"))
+        self.cap_grasp_thumb_curl_steps = int(os.environ.get("CAP_THUMB_REACH_CURL_STEPS", "3"))
+        self.cap_grasp_reach_mcp_steps = int(os.environ.get("CAP_REACH_MCP_STEPS", "17"))
+        self.cap_grasp_reach_segment_samples = int(os.environ.get("CAP_REACH_SEGMENT_SAMPLES", "5"))
+        self.cap_grasp_wrist_max_tries = int(os.environ.get("CAP_GRASP_WRIST_MAX_TRIES", "3000"))
+        # 나사풀림 보상 모드: 데모 각도추종 대신 "풀림 방향 회전 자체"에 보상 (CAP_UNSCREW_REW=1)
+        self.cap_unscrew_rew = bool(int(os.environ.get("CAP_UNSCREW_REW", "0")))
+        self.unscrew_rew_w = float(os.environ.get("UNSCREW_W", "5.0"))       # 풀림(정방향) 보상
+        self.unscrew_rev_w = float(os.environ.get("UNSCREW_REV_W", "5.0"))   # 역방향(잠금) 페널티 크기
+        # 지속 접촉 보상: 손끝 접촉이 길게 유지될수록 reward (그립 유지 유도)
+        self.contact_time_w = float(os.environ.get("CONTACT_TIME_W", "0.0"))    # 가중치(0=off)
+        self.contact_time_ref = float(os.environ.get("CONTACT_TIME_REF", "30"))  # 포화 기준 스텝수
+        # 뚜껑 회전 수동 damping(빡빡함) + 최대 각속도 클램프 (asset 설정은 override로 무력화되어 직접 적용)
+        self.cap_ang_damp = float(os.environ.get("CAP_ANG_DAMP", "5.0"))   # 클수록 빡빡(감쇠↑)
+        self.cap_max_spin = float(os.environ.get("CAP_MAX_ANGVEL", "10.0"))  # 나사축 최대 각속도 rad/s
+        # 나사축(z) 방향 이동 허용: 원통형 조인트(z회전+z이동). 0이면 기존처럼 위치 완전고정.
+        self.cap_axial_trans = bool(int(os.environ.get("CAP_AXIAL_TRANS", "0")))
+        self.cap_lin_damp = float(os.environ.get("CAP_LIN_DAMP", "0.0"))     # 축방향 선속도 감쇠(빡빡함)
+        self.cap_max_lift = float(os.environ.get("CAP_MAX_LIFT", "0.1"))     # 축방향 최대 이동(m), 이탈방지
+        self.cap_free_lift = float(os.environ.get("CAP_FREE_LIFT", "0.0"))   # 축방향 이 거리 넘으면 모든 구속 해제(자유강체). 0=해제안함
+        self._cap_released = None  # (E,) bool 래치: 나사산 이탈 후 자유. reset까지 유지
+        # 나사산 커플링: 축이동 d = pitch × 누적회전각/2π (회전-병진 맞물림, 진짜 나사).
+        #   0이면 비커플(z회전·z이동 독립). >0이면 helical.
+        self.cap_thread_pitch = float(os.environ.get("CAP_THREAD_PITCH", "0.0"))  # m/회전
+        self._cap_screw_angle = None  # (E,) 누적 풀림 회전각(rad). reset시 0
+        # object-centric obs(논문 ObjDex): target에서 데모 손가락(joints)·gt_tips 제외.
+        #   손목(플래너)+물체목표+obj_to_joints+bps만 → obs에 손가락 궤적 없음(trajectory-free).
+        self.objcentric_obs = bool(int(os.environ.get("OBJCENTRIC_OBS", "0")))
+        # 단일정책 모드(논문 ObjDex): base‖residual 분할 없이 action 직접 적용(non-residual 네트워크).
+        self.single_policy = bool(int(os.environ.get("SINGLE_POLICY", "0")))
+        # 손목 서보: 손목을 플래너 손목궤적으로 PID 고정, 정책 action=손가락(n_dofs)만.
+        #   손목 이탈 원천차단 + 손이 항상 뚜껑 옆 → 접촉 보장. (unscrew는 손가락 gaiting 주도)
+        # 팔 통합 모드: dexhand 가 RB5+allegro 결합(베이스 고정, 22관절)이고
+        # 손목은 팔 FK 가 결정한다. 자유 강체 손목 기구(서보/델타/클램프)를
+        # 전부 우회하고, 손목 관측은 base_link 몸체에서 읽는다.
+        self.cap_arm_mode = bool(int(os.environ.get("CAP_ARM_MODE", "0")))
+        # IK 래퍼: 정책의 앞 6차원을 (관절 델타가 아니라) 손목 작업공간 델타
+        # [dx,dy,dz, drx,dry,drz] 로 해석하고, 자코비안 DLS 로 팔 관절 델타로
+        # 변환한다. 관절공간 직접 학습이 정체해서 hand-only 의 검증된 액션
+        # 기하로 환원하는 계층 (Arm6/7 정체의 처방 후보).
+        self.cap_arm_ik_wrapper = bool(int(os.environ.get("CAP_ARM_IK_WRAPPER", "0")))
+        self.cap_arm_ik_dpos = float(os.environ.get("CAP_ARM_IK_DPOS", "0.005"))
+        self.cap_arm_ik_drot = float(os.environ.get("CAP_ARM_IK_DROT", "0.05"))
+        self.cap_arm_ik_lambda = float(os.environ.get("CAP_ARM_IK_LAMBDA", "0.02"))
+        # 추종(내부 서보) 속도 상한 -- 명령 속도와 분리. 같게 두면 정책이
+        # 전속 명령을 유지할 때 오차가 리쉬 벽(30mm/8.6도)에 포화된 채 영영
+        # 못 따라잡는다 (A3 실측). hand-only 서보는 명령의 ~3배(14mm/step)
+        # 로 움직일 수 있었다 -- 같은 비율로 기본 3배.
+        self.cap_arm_ik_pursuit_dpos = float(os.environ.get("CAP_ARM_IK_PURSUIT_DPOS", "0.015"))
+        self.cap_arm_ik_pursuit_drot = float(os.environ.get("CAP_ARM_IK_PURSUIT_DROT", "0.15"))
+        # 손목 명령 저역통과(EMA). Al9 류 정책은 +-1 포화 지터로 미세 제어를
+        # 만드는데, 무거운 팔은 그 고주파를 못 따라가 목표-실제 오차가 리쉬
+        # 벽에 포화된다 (A3 실측). 0=끔, 0.3 = 새 명령 30%% 반영.
+        self.cap_arm_ik_cmd_ema = float(os.environ.get("CAP_ARM_IK_CMD_EMA", "0.0"))
+        # DLS 위치 가중. 회전 추종이 관절 예산(0.05rad/step)을 독식해 위치
+        # 오차 3cm 가 영영 안 닫히는 배분 문제(A3 실측)의 처방 -- 위치 행을
+        # w 배 가중하면 방향보존 스케일링 후에도 위치 보정 몫이 보장된다.
+        self.cap_arm_ik_pos_weight = float(os.environ.get("CAP_ARM_IK_POS_WEIGHT", "1.0"))
+        self._ik_cmd_filt = None
+        self.wrist_servo = bool(int(os.environ.get("WRIST_SERVO", "0")))
+        self.wrist_servo_pos_scale = float(os.environ.get("WRIST_SERVO_POS_SCALE", "0.05"))  # 위치오차 정규화(m)
+        self.wrist_servo_rot_scale = float(os.environ.get("WRIST_SERVO_ROT_SCALE", "0.5"))   # 회전오차 정규화(rad)
+        if self.cap_grasp_mode:
+            self._init_cap_grasp_mode()
+        self._cap_unscrew_axis = None  # (E,3) 풀림 방향축 (n·부호), 이 방향 각속도가 +보상
+        self._cap_unscrew_ref = 1.0    # 기준 각속도(rad/s), 데모 속도에서 보상 포화
+        # 물체 reward 가중치: 회전-모드는 위치가 상수(핀)라 obj_pos↓, obj_rot↑ (env var로 튜닝)
+        # 풀림-보상 모드에선 tracking(obj_rot)을 크게 낮춤 (기본 0.5)
+        self.obj_pos_rew_w = float(os.environ.get("OBJ_POS_W", "0.5" if self.cap_rot_only else "5.0"))
+        _rot_default = "0.5" if self.cap_unscrew_rew else ("5.0" if self.cap_rot_only else "1.0")
+        self.obj_rot_rew_w = float(os.environ.get("OBJ_ROT_W", _rot_default))
+        if self.use_pid_control:
+            self.Kp_rot = self.dexhand.Kp_rot
+            self.Ki_rot = self.dexhand.Ki_rot
+            self.Kd_rot = self.dexhand.Kd_rot
+
+            self.Kp_pos = self.dexhand.Kp_pos
+            self.Ki_pos = self.dexhand.Ki_pos
+            self.Kd_pos = self.dexhand.Kd_pos
+
+        if self.single_policy and self.wrist_servo:
+            # 손목 서보: 정책은 손가락(n_dofs)만 출력 (손목은 플래너로 PID 고정)
+            self.cfg["env"]["numActions"] = self.dexhand.n_dofs
+        elif self.single_policy:
+            # 단일정책: 분할 없이 [손목제어(root_control_dim) + 손가락(n_dofs)] 직접출력
+            _rcd = 9 if self.use_pid_control else 6
+            self.cfg["env"]["numActions"] = _rcd + self.dexhand.n_dofs
+        else:
+            self.cfg["env"]["numActions"] = (1 + 6 + self.dexhand.n_dofs) if use_quat_rot else (6 + self.dexhand.n_dofs)
+        self.act_moving_average = self.cfg["env"]["actionsMovingAverage"]
+        self.translation_scale = self.cfg["env"]["translationScale"]
+        self.orientation_scale = self.cfg["env"]["orientationScale"]
+
+        # a dict containing prop obs name to dump and their dimensions
+        # used for distillation
+        self._prop_dump_info = self.cfg["env"]["propDumpInfo"]
+
+        # Values to be filled in at runtime
+        self.states = {}
+        self.dexhand_handles = {}  # will be dict mapping names to relevant sim handles
+        self.objs_handles = {}  # for obj handlers
+        self.objs_assets = {}
+        self.body_assets = {}  # 고정 텀블러 몸체(scene_body) asset 캐시 (urdf경로 -> asset)
+        self.num_dofs = None  # Total number of DOFs per env
+        self.actions = None  # Current actions to be deployed
+
+        self.dataIndices = self.cfg["env"]["dataIndices"]
+        self.obs_future_length = self.cfg["env"]["obsFutureLength"]
+        self.rollout_state_init = self.cfg["env"]["rolloutStateInit"]
+        self.random_state_init = self.cfg["env"]["randomStateInit"]
+
+        self.tighten_method = self.cfg["env"]["tightenMethod"]
+        self.tighten_factor = self.cfg["env"]["tightenFactor"]
+        self.tighten_steps = self.cfg["env"]["tightenSteps"]
+
+        self.rollout_len = self.cfg["env"].get("rolloutLen", None)
+        self.rollout_begin = self.cfg["env"].get("rolloutBegin", None)
+
+        assert len(self.dataIndices) == 1 or self.rollout_len is None, "rolloutLen only works with one data"
+        assert len(self.dataIndices) == 1 or self.rollout_begin is None, "rolloutBegin only works with one data"
+
+        # Tensor placeholders
+        self._root_state = None  # State of root body        (n_envs, 13)
+        self._dof_state = None  # State of all joints       (n_envs, n_dof)
+        self._q = None  # Joint positions           (n_envs, n_dof)
+        self._qd = None  # Joint velocities          (n_envs, n_dof)
+        self._rigid_body_state = None  # State of all rigid bodies             (n_envs, n_bodies, 13)
+        self.net_cf = None  # contact force
+        self._eef_state = None  # end effector state (at grasping point)
+        self._ftip_center_state = None  # center of fingertips
+        self._eef_lf_state = None  # end effector state (at left fingertip)
+        self._eef_rf_state = None  # end effector state (at left fingertip)
+        self._j_eef = None  # Jacobian for end effector
+        self._mm = None  # Mass matrix
+        self._pos_control = None  # Position actions
+        self._effort_control = None  # Torque actions
+        self._dexhand_effort_limits = None  # Actuator effort limits for dexhand_r
+        self._dexhand_dof_speed_limits = None  # Actuator speed limits for dexhand_r
+        self._global_dexhand_indices = None  # Unique indices corresponding to all envs in flattened array
+
+        self.sim_device = torch.device(sim_device)
+        # hand-obs 정합: IK 래퍼와 함께 쓰면 관측·액션이 hand-only 판과 완전히
+        # 같아져 Al9 등 hand-only 체크포인트를 그대로 웜스타트할 수 있다.
+        # 팔 6 DOF 를 관측에서 빼고(뒤 16 = 손), base 참조를 손목 몸체로 바꾼다.
+        self.cap_arm_hand_obs = bool(int(os.environ.get("CAP_ARM_HAND_OBS", "0")))
+        if self.cap_arm_hand_obs:
+            _nh = 16  # allegro 손 관절
+            self.cfg["env"]["propObsDim"] = 13 + 3 * _nh
+            self.cfg["env"]["privilegedObsDim"] = _nh + 13 + 5 * 4 + 3 + 1
+        # 관측 이력 스태킹: 최근 K 프레임의 (관절속도 + 캡 각속도 + 직전 액션).
+        # 무기억 MLP 에 "내 명령 이력 대비 반응" 을 줘 저항의 암묵적 시스템
+        # 동정을 가능하게 한다 (A17b 실측: 이력 없이는 저항 적응 미형성).
+        # 인코더 쪽 proprioception input_dim 도 K*(2*ndof+3) 만큼 늘려야 한다.
+        self.cap_obs_history = int(os.environ.get("CAP_OBS_HISTORY", "0"))
+        if self.cap_obs_history > 0:
+            _nd = (int(self.cfg["env"]["propObsDim"]) - 13) // 3
+            self._hist_feat_dim = 2 * _nd + 3
+            self.cfg["env"]["propObsDim"] = (
+                int(self.cfg["env"]["propObsDim"]) + self.cap_obs_history * self._hist_feat_dim
+            )
+        # 진짜 저항값(Nm/1.2 정규화)을 privileged(critic 전용)에 추가 —
+        # actor 는 이력에서 추론해야 하므로 sim-to-real 무손상.
+        self.cap_priv_resist = bool(int(os.environ.get("CAP_PRIV_RESIST", "0")))
+        if self.cap_priv_resist:
+            self.cfg["env"]["privilegedObsDim"] = int(self.cfg["env"].get("privilegedObsDim", 0)) + 1
+        super().__init__(
+            config=self.cfg,
+            rl_device=rl_device,
+            sim_device=sim_device,
+            graphics_device_id=graphics_device_id,
+            display=display,
+            record=record,
+            headless=headless,
+        )
+        _wrist_dim = 3 + 3 + 3 + 4 + 4 + 3 + 3          # 손목 궤적 항 = 23
+        _finger_dim = (self.dexhand.n_bodies - 1) * 9    # 손가락(joints pos/vel/dvel)
+        _obj_dim = 3 + 3 + 3 + 4 + 4 + 3 + 3            # 물체 목표 궤적 항 = 23
+        _o2j = self.dexhand.n_bodies                     # obj_to_joints
+        if self.cap_arm_mode:
+            _o2j -= len(self.dexhand.ARM_BODIES)         # 팔 몸체 제외 (hand-only 정합)
+        if self.objcentric_obs:
+            # 논문식: 손가락 궤적·gt_tips 제외, 손목(플래너)+물체목표+obj_to_joints+bps
+            TARGET_OBS_DIM = 128 + (_wrist_dim + _obj_dim + _o2j) * self.obs_future_length
+        else:
+            TARGET_OBS_DIM = 128 + 5 + (_wrist_dim + _finger_dim + _obj_dim + _o2j) * self.obs_future_length
+        # cap grasp 는 중력이 켜지는 시점이 있는 phase task 인데 정책이 MLP 라 메모리가
+        # 없다. 위상을 관측에 넣지 않으면 "언제 조여야 하는지" 를 알 방법이 없다.
+        # 차원은 rl_train/ObjDexUnscrewPPO.yaml 의 target extractor 와 반드시
+        # 같아야 하므로, 양쪽이 동일한 환경변수 하나를 읽는다 (미설정 시 0=off).
+        self.CAP_PHASE_DIM = int(os.environ.get("CAP_GRASP_PHASE_DIM", "0")) if self.cap_grasp_mode else 0
+        # Read here, not inside the curriculum branch: compute_observations uses
+        # it on every tumbler path, curriculum or not.
+        self.cap_hide_angle = bool(int(os.environ.get("CAP_HIDE_ANGLE", "0")))
+        # 캡의 z(상승) 속도를 privileged 에서 가린다. 위치·수평속도는 유지.
+        self.cap_hide_rise = bool(int(os.environ.get("CAP_HIDE_RISE", "0")))
+        # 성공해도 에피소드를 끝내지 않는다 (tools2). 수준 기반 보상에서 성공
+        # 종료는 스텝당 수입을 끊어 "완주 = 수입 포기" 가 된다 -- 계속 두면
+        # 해제 후에도 수입이 이어져 완주가 주차를 지배한다. 성공은 래치로
+        # 잡아 두었다가 에피소드가 실제로 끝날 때 집계된다.
+        self.cap_no_reset_on_success = bool(int(os.environ.get("CAP_NO_RESET_ON_SUCCESS", "0")))
+        # unscrew 모드 낙하 종료: 캡이 홈보다 이만큼(m) 아래로 내려가면 즉시
+        # 끝낸다. 0 = 꺼짐(구 동작). free6 물리 전용 -- released 는 래치라
+        # 떨어진 캡을 바닥에서 재파지해도 성공/수입이 복구되는 구멍을 막는다.
+        self.cap_unscrew_drop_fail_z = float(os.environ.get("CAP_UNSCREW_DROP_FAIL_Z", "0.0"))
+        # 낙하 종료 시 일시불 페널티. 초기 학습처럼 스텝당 순보상이 음수인
+        # 구간에서는 "빨리 떨어뜨려 끝내기"가 총 페널티를 줄이는 지름길이
+        # 된다 (Arm5 에서 ep 길이 719→17 로 붕괴 실측). 할인 지평선(γ=0.99,
+        # ~100스텝)의 최악 음수 합을 상회하는 값이면 자살 유인이 사라진다.
+        self.cap_drop_fail_penalty = float(os.environ.get("CAP_DROP_FAIL_PENALTY", "0.0"))
+        # 손가락 액션을 절대 목표가 아니라 "전 스텝 실측 관절각 + 변화량" 으로
+        # 해석한다 (tools2). 액션 0 = 현재 자세 유지이므로, grasp_init 로 잡은
+        # 채 시작하는 환경은 아무것도 안 해도 파지가 유지된다 -- 절대 방식은
+        # 첫 스텝의 랜덤 출력이 손을 임의 자세로 튕겨 초기 파지를 깬다.
+        self.cap_action_delta = bool(int(os.environ.get("CAP_ACTION_DELTA", "0")))
+        self.cap_action_delta_scale = float(os.environ.get("CAP_ACTION_DELTA_SCALE", "0.05"))
+        # 팔 모드: 팔 관절 델타는 손끝에서 크게 증폭되므로(어깨 0.05rad = ~4cm)
+        # 별도 상한. 스케일 벡터는 _create_envs 후 _build_delta_scale() 이 만든다.
+        # 스칼라 또는 쉼표 6개 (관절별: base,shoulder,elbow,wrist1,wrist2,wrist3)
+        _asa = os.environ.get("CAP_ACTION_DELTA_SCALE_ARM", "0.01")
+        self.cap_action_delta_scale_arm = [float(v) for v in _asa.split(",")]
+        if len(self.cap_action_delta_scale_arm) == 1:
+            self.cap_action_delta_scale_arm *= 6
+        self._delta_scale_vec = None
+        # 델타의 기준. "q" = 실측 관절각 (순응: 밀리면 목표가 따라가 반력이
+        # 유계 k*delta 로 끝남), "target" = 유지되는 목표 (실제 서보: 외력에
+        # 밀리면 변위가 쌓여 드라이브가 토크 한계 7.5Nm 까지 저항).
+        # lag 는 목표가 실측에서 벌어질 수 있는 최대 -- 서보 추종 한계의
+        # 역할이고, 접촉이 풀리는 순간 튀는 적분 폭주를 막는다. 7.5Nm 은
+        # 변위 0.015rad(=7.5/500)에서 이미 포화하므로 lag 0.15 는 충분히 크다.
+        self.cap_action_delta_base = os.environ.get("CAP_ACTION_DELTA_BASE", "q")
+        self.cap_action_delta_lag = float(os.environ.get("CAP_ACTION_DELTA_LAG", "0.15"))
+        # 손목도 변화량으로: 내부 목표 자세를 두고 액션이 그 목표를 스텝당
+        # 최대 pos/rot scale 만큼 옮긴다. 실제 구동은 목표를 향한 PD 힘/토크.
+        # 액션 0 = 목표 정지 = 손목 유지 -- 손가락 델타와 짝이 되어, 잡은 채
+        # 시작한 환경이 랜덤 초기 정책에도 파지를 유지한다. 기존 힘 직결
+        # 방식은 base_action 이 곧 힘이라 랜덤 출력이 손목을 바로 끌고 갔다.
+        self.cap_wrist_delta = bool(int(os.environ.get("CAP_WRIST_DELTA", "0")))
+        self.cap_wrist_delta_pos = float(os.environ.get("CAP_WRIST_DELTA_POS", "0.005"))
+        self.cap_wrist_delta_rot = float(os.environ.get("CAP_WRIST_DELTA_ROT", "0.05"))
+        # PD 게인. 오차를 err_max 로 잘라 힘이 Kp*err_max 로 유계가 되게 한다.
+        # 감쇠의 이산 안정 조건은 Kd*dt/m < 2 다. 처음 값(Kd_pos 40, Kd_rot
+        # 0.4)은 베이스 질량 ~0.3kg 에서 2.2, 회전은 수십 배로 넘겨서 10스텝
+        # 만에 손목 위치가 1e9 mm -> nan 으로 터졌다. 안전 여유를 크게 두고,
+        # 힘·토크 자체도 클램프한다.
+        self.cap_wrist_kp_pos = float(os.environ.get("CAP_WRIST_KP_POS", "100.0"))
+        self.cap_wrist_kd_pos = float(os.environ.get("CAP_WRIST_KD_POS", "4.0"))
+        self.cap_wrist_kp_rot = float(os.environ.get("CAP_WRIST_KP_ROT", "1.0"))
+        self.cap_wrist_kd_rot = float(os.environ.get("CAP_WRIST_KD_ROT", "0.02"))
+        self.cap_wrist_err_max = float(os.environ.get("CAP_WRIST_ERR_MAX", "0.03"))
+        self.cap_wrist_force_max = float(os.environ.get("CAP_WRIST_FORCE_MAX", "20.0"))
+        self.cap_wrist_torque_max = float(os.environ.get("CAP_WRIST_TORQUE_MAX", "1.5"))
+        # 캡의 z(상승) 속도를 privileged 에서 가린다. 위치·수평속도는 유지.
+        self.cap_hide_rise = bool(int(os.environ.get("CAP_HIDE_RISE", "0")))
+        # cap_grasp_init 은 _create_envs 쪽(n_hand_dofs 확정 후)에서 만든다.
+        # 여기서 None 으로 초기화하면 안 된다 -- 이 줄은 super().__init__ 가
+        # 이미 생성을 끝낸 뒤에 실행되어 객체를 지워버렸고, 첫 리셋이 gi=None
+        # 을 보며 초기자세가 한 번도 적용되지 않았다.
+        # 6  = phase block only.
+        # 13 = + the wrist pose in the cap frame (3 pos + 4 quat). Unscrewing
+        #      needs it: the hand turns *with* the cap, so in the cap frame a
+        #      good grip holds that relative pose constant while the world-frame
+        #      wrist pose sweeps through 200 deg.
+        # 14 = + how far the cap has come up, as a fraction of the success
+        #      height. Success is now that single number, and nothing in the
+        #      observation stated it -- only the cap's absolute z, from which
+        #      the network would have to work out the body-relative rise itself.
+        # 15 = + the turn still to go, in units of 10 deg. `turn` alone cannot
+        #      resolve the end of the stroke: 176 deg reads 0.978 and 180 reads
+        #      1.000, a 2% move in one of fifteen components, and after input
+        #      normalisation the two states are all but identical to the policy.
+        #      The reward tells them apart -- release pays 2.6 at 180 and nothing
+        #      at 176 -- but the observation does not, so no action can be
+        #      conditioned on the difference. Measured: the wrist stops turning
+        #      at 176.6 and oscillates in place (signed/absolute yaw ratio falls
+        #      from 0.92 to 0.06) while grip, drive force, joint limit and timing
+        #      all remain fine. In 10-deg units the same pair reads 0.4 and 0.0.
+        # 10 = 각도류(turn, released, hold_frac, lift_frac, remain)를 아예 뺀 판:
+        # [t/T, sin, cos, 손목 상대위치 3, 상대자세 4]. HIDE_ANGLE 이 값을 0 으로
+        # 가리는 것과 달리 차원 자체가 없다 -- 실기에서 만들 수 없는 관측을
+        # 자리부터 남기지 않는다. tools2 가 쓴다.
+        # 11 = 10 + 해제 여부. released 는 HIDE_ANGLE 과 무관하게 원값이 들어간다
+        # -- 각도(어디까지 왔나)는 숨기되 "나사가 풀렸다" 는 이벤트는 정책이
+        # 알아야 잡고 들어올리는 전환을 배울 수 있다.
+        if self.CAP_PHASE_DIM not in (0, 6, 10, 11, 13, 14, 15):
+            raise ValueError(f"CAP_GRASP_PHASE_DIM must be 0, 6, 10, 11, 13, 14 or 15, got {self.CAP_PHASE_DIM}")
+        TARGET_OBS_DIM += self.CAP_PHASE_DIM
+        self.obs_dict.update(
+            {
+                "target": torch.zeros((self.num_envs, TARGET_OBS_DIM), device=self.device),
+            }
+        )
+        obs_space = self.obs_space.spaces
+        obs_space["target"] = spaces.Box(
+            low=-np.inf,
+            high=np.inf,
+            shape=(TARGET_OBS_DIM,),
+        )
+        self.obs_space = spaces.Dict(obs_space)
+
+        default_pose = torch.ones(self.dexhand.n_dofs, device=self.device) * np.pi / 12
+        if self.cfg["env"]["dexhand"] == "inspire":
+            default_pose[8] = 0.3
+            default_pose[9] = 0.01
+        self.dexhand_default_dof_pos = torch.tensor(default_pose, device=self.sim_device)
+        # load BPS model
+        self.bps_feat_type = "dists"
+        self.bps_layer = bps_torch(
+            bps_type="grid_sphere", n_bps_points=128, radius=0.2, randomize=False, device=self.device
+        )
+
+        obj_verts = self.demo_data["obj_verts"]
+        self.obj_bps = self.bps_layer.encode(obj_verts, feature_type=self.bps_feat_type)[self.bps_feat_type]
+
+        # Reset all environments
+        self.reset_idx(torch.arange(self.num_envs, device=self.device))
+
+        # Refresh tensors
+        self._refresh()
+
+    def _init_cap_grasp_mode(self):
+        tools_dir = Path(self.cap_grasp_tools_dir)
+        if str(tools_dir) not in sys.path:
+            sys.path.insert(0, str(tools_dir))
+        # CAP_GRASP_TOOLS_DIR 가 다른 폴더(task1/tools2 등)를 가리켜도, 거기
+        # 없는 모듈은 기본 tools 에서 찾는다. 실험 폴더는 바꿔 쓸 모듈만 담으면
+        # 되고 (보상 등), screw_coupling 같은 공용 모듈을 복사해 둘 필요가 없다.
+        _default_tools = "/home/leegyuwon/Documents/task1/tools"
+        if _default_tools not in sys.path:
+            sys.path.append(_default_tools)
+
+        from cap_grasp_rl_terms import CapGraspRLConfig, cap_grasp_reward_success, gravity_scale_from_progress
+        from wrist_init import PALM_LOCAL, sample_wrist_init, sample_wrist_init_mcp_reachable
+
+        self.cap_grasp_reward_fn = cap_grasp_reward_success
+        self.cap_grasp_gravity_scale_fn = gravity_scale_from_progress
+        self.cap_grasp_sample_wrist_init = sample_wrist_init
+        self.cap_grasp_sample_wrist_mcp_reachable = sample_wrist_init_mcp_reachable
+        self.cap_grasp_palm_local = PALM_LOCAL.detach().clone().float()
+        self.cap_grasp_cfg = CapGraspRLConfig(
+            grasp_time=float(os.environ.get("CAP_GRASP_TIME", "1.0")),
+            settle_time=float(os.environ.get("CAP_SETTLE_TIME", "0.5")),
+            hold_time=float(os.environ.get("CAP_HOLD_TIME", "2.0")),
+            gravity_ramp_time=float(os.environ.get("CAP_GRAVITY_RAMP_TIME", "0.0")),
+            drop_threshold=float(os.environ.get("CAP_DROP_THRESHOLD", "0.015")),
+            cap_vel_threshold=float(os.environ.get("CAP_VEL_THRESHOLD", "0.05")),
+            contact_force_threshold=float(os.environ.get("CAP_CONTACT_FORCE_THRESHOLD", "0.05")),
+            min_contact_tips=int(os.environ.get("CAP_MIN_CONTACT_TIPS", "2")),
+            side_contact_margin=float(os.environ.get("CAP_SIDE_CONTACT_MARGIN", "0.010")),
+            side_z_margin=float(os.environ.get("CAP_SIDE_Z_MARGIN", "0.002")),
+            closure_err_max=float(os.environ.get("CAP_CLOSURE_ERR_MAX", "0.75")),
+            require_gravity_for_hold=bool(int(os.environ.get("CAP_REQUIRE_GRAVITY_FOR_HOLD", "1"))),
+            lift_mode=self.cap_grasp_pedestal,
+            lift_success_height=float(os.environ.get("CAP_LIFT_SUCCESS_HEIGHT", "0.030")),
+            lift_weight=float(os.environ.get("CAP_LIFT_W", "4.0")),
+            lift_requires_grasp=bool(int(os.environ.get("CAP_LIFT_REQUIRES_GRASP", "1"))),
+            level_weight=float(os.environ.get("CAP_LEVEL_W", "1.0")),
+            level_cos_min=float(os.environ.get("CAP_LEVEL_COS_MIN", "0.87")),
+            fallen_threshold=float(os.environ.get("CAP_FALLEN_THRESHOLD", "0.050")),
+            hold_decay_rate=float(os.environ.get("CAP_HOLD_DECAY_RATE", "3.0")),
+            finger_radius=float(os.environ.get("CAP_FINGER_RADIUS", "0.009")),
+            near_weight=float(os.environ.get("CAP_NEAR_W", "0.5")),
+            near_gate_on_grip=float(os.environ.get("CAP_NEAR_GATE_ON_GRIP", "0.5")),
+            grip_force_ref=float(os.environ.get("CAP_GRIP_FORCE_REF", "0.5")),
+            grip_weight=float(os.environ.get("CAP_GRIP_W", "1.5")),
+            tip_dist_scale=float(os.environ.get("CAP_TIP_DIST_SCALE", "0.02")),
+            thumb_contact_weight=float(os.environ.get("CAP_THUMB_CONTACT_W", "2.0")),
+            two_tip_contact_weight=float(os.environ.get("CAP_TWO_TIP_CONTACT_W", "1.0")),
+            grasp_contact_weight=float(os.environ.get("CAP_GRASP_CONTACT_W", "2.0")),
+            hold_weight=float(os.environ.get("CAP_HOLD_W", "3.0")),
+            closure_weight=float(os.environ.get("CAP_CLOSURE_W", "1.0")),
+            drop_penalty_weight=float(os.environ.get("CAP_DROP_PENALTY_W", "2.0")),
+            cap_vel_penalty_weight=float(os.environ.get("CAP_CAP_VEL_PENALTY_W", "0.2")),
+            action_penalty_weight=float(os.environ.get("CAP_ACTION_PENALTY_W", "0.01")),
+            penetration_penalty_weight=float(os.environ.get("CAP_PENETRATION_PENALTY_W", "2.0")),
+            penetration_ref=float(os.environ.get("CAP_PENETRATION_REF", "0.02")),
+            penetration_tol=float(os.environ.get("CAP_PENETRATION_TOL", "0.005")),
+            pedestal_penalty_weight=float(os.environ.get("CAP_PEDESTAL_PENALTY_W", "0.0")),
+            pedestal_ref=float(os.environ.get("CAP_PEDESTAL_REF", "0.020")),
+            pedestal_radius=float(os.environ.get("CAP_PEDESTAL_RADIUS", "0.052")),
+            pedestal_tol=float(os.environ.get("CAP_PEDESTAL_TOL", "0.010")),
+        )
+        # CAP_UNSCREW_CURRICULUM=1 swaps in the ANYmal-style formulation
+        # (dense objective + curriculum factor on the constraints) from
+        # cap_unscrew_curriculum_terms, kept separate so the two are comparable.
+        self.cap_unscrew_curriculum = bool(int(os.environ.get("CAP_UNSCREW_CURRICULUM", "0")))
+        if self.cap_grasp_tumbler and self.cap_unscrew_curriculum:
+            from cap_unscrew_curriculum_terms import (
+                CapUnscrewCurriculumConfig, advance_kc, cap_unscrew_curriculum_reward,
+            )
+            self.cap_unscrew_reward_fn = cap_unscrew_curriculum_reward
+            self.cap_unscrew_advance_kc = advance_kc
+            def _f(k, d):
+                return float(os.environ.get(k, d))
+            self.cap_unscrew_cfg = CapUnscrewCurriculumConfig(
+                kc_initial=_f("CAP_KC0", "0.3"),
+                kc_advance=_f("CAP_KD", "0.997"),
+                unscrew_target_rad=math.radians(_f("CAP_UNSCREW_TARGET_DEG", "180")),
+                lift_success_height=_f("CAP_LIFT_SUCCESS_HEIGHT", "0.016"),
+                collar_overlap=_f("CAP_COLLAR_OVERLAP", "0.0143"),
+                hold_time=_f("CAP_HOLD_TIME", "0.3"),
+                # tools2 전용 필드. 구 tools 판 dataclass 에는 없으므로 있을 때만.
+                **(
+                    {"released_hold_success_time": _f("CAP_RELEASED_HOLD_SUCCESS_TIME", "0.0")}
+                    if "released_hold_success_time" in CapUnscrewCurriculumConfig.__dataclass_fields__
+                    else {}
+                ),
+                band_lo=_f("CAP_BAND_LO", "0.0143"),
+                finger_radius=_f("CAP_FINGER_RADIUS", "0.009"),
+                min_contact_tips=int(os.environ.get("CAP_MIN_CONTACT_TIPS", "2")),
+                palm_facing_min_cos=_f("CAP_PALM_FACING_MIN_COS", "0.0"),
+                unscrew_weight=_f("CAP_UNSCREW_W", "10.0"),
+                hold_weight=_f("CAP_HOLD_W", "4.0"),
+                near_weight=_f("CAP_NEAR_W", "2.0"),
+                lift_weight=_f("CAP_LIFT_W", "4.0"),
+                release_weight=_f("CAP_RELEASE_W", "3.0"),
+                lift_release_height=_f("CAP_LIFT_RELEASE_H", "0.010"),
+                tip_dist_scale=_f("CAP_TIP_DIST_SCALE", "0.06"),
+                pinch_weight=_f("CAP_PINCH_W", "2.0"),
+                pinch_dist_scale=_f("CAP_PINCH_DIST_SCALE", "0.008"),
+                press_weight=_f("CAP_PRESS_W", "1.0"),
+                opposition_penalty_weight=_f("CAP_OPPOSE_W", "4.0"),
+                opposition_min_sep_deg=_f("CAP_OPPOSE_SEP_DEG", "90"),
+                grasp_quality_weight=_f("CAP_GRASP_QUALITY_W", "2.0"),
+                grasp_stable_min=_f("CAP_GRASP_STABLE_MIN", "0.125"),
+                contact_ref=int(os.environ.get("CAP_CONTACT_REF", "4")),
+                grip_weight=_f("CAP_GRIP_W", "1.0"),
+                penetration_penalty_weight=_f("CAP_PENETRATION_PENALTY_W", "3.0"),
+                penetration_tol=_f("CAP_PENETRATION_TOL", "0.002"),
+                reverse_penalty_weight=_f("CAP_REVERSE_PENALTY_W", "2.0"),
+                reverse_angle_penalty_weight=_f("CAP_REVERSE_ANGLE_W", "2.0"),
+                reverse_angle_ref_frac=_f("CAP_REVERSE_ANGLE_REF_FRAC", "0.25"),
+                wrist_leash_weight=_f("CAP_WRIST_LEASH_W", "0.3"),
+                wrist_leash_radius=_f("CAP_WRIST_LEASH_R", "0.10"),
+                palm_down_penalty_weight=_f("CAP_PALM_DOWN_W", "0.0"),
+                thumb_pair_penalty_weight=_f("CAP_THUMB_PAIR_W", "2.0"),
+                thumb_pair_min_sep_deg=_f("CAP_THUMB_PAIR_SEP_DEG", "90"),
+                action_penalty_weight=_f("CAP_ACTION_PENALTY_W", "0.01"),
+                palm_grade=bool(int(os.environ.get("CAP_PALM_GRADE", "0"))),
+                closure_area=bool(int(os.environ.get("CAP_CLOSURE_AREA", "0"))),
+                closure_area_ref=_f("CAP_CLOSURE_AREA_REF", "2.0e-3"),
+                palm_grade_pow=_f("CAP_PALM_GRADE_POW", "2.0"),
+                turn_only=bool(int(os.environ.get("CAP_TURN_ONLY", "0"))),
+                unscrew_norm_rad=math.radians(_f("CAP_UNSCREW_NORM_DEG", "360")),
+                turn_progress=bool(int(os.environ.get("CAP_TURN_PROGRESS", "0"))),
+                unscrew_rate_ref=_f("CAP_UNSCREW_RATE_REF", "2.0"),
+            )
+            self.cap_kc = self.cap_unscrew_cfg.kc_initial
+            # k_c advances once per RL iteration; the env only sees steps.
+            self.cap_kc_period = int(os.environ.get("CAP_KC_PERIOD", "32"))
+            self._kc_step = 0
+            self.cap_unscrew_prev_angle = None
+            # 나사 저항 커리큘럼. 0.8Nm 스크래치는 부트스트랩 고리가 끊긴다
+            # (A13 실측: 가벼운 접촉 회전 수입이 0 이라 파지 강화 선순환이
+            # 시작을 못 함). 저항을 낮게 시작해 성공률 게이트로 올린다.
+            # 켜면 URDF 의 <dynamics friction> 대신 CAP_RESIST_START 로 시작.
+            self.cap_resist_curriculum = bool(int(os.environ.get("CAP_RESIST_CURRICULUM", "0")))
+            self.cap_resist_now = float(os.environ.get("CAP_RESIST_START", "0.2"))
+            self.cap_resist_end = float(os.environ.get("CAP_RESIST_END", "0.8"))
+            # 저항 랜덤화: 리셋마다 env별 uniform(LO, cap_resist_now) 샘플.
+            # cap_resist_now 는 '상한' 역할이 되어 기존 성공률 게이트로 전진한다.
+            # 저항 적응(에너지 절약) 학습은 다양한 저항을 동시에 겪어야 생긴다.
+            self.cap_resist_random = bool(int(os.environ.get("CAP_RESIST_RANDOM", "0")))
+            self.cap_resist_lo = float(os.environ.get("CAP_RESIST_LO", "0.2"))
+            self.cap_resist_step_nm = float(os.environ.get("CAP_RESIST_STEP", "0.1"))
+            self.cap_resist_sr_gate = float(os.environ.get("CAP_RESIST_SR_GATE", "0.8"))
+            self.cap_resist_min_eps = int(os.environ.get("CAP_RESIST_MIN_EPISODES", "4096"))
+            self._resist_ep_count = 0
+            self._resist_succ_count = 0
+        elif self.cap_grasp_tumbler:
+            self.cap_resist_curriculum = False
+            from cap_unscrew_rl_terms import CapUnscrewConfig, cap_unscrew_reward_success
+            import math as _math
+            self.cap_unscrew_reward_fn = cap_unscrew_reward_success
+            self.cap_unscrew_cfg = CapUnscrewConfig(
+                unscrew_target_rad=_math.radians(float(os.environ.get("CAP_UNSCREW_TARGET_DEG", "180"))),
+                hold_time=float(os.environ.get("CAP_HOLD_TIME", "0.3")),
+                hold_decay_rate=float(os.environ.get("CAP_HOLD_DECAY_RATE", "3.0")),
+                cap_radius_lo=float(os.environ.get("CAP_RADIUS_LO", "0.0469")),
+                cap_radius_hi=float(os.environ.get("CAP_RADIUS_HI", "0.0500")),
+                cap_radius_knee=float(os.environ.get("CAP_RADIUS_KNEE", "0.017")),
+                cap_height=float(os.environ.get("CAP_HEIGHT_M", "0.0300")),
+                finger_radius=float(os.environ.get("CAP_FINGER_RADIUS", "0.009")),
+                band_lo=float(os.environ.get("CAP_BAND_LO", "0.0143")),
+                lift_success_height=float(os.environ.get("CAP_LIFT_SUCCESS_HEIGHT", "0.012")),
+                collar_overlap=float(os.environ.get("CAP_COLLAR_OVERLAP", "0.0143")),
+                lift_tol=float(os.environ.get("CAP_LIFT_TOL", "0.0005")),
+                band_margin=float(os.environ.get("CAP_BAND_MARGIN", "0.002")),
+                radial_margin=float(os.environ.get("CAP_RADIAL_MARGIN", "0.010")),
+                contact_force_threshold=float(os.environ.get("CAP_CONTACT_FORCE_THRESHOLD", "0.05")),
+                min_contact_tips=int(os.environ.get("CAP_MIN_CONTACT_TIPS", "2")),
+                grip_force_ref=float(os.environ.get("CAP_GRIP_FORCE_REF", "0.5")),
+                closure_err_max=float(os.environ.get("CAP_CLOSURE_ERR_MAX", "0.75")),
+                unscrew_weight=float(os.environ.get("CAP_UNSCREW_W", "10.0")),
+                hold_weight=float(os.environ.get("CAP_HOLD_W", "4.0")),
+                grasp_contact_weight=float(os.environ.get("CAP_GRASP_CONTACT_W", "2.0")),
+                closure_weight=float(os.environ.get("CAP_CLOSURE_W", "3.0")),
+                grip_weight=float(os.environ.get("CAP_GRIP_W", "1.0")),
+                thumb_contact_weight=float(os.environ.get("CAP_THUMB_CONTACT_W", "0.5")),
+                two_tip_contact_weight=float(os.environ.get("CAP_TWO_TIP_CONTACT_W", "0.5")),
+                near_weight=float(os.environ.get("CAP_NEAR_W", "2.0")),
+                tip_dist_scale=float(os.environ.get("CAP_TIP_DIST_SCALE", "0.06")),
+                near_gate_on_grip=float(os.environ.get("CAP_NEAR_GATE_ON_GRIP", "0.5")),
+                penetration_penalty_weight=float(os.environ.get("CAP_PENETRATION_PENALTY_W", "2.0")),
+                penetration_ref=float(os.environ.get("CAP_PENETRATION_REF", "0.02")),
+                penetration_tol=float(os.environ.get("CAP_PENETRATION_TOL", "0.005")),
+                reverse_penalty_weight=float(os.environ.get("CAP_REVERSE_PENALTY_W", "2.0")),
+                reverse_ref=float(os.environ.get("CAP_REVERSE_REF", "0.5")),
+                action_penalty_weight=float(os.environ.get("CAP_ACTION_PENALTY_W", "0.01")),
+                wrist_leash_weight=float(os.environ.get("CAP_WRIST_LEASH_W", "0.3")),
+                wrist_leash_radius=float(os.environ.get("CAP_WRIST_LEASH_R", "0.16")),
+                thumb_pair_penalty_weight=float(os.environ.get("CAP_THUMB_PAIR_W", "1.0")),
+                thumb_pair_dist_factor=float(os.environ.get("CAP_THUMB_PAIR_FACTOR", "1.6")),
+                palm_down_penalty_weight=float(os.environ.get("CAP_PALM_DOWN_W", "0.0")),
+                palm_down_max_deg=float(os.environ.get("CAP_PALM_DOWN_MAX", "40")),
+                palm_down_ref_deg=float(os.environ.get("CAP_PALM_DOWN_REF", "40")),
+            )
+            # _table_surface_z only exists after _create_envs, so the collar
+            # height is filled in there (see the ScrewCoupling bind block).
+            # num_envs is not readable here -- this runs before VecTask has set
+            # num_environments -- so the buffer is allocated after _create_envs.
+            self.cap_unscrew_prev_angle = None
+        # Probe points sampling the distal segment of each finger, used for all
+        # geometric reward terms. link_X_4 origin -> link_X_tip origin -> tip
+        # mesh end (the tip mesh extends ~18 mm past its own origin).
+        self.cap_grasp_probe_steps = int(os.environ.get("CAP_PROBE_STEPS", "4"))
+        self.cap_grasp_tip_extension = float(os.environ.get("CAP_TIP_EXTENSION", "0.018"))
+
+        self.cap_rot_only = False
+        self.cap_unscrew_rew = False
+        self.objcentric_obs = True
+        self.single_policy = True
+        # Unscrewing needs the wrist: the couple that turns the cap comes from
+        # the whole hand, and the fixed-wrist grasp study showed 82% of sampled
+        # wrist poses could never succeed with fingers alone. wrist_servo=False
+        # makes numActions root_control_dim + n_dofs = 26.
+        self.wrist_servo = (not self.cap_grasp_tumbler) or self.cap_arm_mode
+        if self.cap_grasp_tumbler:
+            self.cap_grasp_lock_wrist = False
+        thumb_mcp_margin = self.cap_grasp_thumb_mcp_outside_margin
+        thumb_mcp_margin_str = "off" if thumb_mcp_margin is None else f"{thumb_mcp_margin:.3f}m"
+        print(
+            "[cap_grasp] mode=on | "
+            f"wrist={'locked' if self.cap_grasp_lock_wrist else 'servo'} + finger policy | "
+            f"grasp={self.cap_grasp_cfg.grasp_time:.2f}s settle={self.cap_grasp_cfg.settle_time:.2f}s "
+            f"hold={self.cap_grasp_cfg.hold_time:.2f}s | "
+            f"wrist_sampler={self.cap_grasp_wrist_sampler} reach_min_fingers={self.cap_grasp_reach_min_fingers} "
+            f"reach_margin={self.cap_grasp_reach_contact_margin:.3f}m "
+            f"thumb_required={self.cap_grasp_reach_require_thumb} "
+            f"thumb_margin={self.cap_grasp_thumb_reach_margin:.3f}m "
+            f"opposition_min={self.cap_grasp_opposition_min_deg}deg | "
+            f"zero_triangle_xy={self.cap_grasp_require_cap_center_in_zero_triangle} "
+            f"thumb_mcp_outside_margin={thumb_mcp_margin_str} "
+            f"reject_palm_collision={self.cap_grasp_reject_palm_collision}:{self.cap_grasp_palm_collision_margin:.3f}m "
+            f"r={self.cap_grasp_wrist_r_range[0]:.3f}~{self.cap_grasp_wrist_r_range[1]:.3f}m "
+            f"z={self.cap_grasp_wrist_z_range[0]:.3f}~{self.cap_grasp_wrist_z_range[1]:.3f}m "
+            f"palm_down_max={self.cap_grasp_palm_down_max_deg}deg "
+            f"side_contact_margin={self.cap_grasp_cfg.side_contact_margin:.3f}m "
+            f"finger_radius={self.cap_grasp_cfg.finger_radius:.3f}m "
+            f"probe_steps={self.cap_grasp_probe_steps} "
+            f"thumb_contact_w={self.cap_grasp_cfg.thumb_contact_weight:.2f} "
+            f"grip_w={self.cap_grasp_cfg.grip_weight:.2f} "
+            f"closure_w={self.cap_grasp_cfg.closure_weight:.2f} "
+            f"closure_err_max={self.cap_grasp_cfg.closure_err_max:.2f} "
+            f"near_w={self.cap_grasp_cfg.near_weight:.2f} "
+            f"require_gravity_for_hold={self.cap_grasp_cfg.require_gravity_for_hold} "
+            f"hold_decay={self.cap_grasp_cfg.hold_decay_rate:.2f} "
+            f"penetration_penalty_w={self.cap_grasp_cfg.penetration_penalty_weight:.2f} "
+            f"penetration_tol={self.cap_grasp_cfg.penetration_tol:.3f}m "
+            f"cap_pre_gravity_lock={self.cap_grasp_lock_cap_before_gravity}:{self.cap_grasp_cap_lock_mode} | "
+            f"pedestal={self.cap_grasp_pedestal}"
+            f"{'(tumbler_body)' if self.cap_grasp_tumbler_body else ''} "
+            f"lift={self.cap_grasp_lift_height:.3f}m@{self.cap_grasp_lift_start:.2f}s/{self.cap_grasp_lift_time:.2f}s "
+            f"lift_success={self.cap_grasp_cfg.lift_success_height:.3f}m "
+            f"level_w={self.cap_grasp_cfg.level_weight:.2f} "
+            f"level_cos_min={self.cap_grasp_cfg.level_cos_min:.2f} | "
+            f"resample_wrist_on_reset={self.cap_grasp_resample_wrist_on_reset} |",
+            flush=True,
+        )
+
+    def create_sim(self):
+        self.sim_params.up_axis = gymapi.UP_AXIS_Z
+        self.sim_params.gravity.x = 0
+        self.sim_params.gravity.y = 0
+        self.sim_params.gravity.z = -9.8
+        self.sim = super().create_sim(
+            self.device_id,
+            self.graphics_device_id,
+            self.physics_engine,
+            self.sim_params,
+        )
+        self._create_ground_plane()
+        self._create_envs()
+
+        if self.randomize:
+            self.apply_randomizations(self.dr_randomizations)
+
+    def _create_ground_plane(self):
+        plane_params = gymapi.PlaneParams()
+        plane_params.normal = gymapi.Vec3(0.0, 0.0, 1.0)
+        self.gym.add_ground(self.sim, plane_params)
+
+    @property
+    def _cap_src(self):
+        """Read-only cap state (E,13). The tumbler's actor root is the fixed
+        body, so there the cap has to come from the rigid-body tensor."""
+        return self._manip_obj_root_state if self._cap_body_state is None else self._cap_body_state
+
+    def _delta_scale(self):
+        """관절별 델타 상한. 팔 모드면 앞 6개(팔)가 별도 값."""
+        if self._delta_scale_vec is None:
+            v = torch.full((self.num_dexhand_dofs,), self.cap_action_delta_scale, device=self.device)
+            if self.cap_arm_mode:
+                v[:6] = torch.tensor(self.cap_action_delta_scale_arm, device=self.device)
+            self._delta_scale_vec = v
+        return self._delta_scale_vec
+
+    def _wrist_state_arm(self):
+        """손목 자세 뷰. 팔 모드에선 base_link 몸체(손 베이스), 아니면 액터 루트."""
+        if self.cap_arm_mode:
+            return self._rigid_body_state[:, self.dexhand_handles["base_link"], :]
+        return self._base_state
+
+    def _mask_palm_thumb_collision(self, env_ptr, actor):
+        """Skip collision between the palm and the thumb's proximal links.
+
+        The palm is concave -- the digits seat in recesses -- and PhysX collides
+        the convex hull of it, which swallows 74% of the thumb's proximal link,
+        16.7 mm deep. The result is a permanent contact the solver keeps trying
+        to resolve: 16524 N measured at rest, which pinned joint_1_1 and
+        joint_1_2 so the thumb could not follow its commanded angles at all.
+        Every run before this trained a hand with an effectively dead thumb --
+        and the thumb is the only digit that opposes the other four, so no
+        opposed grasp was reachable. The policy pushing the cap around with a
+        single finger was the best it could do.
+
+        Shapes skip each other when their filter bits AND to nonzero, so giving
+        just these three links a shared bit removes exactly that pair. Every
+        other self-collision stays on, unlike turning it off wholesale (which
+        lets the fingers pass through each other) or decomposing the whole hand
+        (2.4x the wall clock). Measured after: 0.6 N, all thumb joints tracking.
+        """
+        if not self._palm_thumb_mask:
+            return
+        names = self.gym.get_actor_rigid_body_names(env_ptr, actor)
+        shapes = self.gym.get_actor_rigid_shape_properties(env_ptr, actor)
+        spans = self.gym.get_actor_rigid_body_shape_indices(env_ptr, actor)
+        touched = False
+        for b, n in enumerate(names):
+            if n not in self._palm_thumb_mask:
+                continue
+            for s in range(spans[b].start, spans[b].start + spans[b].count):
+                shapes[s].filter = 1
+                touched = True
+        if touched:
+            self.gym.set_actor_rigid_shape_properties(env_ptr, actor, shapes)
+
+    def _create_envs(self):
+        spacing = 1.0
+        env_lower = gymapi.Vec3(-spacing, -spacing, 0.0)
+        env_upper = gymapi.Vec3(spacing, spacing, spacing)
+
+        # * >>> import table asset
+        table_asset_options = gymapi.AssetOptions()
+        table_asset_options.fix_base_link = True
+
+        table_width_offset = 0.2
+        table_asset = self.gym.create_box(self.sim, 0.8 + table_width_offset, 1.6, 0.03, table_asset_options)
+
+        table_pos = gymapi.Vec3(-table_width_offset / 2, 0, 0.4)
+        self.dexhand_pose = gymapi.Transform()
+        table_half_height = 0.015
+        table_half_width = 0.4
+
+        self._table_surface_z = table_surface_z = table_pos.z + table_half_height
+        if self.cap_arm_mode:
+            # RB5 베이스 = env 원점, 직립. 텀블러 바닥과 같은 z 레벨.
+            self.dexhand_pose.p = gymapi.Vec3(0, 0, 0)
+            self.dexhand_pose.r = gymapi.Quat(0, 0, 0, 1)
+        else:
+            self.dexhand_pose.p = gymapi.Vec3(-table_half_width, 0, table_surface_z + ROBOT_HEIGHT)
+            self.dexhand_pose.r = gymapi.Quat.from_euler_zyx(0, -np.pi / 2, 0)
+
+        mujoco2gym_transf = np.eye(4)
+        mujoco2gym_transf[:3, :3] = aa_to_rotmat(np.array([0, 0, -np.pi / 2])) @ aa_to_rotmat(
+            np.array([np.pi / 2, 0, 0])
+        )
+        mujoco2gym_transf[:3, 3] = np.array([0, 0, self._table_surface_z])
+        self.mujoco2gym_transf = torch.tensor(mujoco2gym_transf, device=self.sim_device, dtype=torch.float32)
+
+        self.demo_dataset_dict = {}
+        if not self.cap_grasp_mode:
+            dataset_list = list(set([ManipDataFactory.dataset_type(data_idx) for data_idx in self.dataIndices]))
+            for dataset_type in dataset_list:
+                self.demo_dataset_dict[dataset_type] = ManipDataFactory.create_data(
+                    manipdata_type=dataset_type,
+                    side=self.side,
+                    device=self.sim_device,
+                    mujoco2gym_transf=self.mujoco2gym_transf,
+                    max_seq_len=self.max_episode_length,
+                    dexhand=self.dexhand,
+                    embodiment=self.cfg["env"]["dexhand"],
+                )
+
+        dexhand_asset_file = self.dexhand.urdf_path
+        asset_options = gymapi.AssetOptions()
+        asset_options.thickness = 0.001
+        asset_options.angular_damping = 20
+        asset_options.linear_damping = 20
+        asset_options.max_linear_velocity = 50
+        asset_options.max_angular_velocity = 100
+        asset_options.fix_base_link = self.cap_arm_mode   # 팔 모드: 베이스 고정
+        asset_options.disable_gravity = not self.cap_arm_mode   # 팔은 중력 받아야 실기적
+        asset_options.flip_visual_attachments = False
+        asset_options.collapse_fixed_joints = False
+        asset_options.default_dof_drive_mode = gymapi.DOF_MODE_POS
+        asset_options.use_mesh_materials = True
+        # Off by default: the phantom contact it was added to fix is handled far
+        # more cheaply by filtering the one offending shape pair (see
+        # _mask_palm_thumb_collision). Decomposing the whole hand at the
+        # resolution that actually works costs 2.4x the wall clock.
+        if bool(int(os.environ.get("DEXHAND_VHACD", "0"))):
+            asset_options.vhacd_enabled = True
+            asset_options.vhacd_params = gymapi.VhacdParams()
+            asset_options.vhacd_params.resolution = int(
+                os.environ.get("DEXHAND_VHACD_RESOLUTION", "1000000")
+            )
+        dexhand_asset = self.gym.load_asset(self.sim, *os.path.split(dexhand_asset_file), asset_options)
+        self._palm_thumb_mask = [
+            n for n in os.environ.get(
+                "DEXHAND_SELF_COLLISION_MASK", "link_base,link_1_1,link_1_2"
+            ).split(",") if n
+        ]
+        # 손가락 드라이브. 500/30 이던 기본은 포화 변위 0.9도짜리 강체 그립을
+        # 만들었고, URDF 의 effort 7.5Nm(20관절 일괄 -- 실측 아닌 기본값 의심)
+        # 은 손끝 힘 ~300N 에 해당한다. 해제 순간 감긴 탄성이 자유 캡에 방출돼
+        # 놓치는 문제의 물리적 뿌리라, 셋 다 환경변수로 노출한다.
+        _dof_kp = float(os.environ.get("CAP_DOF_STIFFNESS", "500"))
+        _dof_kd = float(os.environ.get("CAP_DOF_DAMPING", "30"))
+        self._dof_effort_override = os.environ.get("CAP_DOF_EFFORT", "")
+        dexhand_dof_stiffness = torch.tensor(
+            [_dof_kp] * self.dexhand.n_dofs,
+            dtype=torch.float,
+            device=self.sim_device,
+        )
+        dexhand_dof_damping = torch.tensor(
+            [_dof_kd] * self.dexhand.n_dofs,
+            dtype=torch.float,
+            device=self.sim_device,
+        )
+        self.limit_info = {}
+        asset_rh_dof_props = self.gym.get_asset_dof_properties(dexhand_asset)
+        self.limit_info["rh"] = {
+            "lower": np.asarray(asset_rh_dof_props["lower"]).copy().astype(np.float32),
+            "upper": np.asarray(asset_rh_dof_props["upper"]).copy().astype(np.float32),
+        }
+
+        rigid_shape_props_asset = self.gym.get_asset_rigid_shape_properties(dexhand_asset)
+        _hand_mu = float(os.environ.get("CAP_HAND_FRICTION", "4.0"))
+        _obj_mu = float(os.environ.get("CAP_OBJ_FRICTION", "2.0"))
+        # 런 로그에 마찰 구성을 남긴다 -- 나중에 어떤 마찰로 학습했는지 복원용.
+        print(
+            f"[friction] hand={_hand_mu:.2f} obj={_obj_mu:.2f} "
+            f"유효(평균)={0.5 * (_hand_mu + _obj_mu):.2f}  rolling 0.01/0.05 torsion 0.01/0.05",
+            flush=True,
+        )
+        for element in rigid_shape_props_asset:
+            # PhysX 는 접촉쌍의 마찰을 평균 결합한다. 유효 μ = (손+물체)/2.
+            element.friction = _hand_mu
+            element.rolling_friction = 0.01
+            element.torsion_friction = 0.01
+
+        self.gym.set_asset_rigid_shape_properties(dexhand_asset, rigid_shape_props_asset)
+
+        self.num_dexhand_bodies = self.gym.get_asset_rigid_body_count(dexhand_asset)
+        self.num_dexhand_dofs = self.gym.get_asset_dof_count(dexhand_asset)
+
+        print(f"Num dexhand Bodies: {self.num_dexhand_bodies}")
+        print(f"Num dexhand DOFs: {self.num_dexhand_dofs}")
+
+        dexhand_dof_props = self.gym.get_asset_dof_properties(dexhand_asset)
+        self.dexhand_dof_lower_limits = []
+        self.dexhand_dof_upper_limits = []
+        self._dexhand_effort_limits = []
+        self._dexhand_dof_speed_limits = []
+        _arm_kp = float(os.environ.get("CAP_ARM_STIFFNESS", "4000"))
+        _arm_kd = float(os.environ.get("CAP_ARM_DAMPING", "160"))
+        _arm_eff = [float(v) for v in os.environ.get(
+            "CAP_ARM_EFFORT", "150,150,150,28,28,28").split(",")]
+        for i in range(self.num_dexhand_dofs):
+            dexhand_dof_props["driveMode"][i] = gymapi.DOF_MODE_POS
+            if self.cap_arm_mode and i < 6:
+                # RB5 팔: 정적 유지 실측(처짐 8.9mm@4000/160) 기반 기본값.
+                # effort 는 공식 미공개 -- 동급 코봇 추정 (BASELINE 참조).
+                dexhand_dof_props["stiffness"][i] = _arm_kp
+                dexhand_dof_props["damping"][i] = _arm_kd
+                dexhand_dof_props["effort"][i] = _arm_eff[i]
+            else:
+                dexhand_dof_props["stiffness"][i] = dexhand_dof_stiffness[i]
+                dexhand_dof_props["damping"][i] = dexhand_dof_damping[i]
+                if self._dof_effort_override:
+                    dexhand_dof_props["effort"][i] = float(self._dof_effort_override)
+
+            self.dexhand_dof_lower_limits.append(dexhand_dof_props["lower"][i])
+            self.dexhand_dof_upper_limits.append(dexhand_dof_props["upper"][i])
+            self._dexhand_effort_limits.append(dexhand_dof_props["effort"][i])
+            self._dexhand_dof_speed_limits.append(dexhand_dof_props["velocity"][i])
+        # 전력 추정용: 드라이브에 실제로 심은 k/d/effort 그대로 (PD 추정 토크
+        # tau = clip(k(q_t - q) - d qdot, ±eff) 는 이 값이어야 자기일관).
+        self._power_kde = [
+            [float(dexhand_dof_props["stiffness"][i]) for i in range(self.num_dexhand_dofs)],
+            [float(dexhand_dof_props["damping"][i]) for i in range(self.num_dexhand_dofs)],
+            [float(dexhand_dof_props["effort"][i]) for i in range(self.num_dexhand_dofs)],
+        ]
+        # 런 로그에 드라이브 구성을 남긴다 (마찰의 [friction] 과 같은 목적).
+        print(
+            f"[dof-drive] 손 관절 {self.num_dexhand_dofs}개: "
+            f"stiffness {float(dexhand_dof_stiffness[0]):.0f} damping {float(dexhand_dof_damping[0]):.0f} "
+            f"effort {float(dexhand_dof_props['effort'][0]):.2f}Nm "
+            f"({'CAP_DOF_EFFORT 오버라이드' if self._dof_effort_override else 'URDF 값'}) "
+            f"velocity {float(dexhand_dof_props['velocity'][0]):.2f}rad/s",
+            flush=True,
+        )
+        if os.environ.get("CAP_DOF_DEBUG", ""):
+            for _i in range(self.num_dexhand_dofs):
+                print(f"[dof-all] {_i:2d} {self.dexhand.dof_names[_i]:>10s} "
+                      f"k={float(dexhand_dof_props['stiffness'][_i]):.0f} "
+                      f"d={float(dexhand_dof_props['damping'][_i]):.1f} "
+                      f"eff={float(dexhand_dof_props['effort'][_i]):.2f}", flush=True)
+
+
+        self.dexhand_dof_lower_limits = torch.tensor(self.dexhand_dof_lower_limits, device=self.sim_device)
+        self.dexhand_dof_upper_limits = torch.tensor(self.dexhand_dof_upper_limits, device=self.sim_device)
+        self._dexhand_effort_limits = torch.tensor(self._dexhand_effort_limits, device=self.sim_device)
+        self._dexhand_dof_speed_limits = torch.tensor(self._dexhand_dof_speed_limits, device=self.sim_device)
+
+        # compute aggregate size
+        num_dexhand_bodies = self.gym.get_asset_rigid_body_count(dexhand_asset)
+        num_dexhand_shapes = self.gym.get_asset_rigid_shape_count(dexhand_asset)
+
+        self.dexhand_rs = []
+        self.envs = []
+
+        assert len(self.dataIndices) == 1 or not self.rollout_state_init, "rollout_state_init only works with one data"
+
+        if self.cap_grasp_mode:
+            self.demo_data = {}
+            self._apply_cap_grasp_demo_override()
+        else:
+            def segment_data(k):
+                todo_list = self.dataIndices
+                idx = todo_list[k % len(todo_list)]
+                return self.demo_dataset_dict[ManipDataFactory.dataset_type(idx)][idx]
+
+            self.demo_data = [segment_data(i) for i in tqdm(range(self.num_envs))]
+            self.demo_data = self.pack_data(self.demo_data)
+
+        if not self.cap_grasp_mode:
+            # B방식: 손 imitation 타겟을 리타겟 결과(opt_*)로 교체 (물체 궤적 obj_trajectory 등은 그대로).
+            # opt_joints_pos (E,T,26,3) body순 -> base 제외 [1:]가 packed mano_joints(25 body)와 1:1 대응.
+            if self.imitate_retarget:
+                E, T = self.demo_data["mano_joints"].shape[:2]
+                self.demo_data["wrist_pos"] = self.demo_data["opt_wrist_pos"]
+                self.demo_data["wrist_rot"] = self.demo_data["opt_wrist_rot"]
+                self.demo_data["wrist_velocity"] = self.demo_data["opt_wrist_velocity"]
+                self.demo_data["wrist_angular_velocity"] = self.demo_data["opt_wrist_angular_velocity"]
+                self.demo_data["mano_joints"] = self.demo_data["opt_joints_pos"][:, :, 1:].reshape(E, T, -1)
+                self.demo_data["mano_joints_velocity"] = self.demo_data["opt_joints_velocity"][:, :, 1:].reshape(E, T, -1)
+                print("[imitate_retarget] Stage-2 손 타겟 = 리타겟 결과(opt_*) (B방식, 물체 궤적은 원본)")
+
+            # 손목 플래너 override: WRIST_PLANNER_NPZ 지정 시 손목 타겟을 플래너 출력으로 교체
+            #   (trajectory-free: 데모손목 대신 플래너손목. base_model이 target[:,:248]로 자동 추종)
+            self._apply_wrist_planner_override()
+
+        # 회전만 학습 모드: (1) 궤적을 돌리는 구간까지만 트림(seq_len 클램프),
+        #   (2) 물체 위치 타겟을 프레임0로 고정(회전만 추종), (3) 물리 핀 위치 저장.
+        if self.cap_rot_only:
+            if self.cap_trim_len > 0:
+                self.demo_data["seq_len"] = torch.clamp(self.demo_data["seq_len"], max=self.cap_trim_len)
+                print(f"[cap_rot_only] trajectory 트림 → seq_len ≤ {self.cap_trim_len} (돌리는 구간까지)")
+            tr = self.demo_data["obj_trajectory"]  # (E,T,4,4)
+            tr[:, :, :3, 3] = tr[:, 0:1, :3, 3]  # 위치 = 프레임0로 고정 (회전 R은 원본 유지)
+            self.demo_data["obj_velocity"] = torch.zeros_like(self.demo_data["obj_velocity"])
+            self._cap_lock_pos = tr[:, 0, :3, 3].clone()  # (E,3) 물리 핀 대상 위치
+            # 1-DOF 나사축: 프레임0 자세의 원반 normal(local z) → gym 월드축 n = R0·ẑ (상수)
+            R0 = tr[:, 0, :3, :3]  # (E,3,3) gym 프레임
+            self._cap_screw_axis = torch.nn.functional.normalize(R0[:, :, 2], dim=-1)  # (E,3)
+            self._cap_local_z = torch.zeros_like(self._cap_screw_axis)
+            self._cap_local_z[:, 2] = 1.0
+            self._cap_released = torch.zeros(E, dtype=torch.bool, device=self.device)  # 이탈 래치
+            self._cap_screw_angle = torch.zeros(E, device=self.device)  # 누적 풀림 회전각
+            print("[cap_rot_only] 뚜껑 위치 고정 + 나사축 1-DOF 회전 구속, 텀블러 몸체 없음")
+            if self.cap_axial_trans:
+                print(f"[cap_axial_trans] 나사축 z이동 허용(max_lift={self.cap_max_lift}m, "
+                      f"lin_damp={self.cap_lin_damp}) | free_lift={self.cap_free_lift}m 넘으면 구속해제")
+            if self.cap_unscrew_rew:
+                # 풀림 방향 = 데모 각속도를 나사축에 투영한 부호 (그 방향으로 돌면 풀림)
+                demo_w = self.demo_data["obj_angular_velocity"]  # (E,T,3) gym
+                proj = (demo_w * self._cap_screw_axis[:, None, :]).sum(-1)  # (E,T)
+                sign = torch.sign(proj.mean(dim=1, keepdim=True) + 1e-8)  # (E,1)
+                self._cap_unscrew_axis = self._cap_screw_axis * sign  # (E,3)
+                self._cap_unscrew_ref = float(proj.abs().mean().clamp_min(0.5))  # 기준 각속도
+                print(f"[cap_unscrew_rew] 풀림방향 회전 보상 활성 (기준 각속도={self._cap_unscrew_ref:.2f} rad/s, "
+                      f"obj_rot_w={self.obj_rot_rew_w}, unscrew_w={self.unscrew_rew_w})")
+
+        # Create environments
+        self.manip_obj_mass = []
+        self.manip_obj_com = []
+        num_per_row = int(np.sqrt(self.num_envs))
+        for i in range(self.num_envs):
+            # create env instance
+            env_ptr = self.gym.create_env(self.sim, env_lower, env_upper, num_per_row)
+            current_asset, sum_rigid_body_count, sum_rigid_shape_count, obj_scale, obj_mass = self._create_obj_assets(i)
+            body_asset, body_rigid_body_count, body_rigid_shape_count = self._load_body_asset(i)
+            max_agg_bodies = (
+                num_dexhand_bodies
+                + 1
+                + sum_rigid_body_count
+                + body_rigid_body_count  # 고정 텀블러 몸체
+                + (5 + (0 + self.dexhand.n_bodies if not self.headless else 0))
+            )  # 1 for table
+            max_agg_shapes = (
+                num_dexhand_shapes
+                + 1
+                + sum_rigid_shape_count
+                + body_rigid_shape_count  # 고정 텀블러 몸체
+                + (5 + (0 + self.dexhand.n_bodies if not self.headless else 0))
+                + (1 if self._record else 0)
+            )
+            # Create actors and define aggregate group appropriately depending on setting
+            # NOTE: dexhand_r should ALWAYS be loaded first in sim!
+            if self.aggregate_mode >= 3:
+                self.gym.begin_aggregate(env_ptr, max_agg_bodies, max_agg_shapes, True)
+
+            # camera handler for view rendering
+            if self.camera_handlers is not None:
+                self.camera_handlers.append(
+                    self.create_camera(
+                        env=env_ptr,
+                        isaac_gym=self.gym,
+                    )
+                )
+
+            # Create dexhand_r
+            dexhand_actor = self.gym.create_actor(
+                env_ptr,
+                dexhand_asset,
+                self.dexhand_pose,
+                "dexhand",
+                i,
+                # 손 자기충돌 필터. 기본은 dexhand 클래스 값(allegro=1 끔,
+                # dg5fs=0 켬). allegro 는 rest/파지 유령 접촉 0 실측이라
+                # 0(켬)으로 덮어써도 안전 -- 런처가 결정한다.
+                int(os.environ.get("DEXHAND_COLLISION_FILTER", "1" if self.dexhand.self_collision else "0")),
+            )
+            self._mask_palm_thumb_collision(env_ptr, dexhand_actor)
+            if self.cap_arm_mode:
+                # 팔 링크 질량 스케일 (CAP_ARM_MASS_SCALE, 기본 1.0=원본).
+                # PD 드라이브엔 적분항이 없어 정적 처짐 = 중력토크/강성 이
+                # 남는데, 실기 RB5 는 적분 제어라 처짐 0 -- 질량을 줄이면
+                # 실기의 정적 거동에 가까워진다. 손(allegro) 질량은 접촉
+                # 물리 보존을 위해 유지. 0 은 PhysX 불안정이라 하한 클램프.
+                _ms = float(os.environ.get("CAP_ARM_MASS_SCALE", "1.0"))
+                if _ms != 1.0:
+                    _ms = max(_ms, 0.01)
+                    _n_arm = len(getattr(self.dexhand, "ARM_BODIES", []))
+                    _props = self.gym.get_actor_rigid_body_properties(env_ptr, dexhand_actor)
+                    _before = sum(pr.mass for pr in _props[:_n_arm])
+                    for _pr in _props[:_n_arm]:
+                        _pr.mass *= _ms
+                        _pr.inertia.x.x *= _ms; _pr.inertia.x.y *= _ms; _pr.inertia.x.z *= _ms
+                        _pr.inertia.y.x *= _ms; _pr.inertia.y.y *= _ms; _pr.inertia.y.z *= _ms
+                        _pr.inertia.z.x *= _ms; _pr.inertia.z.y *= _ms; _pr.inertia.z.z *= _ms
+                    self.gym.set_actor_rigid_body_properties(env_ptr, dexhand_actor, _props, False)
+                    if i == 0:
+                        _after = sum(pr.mass for pr in _props[:_n_arm])
+                        print(f"[arm-mass] 팔 {_n_arm}몸체 질량 x{_ms}: {_before:.2f}kg -> {_after:.2f}kg",
+                              flush=True)
+            self.gym.enable_actor_dof_force_sensors(env_ptr, dexhand_actor)
+            self.gym.set_actor_dof_properties(env_ptr, dexhand_actor, dexhand_dof_props)
+
+            # Create table and obstacles
+            table_pose = gymapi.Transform()
+            table_pose.p = gymapi.Vec3(table_pos.x, table_pos.y, table_pos.z)
+            if self.cap_arm_mode:
+                # 팔 작업공간과 겹치는 상판을 치운다 (씬은 지면 + 텀블러뿐)
+                table_pose.p = gymapi.Vec3(0, 0, -1.0)
+            table_actor = self.gym.create_actor(env_ptr, table_asset, table_pose, "table", i, 0)
+            table_props = self.gym.get_actor_rigid_shape_properties(env_ptr, table_actor)
+            table_props[0].friction = 0.1  # ? only one table shape in each env
+            self.gym.set_actor_rigid_shape_properties(env_ptr, table_actor, table_props)
+            # set table's color to be dark gray
+            self.gym.set_rigid_body_color(env_ptr, table_actor, 0, gymapi.MESH_VISUAL, gymapi.Vec3(0.1, 0.1, 0.1))
+
+            self.obj_handle, _ = self._create_obj_actor(
+                env_ptr, i, current_asset
+            )  # the handle is all the same for all envs
+            self.gym.set_actor_scale(env_ptr, self.obj_handle, obj_scale)
+            obj_props = self.gym.get_actor_rigid_body_properties(env_ptr, self.obj_handle)
+            obj_props[0].mass = min(0.5, obj_props[0].mass)  # * we only consider the mass less than 500g
+            # ? caculate mass by density
+            if obj_mass is not None:
+                obj_props[0].mass = obj_mass
+
+            # ! Updating the mass and scale might slightly alter the inertia tensor;
+            # ! however, because the magnitude of our modifications is minimal, we temporarily neglect this effect.
+            self.gym.set_actor_rigid_body_properties(env_ptr, self.obj_handle, obj_props)
+            self.manip_obj_mass.append(obj_props[0].mass)
+            self.manip_obj_com.append(torch.tensor([obj_props[0].com.x, obj_props[0].com.y, obj_props[0].com.z]))
+
+            if self.aggregate_mode > 0:
+                self.gym.end_aggregate(env_ptr)
+
+            # Store the created env pointers
+            self.envs.append(env_ptr)
+            self.dexhand_rs.append(dexhand_actor)
+
+        self.manip_obj_mass = torch.tensor(self.manip_obj_mass, device=self.device)
+        self.manip_obj_com = torch.stack(self.manip_obj_com, dim=0).to(self.device)
+
+        # Setup data
+        self.init_data()
+
+    def init_data(self):
+        # Setup sim handles
+        env_ptr = self.envs[0]
+        dexhand_handle = self.gym.find_actor_handle(env_ptr, "dexhand")
+        self.dexhand_handles = {
+            k: self.gym.find_actor_rigid_body_handle(env_ptr, dexhand_handle, k) for k in self.dexhand.body_names
+        }
+        self.dexhand_cf_weights = {
+            k: (1.0 if ("intermediate" in k or "distal" in k) else 0.0) for k in self.dexhand.body_names
+        }
+        # Get total DOFs
+        self.num_dofs = self.gym.get_sim_dof_count(self.sim) // self.num_envs
+        if self.cap_arm_mode and self.cap_arm_ik_wrapper:
+            _jt = self.gym.acquire_jacobian_tensor(self.sim, "dexhand")
+            self._jacobian = gymtorch.wrap_tensor(_jt)
+            # 고정 베이스 액터의 자코비안은 (E, links, 6, dofs) 이고 루트가
+            # 빠진다 -- base_link 의 행 = 핸들 - 1.
+            self._jac_bl_row = self.dexhand_handles["base_link"] - 1
+            print(f"[ik-wrapper] jacobian {tuple(self._jacobian.shape)}  base_link row {self._jac_bl_row}",
+                  flush=True)
+
+        # Setup tensor buffers
+        _actor_root_state_tensor = self.gym.acquire_actor_root_state_tensor(self.sim)
+        _dof_state_tensor = self.gym.acquire_dof_state_tensor(self.sim)
+        _rigid_body_state_tensor = self.gym.acquire_rigid_body_state_tensor(self.sim)
+        _net_cf = self.gym.acquire_net_contact_force_tensor(self.sim)
+        _dof_force = self.gym.acquire_dof_force_tensor(self.sim)
+
+        self._root_state = gymtorch.wrap_tensor(_actor_root_state_tensor).view(self.num_envs, -1, 13)
+        self._dof_state = gymtorch.wrap_tensor(_dof_state_tensor).view(self.num_envs, -1, 2)
+        self._rigid_body_state = gymtorch.wrap_tensor(_rigid_body_state_tensor).view(self.num_envs, -1, 13)
+        self._q = self._dof_state[..., 0]
+        self._qd = self._dof_state[..., 1]
+        self._base_state = self._root_state[:, 0, :]
+
+        # ? >>> for visualization
+        if not self.headless:
+
+            self.mano_joint_points = [
+                self._root_state[:, self.gym.find_actor_handle(env_ptr, f"mano_joint_{i}"), :]
+                for i in range(self.dexhand.n_bodies)
+            ]
+        # ? <<<
+
+        self._manip_obj_handle = self.gym.find_actor_handle(env_ptr, "manip_obj")
+        self._manip_obj_root_state = self._root_state[:, self._manip_obj_handle, :]
+        self.net_cf = gymtorch.wrap_tensor(_net_cf).view(self.num_envs, -1, 3)
+        self.dof_force = gymtorch.wrap_tensor(_dof_force).view(self.num_envs, -1)
+        self._manip_obj_rigid_body_handle = self.gym.find_actor_rigid_body_handle(
+            env_ptr, self._manip_obj_handle, "base"
+        )
+        if self._manip_obj_rigid_body_handle < 0:
+            # -1 is not "missing" to a tensor index -- it is the last body of the
+            # env, so forces meant for the object land somewhere else entirely.
+            # The tumbler's links are body / cap_spinner / cap, no "base".
+            fallback = "cap" if self.cap_grasp_tumbler else None
+            h = (
+                self.gym.find_actor_rigid_body_handle(env_ptr, self._manip_obj_handle, fallback)
+                if fallback
+                else -1
+            )
+            if h < 0:
+                raise RuntimeError(
+                    f"manip_obj has no 'base' body and no usable fallback "
+                    f"(tumbler={self.cap_grasp_tumbler})"
+                )
+            self._manip_obj_rigid_body_handle = h
+        self._manip_obj_cf = self.net_cf[:, self._manip_obj_rigid_body_handle, :]
+
+        if self.cap_grasp_tumbler:
+            # The actor root is the fixed body; the graspable cap is a link of the
+            # same articulation, so its pose comes from the rigid-body tensor.
+            # Read-only: unlike the root-state path, writing here does nothing.
+            cap_bh = self.gym.find_actor_rigid_body_handle(env_ptr, self._manip_obj_handle, "cap")
+            self._cap_body_handle = cap_bh
+            if cap_bh < 0:
+                raise RuntimeError("tumbler asset has no 'cap' rigid body")
+            self._cap_body_state = self._rigid_body_state[:, cap_bh, :]
+            self._manip_obj_cf = self.net_cf[:, cap_bh, :]
+            import sys as _sys
+            if self.cap_grasp_tools_dir not in _sys.path:
+                _sys.path.insert(0, self.cap_grasp_tools_dir)
+            from screw_coupling import ScrewCoupling
+            self.cap_grasp_screw = ScrewCoupling.from_urdf(
+                self.cap_grasp_tumbler_urdf,
+                # The thread ends here; the joint's own limit sits 2 deg past it
+                # so the reading can actually reach this value.
+                engage_deg=float(os.environ.get("CAP_ENGAGE_DEG", "180")),
+            )
+            self.cap_grasp_obj_actors = [self.gym.find_actor_handle(e, "manip_obj") for e in self.envs]
+            for env, a in zip(self.envs, self.cap_grasp_obj_actors):
+                self.cap_grasp_screw.bind(self.gym, env, a, device=str(self.device), num_envs=self.num_envs)
+            if getattr(self, "cap_resist_curriculum", False):
+                self.cap_grasp_screw.set_resistance(
+                    self.gym, self.envs, self.cap_grasp_obj_actors, self.cap_resist_now
+                )
+                print(
+                    f"[resist-curriculum] {self.cap_resist_now:.2f} -> {self.cap_resist_end:.2f}Nm "
+                    f"(step {self.cap_resist_step_nm:.2f}, sr게이트 {self.cap_resist_sr_gate:.2f}, "
+                    f"창 {self.cap_resist_min_eps}ep)",
+                    flush=True,
+                )
+            self.cap_unscrew_prev_angle = torch.zeros(self.num_envs, device=self.device)
+            self.cap_unscrew_hwm = torch.zeros(self.num_envs, device=self.device)
+            # How long the grasp has been stable; gates the unscrew reward.
+            self.cap_grasp_stable_timer = torch.zeros(self.num_envs, device=self.device)
+            # wrist_init.PALM_LOCAL = +x in the wrist frame.
+            self._palm_local_w = torch.zeros(self.num_envs, 3, device=self.device)
+            self._palm_local_w[:, 0] = 1.0
+            # Palmar axis of each distal link, in that link's OWN frame -- the
+            # runtime check is per finger, so nothing global is stored here.
+            #
+            # Measured as the direction the tip travels when the DIP joint
+            # flexes (scratchpad/palm_axis2.py), which is what the palmar face
+            # means: all five give [-0.48, +0.88, 0.00], i.e. local +y.
+            #
+            # An earlier version set the thumb to +z, from dotting its axes
+            # against the *wrist* palm direction at the zero pose. That is the
+            # wrong test for an opposed thumb -- its link frame sits differently
+            # from the other four -- and it made the thumb's dorsal side read as
+            # palmar, so the gate passed exactly the contacts it existed to
+            # reject. Visible in the viewer as the thumb pushing with its back.
+            # 손마다 다르다: dg5fs 는 +y, allegro 는 +x (둘 다 위 방법으로 실측).
+            _ax = [float(v) for v in os.environ.get("CAP_PALM_LOCAL_AXIS", "0,1,0").split(",")]
+            pl = torch.zeros(5, 3, device=self.device)
+            pl[:, 0], pl[:, 1], pl[:, 2] = _ax[0], _ax[1], _ax[2]
+            self.cap_palm_local = pl[None].expand(self.num_envs, -1, -1).contiguous()
+            c = self.cap_unscrew_cfg
+            print(
+                f"[cap_unscrew] {self.cap_grasp_screw.describe()}  "
+                f"target={c.unscrew_target_rad * 57.2958:.0f}deg  "
+                f"band={c.band_lo * 1000:.1f}~{c.cap_height * 1000:.1f}mm (고정)  "
+                f"lift>={c.lift_success_height * 1000:.1f}mm\n"
+                f"[cap_unscrew] actions={self.cfg['env']['numActions']} "
+                f"(wrist {'OFF' if self.wrist_servo else 'ON'} + fingers {self.dexhand.n_dofs})\n"
+                f"[cap_unscrew] {'curriculum' if self.cap_unscrew_curriculum else 'gated'} reward | "
+                + (f"kc {c.kc_initial}->1 (kd={c.kc_advance}, /{self.cap_kc_period} steps)  "
+                   f"objective: unscrew={c.unscrew_weight} hold={c.hold_weight} "
+                   f"near={c.near_weight} pinch={c.pinch_weight}@{c.pinch_dist_scale * 1000:.0f}mm "
+                   f"quality={c.grasp_quality_weight}(대향 x 접촉/{c.contact_ref}, "
+                   f"stable>={c.grasp_stable_min}) grip={c.grip_weight}  "
+                   f"constraints(xkc): pen={c.penetration_penalty_weight} "
+                   f"reverse={c.reverse_penalty_weight} "
+                   f"revang={c.reverse_angle_penalty_weight}"
+                   f"(ref={c.reverse_angle_ref_frac}) leash={c.wrist_leash_weight} "
+                   f"palm={c.palm_down_penalty_weight} tpair={c.thumb_pair_penalty_weight} "
+                   f"action={c.action_penalty_weight}"
+                   if self.cap_unscrew_curriculum else
+                   f"unscrew={c.unscrew_weight} hold={c.hold_weight} grasp={c.grasp_contact_weight} "
+                   f"closure={c.closure_weight} grip={c.grip_weight} near={c.near_weight} | "
+                   f"pen={c.penetration_penalty_weight} reverse={c.reverse_penalty_weight} "
+                   f"leash={c.wrist_leash_weight}@{c.wrist_leash_radius}m"),
+                flush=True,
+            )
+
+        self.dexhand_root_state = self._root_state[:, dexhand_handle, :]
+
+        if self.cap_grasp_mode:
+            # Contact geometry must be evaluated on the bodies that actually
+            # touch the cap. `contact_body_names` is the distal phalanx
+            # (link_X_4), where net contact forces are reported; the tip link
+            # (link_X_tip) is a separate fixed-joint body ~18/29 mm further out
+            # that also has collision geometry. Using only the tip *origin* for
+            # geometry (as before) put the reference point ~2-3 cm past the real
+            # contact patch, so every genuine contact failed the side-wall test
+            # and instead triggered the penetration penalty.
+            self.cap_grasp_distal_body_names = list(self.dexhand.contact_body_names)
+            self.cap_grasp_tip_body_names = [
+                self.dexhand.body_names[self.dexhand.weight_idx[k][0]]
+                for k in ("thumb_tip", "index_tip", "middle_tip", "ring_tip", "pinky_tip")
+            ]
+            self.cap_grasp_distal_handles = [
+                self.dexhand_handles[k] for k in self.cap_grasp_distal_body_names
+            ]
+            self.cap_grasp_tip_handles = [self.dexhand_handles[k] for k in self.cap_grasp_tip_body_names]
+            # Interpolation weights along distal-origin -> tip-origin -> tip-end.
+            self.cap_grasp_probe_t = torch.linspace(
+                0.0, 1.0, max(2, self.cap_grasp_probe_steps), device=self.device, dtype=torch.float32
+            ).view(1, 1, -1, 1)
+            print(
+                f"[cap_grasp] contact bodies per finger: "
+                f"{list(zip(self.cap_grasp_distal_body_names, self.cap_grasp_tip_body_names))}",
+                flush=True,
+            )
+            self.cap_grasp_hold_timer = torch.zeros(self.num_envs, device=self.device, dtype=torch.float32)
+            self.cap_grasp_initial_wrist_pos = torch.zeros((self.num_envs, 3), device=self.device, dtype=torch.float32)
+            self.cap_grasp_initial_yaw = torch.zeros(self.num_envs, device=self.device, dtype=torch.float32)
+            self.cap_grasp_initial_wrist_quat = torch.zeros((self.num_envs, 4), device=self.device, dtype=torch.float32)
+            self.cap_grasp_initial_cap_pos = torch.zeros((self.num_envs, 3), device=self.device, dtype=torch.float32)
+            self.cap_grasp_initial_cap_quat = torch.zeros((self.num_envs, 4), device=self.device, dtype=torch.float32)
+            self.cap_grasp_episode_id = torch.zeros(self.num_envs, device=self.device, dtype=torch.long)
+            # Terminal frames land after the lift, so they cannot show whether a
+            # finger was jammed into the pedestal during the approach. Carry the
+            # per-episode max so the logged record answers that.
+            self.cap_grasp_pedestal_depth_max = torch.zeros(self.num_envs, device=self.device, dtype=torch.float32)
+
+        self.apply_forces = torch.zeros(
+            (self.num_envs, self._rigid_body_state.shape[1], 3), device=self.device, dtype=torch.float
+        )
+        self.apply_torque = torch.zeros(
+            (self.num_envs, self._rigid_body_state.shape[1], 3), device=self.device, dtype=torch.float
+        )
+        # Hand-sized, not num_dofs: in tumbler mode the sim also carries cap_spin
+        # and cap_lift, which the policy does not drive. curr_targets is rebuilt
+        # from the action each step and is hand-sized anyway, so they must match.
+        self.n_hand_dofs = self.dexhand.n_dofs
+        # 파지 초기자세. task1/grasp_init 참고 -- 관측도 보상도 안 바꾸므로
+        # 켜고 끄는 것만으로 기존 체크포인트를 이어 쓸 수 있다. 관절 수를 알아야
+        # 자세 파일의 길이를 검증할 수 있어서 여기서 만든다.
+        if self.cap_grasp_mode:
+            sys.path.insert(0, "/home/leegyuwon/Documents/task1/grasp_init")
+            from reference_pose import GraspInitializer
+
+            self.cap_grasp_init = GraspInitializer(self.sim_device, self.n_hand_dofs)
+        self.prev_targets = torch.zeros((self.num_envs, self.n_hand_dofs), dtype=torch.float, device=self.device)
+        self.curr_targets = torch.zeros((self.num_envs, self.n_hand_dofs), dtype=torch.float, device=self.device)
+        # 손목 델타 모드의 내부 목표 자세. 리셋 때 그 시점의 손목 자세로 맞춘다.
+        self.cap_wrist_target_pos = torch.zeros((self.num_envs, 3), dtype=torch.float, device=self.device)
+        self.cap_wrist_target_quat = torch.zeros((self.num_envs, 4), dtype=torch.float, device=self.device)
+        self.cap_wrist_target_quat[:, 3] = 1.0
+
+        if self.use_pid_control:
+            self.prev_pos_error = torch.zeros((self.num_envs, 3), dtype=torch.float, device=self.device)
+            self.prev_rot_error = torch.zeros((self.num_envs, 3), dtype=torch.float, device=self.device)
+            self.pos_error_integral = torch.zeros((self.num_envs, 3), dtype=torch.float, device=self.device)
+            self.rot_error_integral = torch.zeros((self.num_envs, 3), dtype=torch.float, device=self.device)
+
+        # Initialize actions
+        self._pos_control = torch.zeros((self.num_envs, self.num_dofs), dtype=torch.float, device=self.device)
+        self._effort_control = torch.zeros_like(self._pos_control)
+
+        # Initialize indices
+        self._global_dexhand_indices = torch.tensor(
+            [self.gym.find_actor_index(env, "dexhand", gymapi.DOMAIN_SIM) for env in self.envs],
+            dtype=torch.int32,
+            device=self.sim_device,
+        ).view(self.num_envs, -1)
+
+        self._global_manip_obj_indices = torch.tensor(
+            [self.gym.find_actor_index(env, "manip_obj", gymapi.DOMAIN_SIM) for env in self.envs],
+            dtype=torch.int32,
+            device=self.sim_device,
+        ).view(self.num_envs, -1)
+
+        CONTACT_HISTORY_LEN = 3
+        self.tips_contact_history = torch.ones(self.num_envs, CONTACT_HISTORY_LEN, 5, device=self.device).bool()
+        self.tips_contact_duration = torch.zeros(self.num_envs, 5, device=self.device)  # 손끝별 연속 접촉 스텝수
+        # trajectory 가용성 플래그 (episode 단위 유지, reset 시 재샘플). 1=궤적 제공, 0=드롭아웃.
+        # force_probability 지정 시 첫 에피소드부터 그 확률로 초기화 (eval용).
+        if self.traj_dropout_enabled and self.traj_force_prob >= 0.0:
+            self.trajectory_available = (
+                torch.rand(self.num_envs, 1, device=self.device) > self.trajectory_dropout_probability
+            ).float()
+        else:
+            self.trajectory_available = torch.ones(self.num_envs, 1, device=self.device)
+
+    def pack_data(self, data):
+        packed_data = {}
+        packed_data["seq_len"] = torch.tensor([len(d["obj_trajectory"]) for d in data], device=self.device)
+        max_len = packed_data["seq_len"].max()
+        assert max_len <= self.max_episode_length, "max_len should be less than max_episode_length"
+
+        def fill_data(stack_data):
+            for i in range(len(stack_data)):
+                if len(stack_data[i]) < max_len:
+                    stack_data[i] = torch.cat(
+                        [
+                            stack_data[i],
+                            stack_data[i][-1]
+                            .unsqueeze(0)
+                            .repeat(max_len - len(stack_data[i]), *[1 for _ in stack_data[i].shape[1:]]),
+                        ],
+                        dim=0,
+                    )
+            return torch.stack(stack_data).squeeze()
+
+        for k in data[0].keys():
+            if k == "scene_body_transf":
+                # (4,4) 정지 transform — 시계열이 아니므로 fill_data(패딩) 금지, 그대로 스택 (E,4,4)
+                packed_data[k] = torch.stack([d[k] for d in data])
+                continue
+            if k == "mano_joints" or k == "mano_joints_velocity":
+                mano_joints = []
+                for d in data:
+                    mano_joints.append(
+                        torch.concat(
+                            [
+                                d[k][self.dexhand.to_hand(j_name)[0]]
+                                for j_name in self.dexhand.body_names
+                                if self.dexhand.to_hand(j_name)[0] != "wrist"
+                            ],
+                            dim=-1,
+                        )
+                    )
+                packed_data[k] = fill_data(mano_joints)
+            elif type(data[0][k]) == torch.Tensor:
+                stack_data = [d[k] for d in data]
+                if k != "obj_verts":
+                    packed_data[k] = fill_data(stack_data)
+                else:
+                    packed_data[k] = torch.stack(stack_data).squeeze()
+            elif type(data[0][k]) == np.ndarray:
+                raise RuntimeError("Using np is very slow.")
+            else:
+                packed_data[k] = [d[k] for d in data]
+        return packed_data
+
+    def allocate_buffers(self):
+        # will also allocate extra buffers for data dumping, used for distillation
+        super().allocate_buffers()
+
+        # basic prop fields
+        if not self.training:
+            self.dump_fileds = {
+                k: torch.zeros(
+                    (self.num_envs, v),
+                    device=self.device,
+                    dtype=torch.float,
+                )
+                for k, v in self._prop_dump_info.items()
+            }
+
+    def _create_obj_assets(self, i):
+        obj_id = self.demo_data["obj_id"][i]
+
+        if obj_id in self.objs_assets:
+            current_asset = self.objs_assets[obj_id]
+        else:
+            asset_options = gymapi.AssetOptions()
+            asset_options.override_com = True
+            asset_options.override_inertia = True
+            asset_options.convex_decomposition_from_submeshes = True
+            asset_options.mesh_normal_mode = gymapi.COMPUTE_PER_VERTEX
+            asset_options.thickness = 0.001
+            asset_options.max_linear_velocity = 50
+            asset_options.max_angular_velocity = 100
+            # Stage-0 curriculum: make the cap a genuinely static body instead of
+            # faking immobility with a per-step teleport (which tunnels fingers
+            # through it) or a servo (which lets a 0.05 kg disc in zero-g get
+            # knocked away on first touch). Contacts then resolve normally.
+            asset_options.fix_base_link = bool(int(os.environ.get("CAP_GRASP_FIX_CAP", "0")))
+            if self.cap_grasp_tumbler:
+                asset_options.fix_base_link = True   # body is the ground anchor
+            # opt-in: 뚜껑 중력 끄기 (CAP_NO_GRAVITY=1) — regrasp 놓는 순간 낙하 방지 테스트용
+            asset_options.disable_gravity = (
+                bool(int(os.environ.get("CAP_NO_GRAVITY", "0")))
+                or self.cap_rot_only
+                or (self.cap_grasp_mode and not self.cap_grasp_pedestal and not self.cap_grasp_tumbler)
+            )
+            # 참고: 회전-모드 damping은 asset(angular_damping)로는 안 먹음 — 매 스텝 각속도를
+            # override하므로 PhysX 감쇠가 무력화됨. 대신 _apply_cap_constraint에서 수동 적용.
+            # The cap is modelled as a SOLID puck by the reward terms. VHACD
+            # decomposes the lid mesh into a thin annular skirt with a hollow
+            # interior, so fingers slip inside it and the penetration term
+            # (correctly) flags them. A single convex hull keeps the cap solid
+            # and matches cap_grasp_rl_terms' cylinder approximation.
+            solid_cap = self.cap_grasp_mode and bool(int(os.environ.get("CAP_GRASP_SOLID_CAP", "1")))
+            if self.cap_grasp_tumbler:
+                # One hull over the whole tumbler would weld body and cap into a
+                # single blob; each link needs its own decomposition.
+                solid_cap = False
+            asset_options.convex_decomposition_from_submeshes = (
+                asset_options.convex_decomposition_from_submeshes and not solid_cap
+            )
+            asset_options.vhacd_enabled = True
+            asset_options.vhacd_params = gymapi.VhacdParams()
+            asset_options.vhacd_params.resolution = 200000
+            if solid_cap:
+                # One convex hull => solid puck, matching the reward's cylinder
+                # model. Disabling VHACD entirely would leave a triangle mesh,
+                # which PhysX only supports on static bodies -- a dynamic cap
+                # would then have no collision at all and fall through the
+                # pedestal.
+                asset_options.vhacd_params.max_convex_hulls = 1
+            asset_options.density = 200  # * the average density of low-fill-rate 3D-printed models
+            current_asset = self.gym.load_asset(
+                self.sim, *os.path.split(self.demo_data["obj_urdf_path"][i]), asset_options
+            )
+
+            rigid_shape_props_asset = self.gym.get_asset_rigid_shape_properties(current_asset)
+            for element in rigid_shape_props_asset:
+                element.friction = float(os.environ.get("CAP_OBJ_FRICTION", "2.0"))  # * We increase the friction coefficient to compensate for missing skin deformation friction in simulation. See the Appx for details.
+                element.rolling_friction = 0.05
+                element.torsion_friction = 0.05
+            self.gym.set_asset_rigid_shape_properties(current_asset, rigid_shape_props_asset)
+            self.objs_assets[obj_id] = current_asset
+
+        # * load assigned scale and mass for the object if available
+        if obj_id in oakink2_obj_scale:
+            scale = oakink2_obj_scale[obj_id]
+        else:
+            scale = 1.0
+
+        if obj_id in oakink2_obj_mass:
+            mass = oakink2_obj_mass[obj_id]
+        else:
+            mass = None
+
+        sum_rigid_body_count = self.gym.get_asset_rigid_body_count(current_asset)
+        sum_rigid_shape_count = self.gym.get_asset_rigid_shape_count(current_asset)
+        return current_asset, sum_rigid_body_count, sum_rigid_shape_count, scale, mass
+
+    def _load_body_asset(self, i):
+        # 고정 텀블러 몸체(scene_body): unscrew 구간 거의 정지인 LH 객체를 fix_base로 로드.
+        # 뚜껑이 regrasp 놓는 순간 중력으로 낙하해도 이 몸체가 받쳐줌. 반환: (asset, nbody, nshape).
+        # Pedestal mode reuses this static-support path (fix_base_link) to hold
+        # the cap up, which is what removes the need for an artificial pin.
+        if self.cap_rot_only or (self.cap_grasp_mode and not self.cap_grasp_pedestal):
+            return None, 0, 0
+        body_urdf = self.demo_data["scene_body_urdf_path"][i]
+        if not body_urdf:
+            return None, 0, 0
+        if body_urdf not in self.body_assets:
+            ao = gymapi.AssetOptions()
+            ao.fix_base_link = True  # 정지 지지물
+            ao.override_com = True
+            ao.override_inertia = True
+            ao.mesh_normal_mode = gymapi.COMPUTE_PER_VERTEX
+            ao.thickness = 0.001
+            ao.vhacd_enabled = True
+            ao.vhacd_params = gymapi.VhacdParams()
+            ao.vhacd_params.resolution = 100000
+            asset = self.gym.load_asset(self.sim, *os.path.split(body_urdf), ao)
+            props = self.gym.get_asset_rigid_shape_properties(asset)
+            for e in props:
+                e.friction = float(os.environ.get("CAP_OBJ_FRICTION", "2.0"))
+                e.rolling_friction = 0.05
+                e.torsion_friction = 0.05
+            self.gym.set_asset_rigid_shape_properties(asset, props)
+            self.body_assets[body_urdf] = asset
+        asset = self.body_assets[body_urdf]
+        return (
+            asset,
+            self.gym.get_asset_rigid_body_count(asset),
+            self.gym.get_asset_rigid_shape_count(asset),
+        )
+
+    def _create_obj_actor(self, env_ptr, i, current_asset):
+
+        obj_transf = self.demo_data["obj_trajectory"][i][0]
+
+        pose = gymapi.Transform()
+        pose.p = gymapi.Vec3(obj_transf[0, 3], obj_transf[1, 3], obj_transf[2, 3])
+        obj_aa = rotmat_to_aa(obj_transf[:3, :3])
+        obj_aa_angle = torch.norm(obj_aa)
+        if float(obj_aa_angle) < 1e-8:
+            pose.r = gymapi.Quat(0, 0, 0, 1)
+        else:
+            obj_aa_axis = obj_aa / obj_aa_angle
+            pose.r = gymapi.Quat.from_axis_angle(
+                gymapi.Vec3(obj_aa_axis[0], obj_aa_axis[1], obj_aa_axis[2]), obj_aa_angle
+            )
+
+        if self.cap_grasp_tumbler:
+            # 텀블러 루트(바닥) 위치 고정 오버라이드. 팔(RB5) 통합 준비:
+            # base 가 env 원점에 서므로 "RB5 base 기준 (x,y,z)" = env 프레임 값.
+            # z 는 바닥 레벨(0) -- 캡은 나사 원점(+0.225)에 자동으로 온다.
+            _tp = os.environ.get("CAP_GRASP_TUMBLER_POS", "").strip()
+            if _tp:
+                _x, _y, _z = (float(v) for v in _tp.split(","))
+                pose.p = gymapi.Vec3(_x, _y, _z)
+                pose.r = gymapi.Quat(0, 0, 0, 1)
+            # 리셋 루트 강제용 생성 자세 저장 (고정체 텔레포트 방지)
+            self._tumbler_creation_pose = (pose.p.x, pose.p.y, pose.p.z,
+                                           pose.r.x, pose.r.y, pose.r.z, pose.r.w)
+
+        # ? object actor filter bit is always 1
+        # filter=1 in tumbler mode: the screw joint is the thread, so the cap and
+        # body meshes must not also push each other apart (they overlap by design).
+        # 텀블러 자기충돌(캡-몸체)을 끄는 필터. 1 이면 allegro 처럼
+        # self_collision 필터 1 을 쓰는 손과 AND 가 겹쳐 손-텀블러 충돌까지
+        # 통째로 사라진다 (Al1~Al3 접촉 0 의 원인). 2 는 텀블러끼리만 걸러서
+        # dg5fs(0)/allegro(1) 어느 손과도 정상 충돌한다.
+        obj_filter = 2 if self.cap_grasp_tumbler else 0
+        obj_actor = self.gym.create_actor(env_ptr, current_asset, pose, "manip_obj", i, obj_filter)
+        if self.cap_grasp_tumbler and int(os.environ.get("CAP_BODY_COLLISION", "0")):
+            # 캡-몸체 충돌 활성: 놓친 캡이 몸체를 통과하지 않고 입구에 얹힌다.
+            # 몸체가 캡 밑면 위로 겹치지 않는 자산(tumbler_cyl_col, H=223mm)
+            # 전용 -- 겹치는 자산에서 켜면 잠긴 상태에서 솔버가 폭발한다.
+            # 캡 shape 만 4 로 옮기면 몸체(2)와 AND=0 이라 서로 충돌하고,
+            # 손(0/1)과의 충돌도 유지된다.
+            _names = self.gym.get_actor_rigid_body_names(env_ptr, obj_actor)
+            _shapes = self.gym.get_actor_rigid_shape_properties(env_ptr, obj_actor)
+            _spans = self.gym.get_actor_rigid_body_shape_indices(env_ptr, obj_actor)
+            for _b, _n in enumerate(_names):
+                if _n == "cap":
+                    for _k in range(_spans[_b].start, _spans[_b].start + _spans[_b].count):
+                        _shapes[_k].filter = 4
+            self.gym.set_actor_rigid_shape_properties(env_ptr, obj_actor, _shapes)
+        obj_index = self.gym.get_actor_index(env_ptr, obj_actor, gymapi.DOMAIN_SIM)
+        if self.cap_grasp_pedestal:
+            # Bright orange so the cap is unmistakable against the pedestal and
+            # its tilt/lift are readable at a glance in the viewer.
+            self.gym.set_rigid_body_color(
+                env_ptr, obj_actor, 0, gymapi.MESH_VISUAL, gymapi.Vec3(0.95, 0.45, 0.10)
+            )
+
+        # 고정 텀블러 몸체(scene_body): 뚜껑을 받쳐주는 정지 지지물. filter 0 → 손/뚜껑과 충돌.
+        body_urdf = self.demo_data["scene_body_urdf_path"][i]
+        if body_urdf and body_urdf in self.body_assets:
+            body_asset = self.body_assets[body_urdf]
+            btr = self.demo_data["scene_body_transf"][i]  # (4,4) gym frame, 정지
+            bpose = gymapi.Transform()
+            bpose.p = gymapi.Vec3(btr[0, 3], btr[1, 3], btr[2, 3])
+            b_aa = rotmat_to_aa(btr[:3, :3])
+            b_ang = torch.norm(b_aa)
+            if float(b_ang) < 1e-8:
+                # Identity rotation: the axis is undefined and from_axis_angle
+                # normalises it, so 0/0 yields a NaN quaternion and the actor is
+                # spawned at a NaN pose (silently -- it then takes part in no
+                # collisions). The manip_obj path already guards this.
+                bpose.r = gymapi.Quat(0, 0, 0, 1)
+            else:
+                b_axis = b_aa / b_ang
+                bpose.r = gymapi.Quat.from_axis_angle(
+                    gymapi.Vec3(b_axis[0], b_axis[1], b_axis[2]), b_ang
+                )
+            body_actor = self.gym.create_actor(env_ptr, body_asset, bpose, "scene_body", i, 0)
+            # 뚜껑과 동일 obj_id 계열의 scale 적용 (urdf 부모 폴더명 = obj_id)
+            body_obj_id = os.path.basename(os.path.dirname(body_urdf))
+            if body_obj_id in oakink2_obj_scale:
+                self.gym.set_actor_scale(env_ptr, body_actor, oakink2_obj_scale[body_obj_id])
+            # The pedestal has the same radius as the cap, so in the default grey
+            # the two read as a single cylinder in the viewer and you cannot see
+            # whether the cap actually separated. Give the support a distinctly
+            # darker blue so the cap stands out on top of it.
+            body_color = (
+                gymapi.Vec3(0.12, 0.15, 0.30)
+                if self.cap_grasp_pedestal
+                else gymapi.Vec3(0.35, 0.35, 0.4)
+            )
+            self.gym.set_rigid_body_color(env_ptr, body_actor, 0, gymapi.MESH_VISUAL, body_color)
+
+        scene_objs = self.demo_data["scene_objs"][i]
+        scene_asset_options = gymapi.AssetOptions()
+        scene_asset_options.fix_base_link = True
+
+        for so_id, scene_obj in enumerate(scene_objs):
+            scene_obj_type = scene_obj["obj"].type
+            scene_obj_size = scene_obj["obj"].size
+            scene_obj_pose = scene_obj["pose"]
+            if scene_obj_type == "cube":
+                scene_asset = self.gym.create_box(
+                    self.sim,
+                    scene_obj_size[0],
+                    scene_obj_size[1],
+                    scene_obj_size[2],
+                    scene_asset_options,
+                )
+                offset = np.eye(4)
+                offset[:3, 3] = np.array(scene_obj_size) / 2
+                scene_obj_pose = scene_obj_pose @ offset
+            elif scene_obj_type == "cylinder":
+                scene_asset = self.gym.create_box(
+                    self.sim,
+                    scene_obj_size[0] * 2,
+                    scene_obj_size[0] * 2,
+                    scene_obj_size[1],
+                    scene_asset_options,
+                )
+            else:
+                raise NotImplementedError
+            scene_obj_pose = self.mujoco2gym_transf @ torch.tensor(
+                scene_obj_pose, device=self.sim_device, dtype=torch.float32
+            )
+            pose = gymapi.Transform()
+            pose.p = gymapi.Vec3(scene_obj_pose[0, 3], scene_obj_pose[1, 3], scene_obj_pose[2, 3])
+            obj_aa = rotmat_to_aa(scene_obj_pose[:3, :3])
+            obj_aa_angle = torch.norm(obj_aa)
+            obj_aa_axis = obj_aa / obj_aa_angle
+            pose.r = gymapi.Quat.from_axis_angle(
+                gymapi.Vec3(obj_aa_axis[0], obj_aa_axis[1], obj_aa_axis[2]), obj_aa_angle
+            )
+            self.gym.create_actor(env_ptr, scene_asset, pose, f"scene_obj_{so_id}", i, 0)
+        # add dummy scene object
+        MAX_SCENE_OBJS = 5 + (0 if not self.headless else 0)
+        for so_id in range(MAX_SCENE_OBJS - len(scene_objs)):
+            scene_asset = self.gym.create_box(self.sim, 0.02, 0.04, 0.06, scene_asset_options)
+            # ? collision filter bit is always 0b11111111, never collide with anything (except the ground)
+            a = self.gym.create_actor(
+                env_ptr,
+                scene_asset,
+                gymapi.Transform(),
+                f"scene_obj_{so_id +  len(scene_objs)}",
+                self.num_envs + 1,
+                0b1,
+            )
+            c = [
+                gymapi.Vec3(1, 1, 0.5),
+                gymapi.Vec3(0.5, 1, 1),
+                gymapi.Vec3(1, 0, 1),
+                gymapi.Vec3(1, 1, 0),
+                gymapi.Vec3(0, 1, 1),
+                gymapi.Vec3(0, 0, 1),
+                gymapi.Vec3(0, 1, 0),
+                gymapi.Vec3(1, 0, 0),
+            ][so_id + len(scene_objs)]
+            self.gym.set_rigid_body_color(env_ptr, a, 0, gymapi.MESH_VISUAL, c)
+
+        # * just for visualization purposes, add a small sphere at the finger positions
+        if not self.headless:
+            for joint_vis_id, joint_name in enumerate(self.dexhand.body_names):
+                joint_name = self.dexhand.to_hand(joint_name)[0]
+                joint_point = self.gym.create_sphere(self.sim, 0.005, scene_asset_options)
+                a = self.gym.create_actor(
+                    env_ptr, joint_point, gymapi.Transform(), f"mano_joint_{joint_vis_id}", self.num_envs + 1, 0b1
+                )
+                if "index" in joint_name:
+                    inter_c = 70
+                elif "middle" in joint_name:
+                    inter_c = 130
+                elif "ring" in joint_name:
+                    inter_c = 190
+                elif "pinky" in joint_name:
+                    inter_c = 250
+                elif "thumb" in joint_name:
+                    inter_c = 10
+                else:
+                    inter_c = 0
+                if "tip" in joint_name:
+                    c = gymapi.Vec3(inter_c / 255, 200 / 255, 200 / 255)
+                elif "proximal" in joint_name:
+                    c = gymapi.Vec3(200 / 255, inter_c / 255, 200 / 255)
+                elif "intermediate" in joint_name:
+                    c = gymapi.Vec3(200 / 255, 200 / 255, inter_c / 255)
+                else:
+                    c = gymapi.Vec3(100 / 255, 150 / 255, 200 / 255)
+                self.gym.set_rigid_body_color(env_ptr, a, 0, gymapi.MESH_VISUAL, c)
+
+        return obj_actor, obj_index
+
+    def _update_states(self):
+        self.states.update(
+            {
+                "q": self._q[:, : self.n_hand_dofs],
+                "cos_q": torch.cos(self._q[:, : self.n_hand_dofs]),
+                "sin_q": torch.sin(self._q[:, : self.n_hand_dofs]),
+                "dq": self._qd[:, : self.n_hand_dofs],
+                "base_state": self._base_state[:, :],
+            }
+        )
+
+        self.states["joints_state"] = torch.stack(
+            [self._rigid_body_state[:, self.dexhand_handles[k], :][:, :10] for k in self.dexhand.body_names],
+            dim=1,
+        )
+
+        self.states.update(
+            {
+                "manip_obj_pos": self._cap_src[:, :3],
+                "manip_obj_quat": self._cap_src[:, 3:7],
+                "manip_obj_vel": self._cap_src[:, 7:10],
+                "manip_obj_ang_vel": self._cap_src[:, 10:],
+            }
+        )
+
+    def _apply_wrist_planner_override(self):
+        """WRIST_PLANNER_NPZ 지정 시 demo_data 손목 타겟을 플래너 손목(RH)으로 교체.
+
+        trajectory-free 핵심: 데모 손목궤적 대신 플래너가 물체목표에서 생성한 손목을 씀.
+        npz(procedural_goal.py 출력)의 rh_wpos/rh_waa(N,3)를 demo T로 리샘플, 전 env 브로드캐스트.
+        속도는 유한차분(dt=self.dt, env가 progress_buf로 1프레임/스텝 인덱싱하므로 정합).
+        """
+        npz_path = os.environ.get("WRIST_PLANNER_NPZ", "")
+        if not npz_path:
+            return
+        import numpy as _np
+        from scipy.spatial.transform import Rotation as _R
+        d = _np.load(npz_path, allow_pickle=True)
+        E, T = self.demo_data["wrist_pos"].shape[:2]
+        dt = float(self.dt)
+
+        def _resample(a, n):
+            xs = _np.linspace(0, len(a) - 1, n)
+            return _np.stack([_np.interp(xs, _np.arange(len(a)), a[:, k]) for k in range(a.shape[1])], axis=1)
+
+        wp = _resample(_np.asarray(d["rh_wpos"], _np.float32), T)          # (T,3)
+        waa = _np.asarray(d["rh_waa"], _np.float32)
+        # 회전은 Slerp로 리샘플
+        from scipy.spatial.transform import Slerp as _Slerp
+        src_t = _np.linspace(0, T - 1, len(waa))
+        Rr = _Slerp(src_t, _R.from_rotvec(waa))(_np.arange(T))
+        waa_rs = Rr.as_rotvec().astype(_np.float32)                        # (T,3)
+        # 속도(유한차분)
+        wv = _np.zeros_like(wp); wv[:-1] = (wp[1:] - wp[:-1]) / dt; wv[-1] = wv[-2] if T > 1 else 0
+        rel = (Rr[1:] * Rr[:-1].inv()).as_rotvec()
+        wav = _np.zeros_like(wp); wav[:-1] = rel / dt; wav[-1] = wav[-2] if T > 1 else 0
+
+        dev = self.device
+        def _bc(a):  # (T,3) -> (E,T,3) torch
+            return torch.tensor(a, device=dev, dtype=torch.float32)[None].repeat(E, 1, 1)
+        self.demo_data["wrist_pos"] = _bc(wp)
+        self.demo_data["wrist_rot"] = _bc(waa_rs)
+        self.demo_data["wrist_velocity"] = _bc(wv)
+        self.demo_data["wrist_angular_velocity"] = _bc(wav)
+        print(f"[wrist_planner] 손목 타겟 = 플래너 출력 override ({os.path.basename(npz_path)}, "
+              f"E={E} T={T}, RH 손목이동={_np.linalg.norm(wp.max(0)-wp.min(0))*100:.1f}cm)")
+
+    def _cap_grasp_cap_points(self, num_points=1000):
+        from wrist_init import CAP_HEIGHT, CAP_RADIUS
+
+        n_side = int(num_points * 0.6)
+        n_top = (num_points - n_side) // 2
+        n_bottom = num_points - n_side - n_top
+
+        dtype = torch.float32
+        dev = self.device
+        side_t = torch.linspace(0.0, 1.0, n_side, device=dev, dtype=dtype)
+        side_phi = torch.linspace(0.0, 2.0 * math.pi, n_side, device=dev, dtype=dtype)
+        side = torch.stack(
+            [
+                torch.full_like(side_phi, CAP_RADIUS) * torch.cos(side_phi),
+                torch.full_like(side_phi, CAP_RADIUS) * torch.sin(side_phi),
+                side_t * CAP_HEIGHT,
+            ],
+            dim=-1,
+        )
+
+        def disk(n, z):
+            t = torch.linspace(0.0, 1.0, n, device=dev, dtype=dtype)
+            phi = torch.linspace(0.0, 2.0 * math.pi, n, device=dev, dtype=dtype)
+            r = torch.sqrt(t) * CAP_RADIUS
+            return torch.stack([r * torch.cos(phi), r * torch.sin(phi), torch.full_like(r, z)], dim=-1)
+
+        return torch.cat([side, disk(n_top, CAP_HEIGHT), disk(n_bottom, 0.0)], dim=0)
+
+    def _sample_cap_grasp_wrist_topdown(self, cap_pos):
+        """Uniform top-down poses: palm down, just above the cap. No rejection.
+
+        wrist_init's mcp_reachable sampler tests reachability against a bare
+        cylinder of r=52 mm, h=31 mm standing alone. On the tumbler that model
+        is wrong twice over: the body's collar shrouds the cap's lower 14.3 mm
+        (so poses aimed there can never earn contact, which the reward gates on
+        the 14.3-30.0 mm band), and the handle reaching r=98 mm over azimuth
+        -10..+6 deg is invisible to it. Rather than teach that sampler about the
+        tumbler, this just spreads poses over a simple region and lets the
+        policy sort out which ones work.
+        """
+        E = cap_pos.shape[0]
+        dev, dt = cap_pos.device, cap_pos.dtype
+
+        def u(lo, hi):
+            return torch.rand(E, device=dev, dtype=dt) * (hi - lo) + lo
+
+        two_pi = 2.0 * math.pi
+        phi = u(0.0, two_pi)
+        rad = self.cap_topdown_r_max * torch.sqrt(torch.rand(E, device=dev, dtype=dt))  # area-uniform
+        pos = cap_pos.clone()
+        pos[:, 0] = pos[:, 0] + rad * torch.cos(phi)
+        pos[:, 1] = pos[:, 1] + rad * torch.sin(phi)
+        base_z = self.cap_unscrew_cfg.cap_height if self.cap_topdown_z_from_top else 0.0
+        pos[:, 2] = pos[:, 2] + base_z + u(self.cap_topdown_z_range[0], self.cap_topdown_z_range[1])
+
+        # Nominal frame: palm (local +x, see wrist_init.PALM_LOCAL) points down,
+        # the hand's long axis (local +z) points out along yaw.
+        yaw = u(*self.cap_topdown_yaw_range)
+        self._sampled_yaw = torch.remainder(yaw, two_pi)
+        zeros, ones = torch.zeros(E, device=dev, dtype=dt), torch.ones(E, device=dev, dtype=dt)
+        ex = torch.stack([zeros, zeros, -ones], dim=-1)
+        ez = torch.stack([torch.cos(yaw), torch.sin(yaw), zeros], dim=-1)
+        ey = torch.cross(ez, ex, dim=-1)
+
+        # Tilt the whole frame off straight-down by a random small angle, so the
+        # policy does not only ever see a perfectly vertical palm.
+        tilt = u(0.0, math.radians(self.cap_topdown_tilt_deg))
+        ta = u(0.0, two_pi)
+        axis = torch.stack([torch.cos(ta), torch.sin(ta), zeros], dim=-1)
+        c, sn = torch.cos(tilt)[:, None], torch.sin(tilt)[:, None]
+
+        def rot(v):  # Rodrigues about `axis`
+            return v * c + torch.cross(axis, v, dim=-1) * sn + axis * (axis * v).sum(-1, keepdim=True) * (1 - c)
+
+        R = torch.stack([rot(ex), rot(ey), rot(ez)], dim=-1)  # columns = images of local axes
+        quat_wxyz = rotmat_to_quat(R)
+        ok = torch.ones(E, dtype=torch.bool, device=dev)
+        return pos, quat_wxyz, ok
+
+    def _sample_cap_grasp_wrist(self, cap_pos):
+        sampler = str(self.cap_grasp_wrist_sampler).lower()
+        if sampler in {"topdown", "top_down", "fixed_top"}:
+            return self._sample_cap_grasp_wrist_topdown(cap_pos)
+        if sampler in {"mcp_reachable", "reach", "reachable"}:
+            return self.cap_grasp_sample_wrist_mcp_reachable(
+                cap_pos,
+                z_range=self.cap_grasp_wrist_z_range,
+                r_range=self.cap_grasp_wrist_r_range,
+                palm_down_max_deg=self.cap_grasp_palm_down_max_deg,
+                contact_margin=self.cap_grasp_reach_contact_margin,
+                min_reach_fingers=self.cap_grasp_reach_min_fingers,
+                require_thumb=self.cap_grasp_reach_require_thumb,
+                thumb_contact_margin=self.cap_grasp_thumb_reach_margin,
+                thumb_mcp_outside_margin=self.cap_grasp_thumb_mcp_outside_margin,
+                require_cap_center_in_zero_triangle=self.cap_grasp_require_cap_center_in_zero_triangle,
+                reject_palm_collision=self.cap_grasp_reject_palm_collision,
+                palm_collision_margin=self.cap_grasp_palm_collision_margin,
+                opposition_min_deg=self.cap_grasp_opposition_min_deg,
+                thumb_opposition_steps=self.cap_grasp_thumb_opposition_steps,
+                thumb_flex_steps=self.cap_grasp_thumb_flex_steps,
+                thumb_curl_steps=self.cap_grasp_thumb_curl_steps,
+                grid_steps=self.cap_grasp_reach_mcp_steps,
+                segment_samples=self.cap_grasp_reach_segment_samples,
+                max_tries=self.cap_grasp_wrist_max_tries,
+            )
+        return self.cap_grasp_sample_wrist_init(
+            cap_pos,
+            z_range=self.cap_grasp_wrist_z_range,
+            r_range=self.cap_grasp_wrist_r_range,
+            palm_down_max_deg=self.cap_grasp_palm_down_max_deg,
+            thumb_mcp_outside_margin=self.cap_grasp_thumb_mcp_outside_margin,
+            require_cap_center_in_zero_triangle=self.cap_grasp_require_cap_center_in_zero_triangle,
+            reject_palm_collision=self.cap_grasp_reject_palm_collision,
+            palm_collision_margin=self.cap_grasp_palm_collision_margin,
+            max_tries=self.cap_grasp_wrist_max_tries,
+        )
+
+    def _cap_grasp_lift_profile(self, T, dt):
+        """(T,) wrist z offset: hold still, then ramp up by lift_height.
+
+        The wrist is PID-servoed to demo_data["wrist_pos"], so putting the lift
+        in the reference trajectory is all that is needed to command it. Zero
+        everywhere outside pedestal mode, which keeps the old behaviour exact.
+        """
+        offset = torch.zeros(T, device=self.device, dtype=torch.float32)
+        if not self.cap_grasp_pedestal:
+            return offset
+        t = torch.arange(T, device=self.device, dtype=torch.float32) * dt
+        a = ((t - self.cap_grasp_lift_start) / max(self.cap_grasp_lift_time, 1e-6)).clamp(0.0, 1.0)
+        return a * self.cap_grasp_lift_height
+
+    def _apply_cap_grasp_demo_override(self):
+        if not self.cap_grasp_mode:
+            return
+
+        E = self.num_envs
+        dt = float(self.dt)
+        episode_steps = int(
+            os.environ.get(
+                "CAP_GRASP_EPISODE_STEPS",
+                str(max(2, math.ceil((self.cap_grasp_cfg.grasp_time + self.cap_grasp_cfg.settle_time + self.cap_grasp_cfg.hold_time + 0.5) / dt))),
+            )
+        )
+        T = max(2, min(self.max_episode_length, episode_steps))
+        self.demo_data["seq_len"] = torch.full((E,), T, dtype=torch.long, device=self.device)
+
+        cap_pos = torch.zeros((E, 3), dtype=torch.float32, device=self.device)
+        cap_pos[:, 2] = float(self._table_surface_z + self.cap_grasp_cap_z)
+        _tp = os.environ.get("CAP_GRASP_TUMBLER_POS", "").strip()
+        # 주의: Al9 등 기존 hand-only 체크포인트는 이설 미반영(원점 0.64) 데모
+        # 관측으로 훈련됐고 정규화 통계도 그 분포다. 웜스타트 등가성을 위해
+        # CAP_DEMO_FOLLOW_TUMBLER=0 으로 훈련 당시 관측을 재현할 수 있다.
+        _demo_follow = bool(int(os.environ.get("CAP_DEMO_FOLLOW_TUMBLER", "0")))
+        if self.cap_grasp_tumbler and _tp and _demo_follow:
+            # 텀블러가 이설되면(CAP_GRASP_TUMBLER_POS) 데모 캡/손목 궤적도 따라
+            # 가야 한다. 아니면 target 관측(delta_wrist/obj)이 옛 위치(원점 위
+            # 0.64m)를 가리키는 쓰레기가 된다 -- Al9 웜스타트가 -x+z 로 날아간
+            # 원인. 이 빌더는 액터 생성 전에 돌므로 env 변수를 직접 파싱한다
+            # (생성부 1642행과 동일 규약). 캡 홈 = 루트 + 나사 원점(cap_z).
+            _x, _y, _z = (float(v) for v in _tp.split(","))
+            cap_pos[:, 0] = _x
+            cap_pos[:, 1] = _y
+            cap_pos[:, 2] = _z + float(self.cap_grasp_cap_z)
+
+        wrist_pos, wrist_quat_wxyz, ok = self._sample_cap_grasp_wrist(cap_pos)
+        self._store_sampled_yaw()
+        if not bool(ok.all()):
+            bad = int((~ok).sum().item())
+            raise RuntimeError(f"CAP_GRASP_MODE wrist_init failed for {bad}/{E} envs")
+        wrist_aa = quat_to_aa(wrist_quat_wxyz)
+
+        eye = torch.eye(4, dtype=torch.float32, device=self.device)
+        obj_trajectory = eye.view(1, 1, 4, 4).repeat(E, T, 1, 1)
+        obj_trajectory[:, :, :3, 3] = cap_pos[:, None, :]
+
+        zeros_3 = torch.zeros((E, T, 3), dtype=torch.float32, device=self.device)
+        self.demo_data["obj_trajectory"] = obj_trajectory
+        self.demo_data["obj_velocity"] = zeros_3.clone()
+        self.demo_data["obj_angular_velocity"] = zeros_3.clone()
+        self.demo_data["wrist_pos"] = wrist_pos[:, None, :].repeat(1, T, 1)
+        self.demo_data["wrist_pos"][:, :, 2] += self._cap_grasp_lift_profile(T, dt)[None, :]
+        self.demo_data["wrist_rot"] = wrist_aa[:, None, :].repeat(1, T, 1)
+        self.demo_data["wrist_velocity"] = zeros_3.clone()
+        self.demo_data["wrist_angular_velocity"] = zeros_3.clone()
+        self.demo_data["opt_wrist_pos"] = self.demo_data["wrist_pos"].clone()  # lift included
+        self.demo_data["opt_wrist_rot"] = self.demo_data["wrist_rot"].clone()
+        self.demo_data["opt_wrist_velocity"] = zeros_3.clone()
+        self.demo_data["opt_wrist_angular_velocity"] = zeros_3.clone()
+        self.demo_data["opt_dof_pos"] = torch.zeros((E, T, self.dexhand.n_dofs), dtype=torch.float32, device=self.device)
+        self.demo_data["opt_dof_velocity"] = torch.zeros_like(self.demo_data["opt_dof_pos"])
+
+        n_body = self.dexhand.n_bodies
+        joints_pos = torch.zeros((E, T, n_body, 3), dtype=torch.float32, device=self.device)
+        joints_pos[:, :, 0, :] = wrist_pos[:, None, :]
+        self.demo_data["opt_joints_pos"] = joints_pos
+        self.demo_data["opt_joints_velocity"] = torch.zeros_like(joints_pos)
+        self.demo_data["mano_joints"] = joints_pos[:, :, 1:, :].reshape(E, T, -1)
+        self.demo_data["mano_joints_velocity"] = torch.zeros_like(self.demo_data["mano_joints"])
+        self.demo_data["tips_distance"] = torch.ones((E, T, 5), dtype=torch.float32, device=self.device) * 0.05
+
+        cap_points = self._cap_grasp_cap_points(1000)
+        self.demo_data["obj_verts"] = cap_points[None].repeat(E, 1, 1)
+        self.demo_data["obj_id"] = ["task1_cap_only"] * E
+        self.demo_data["obj_urdf_path"] = [self.cap_grasp_urdf] * E
+        self.demo_data["obj_mesh_path"] = [self.cap_grasp_urdf] * E
+        self.demo_data["scene_objs"] = [[] for _ in range(E)]
+        if self.cap_grasp_tumbler:
+            # One actor holds body + screw + cap, so there is no separate support.
+            self.demo_data["obj_urdf_path"] = [self.cap_grasp_tumbler_urdf] * E
+            self.demo_data["obj_mesh_path"] = [self.cap_grasp_tumbler_urdf] * E
+            self.demo_data["scene_body_urdf_path"] = [""] * E
+            body_transf = torch.eye(4, dtype=torch.float32, device=self.device).repeat(E, 1, 1)
+            body_transf[:, 2, 3] = float(self._table_surface_z)
+            self.demo_data["scene_body_transf"] = body_transf
+            # The actor root is the fixed body at the table, not the cap.
+            obj_trajectory[:, :, 2, 3] = float(self._table_surface_z)
+        elif self.cap_grasp_pedestal:
+            # Static support standing on the table, cap resting on its top face.
+            self.demo_data["scene_body_urdf_path"] = [self.cap_grasp_pedestal_urdf] * E
+            body_transf = torch.eye(4, dtype=torch.float32, device=self.device).repeat(E, 1, 1)
+            body_transf[:, 2, 3] = float(self._table_surface_z)
+            self.demo_data["scene_body_transf"] = body_transf
+        else:
+            self.demo_data["scene_body_urdf_path"] = [""] * E
+            self.demo_data["scene_body_transf"] = torch.eye(
+                4, dtype=torch.float32, device=self.device
+            ).repeat(E, 1, 1)
+
+        self.cap_grasp_target_cap_pos = cap_pos.clone()
+        self.cap_grasp_target_wrist_pos = wrist_pos.clone()
+        self.cap_grasp_target_wrist_quat_wxyz = wrist_quat_wxyz.clone()
+        print(
+            f"[cap_grasp] cap-only demo override | envs={E} steps={T} "
+            f"cap_z={float(cap_pos[0, 2]):.3f}m urdf={self.cap_grasp_urdf}",
+            flush=True,
+        )
+
+    def _store_sampled_yaw(self, env_ids=None):
+        """Keep the yaw the topdown sampler just drew, for the init-vs-outcome
+        diagnostic. Called from both sampler sites: env creation covers every
+        env, resets only the ones being reset. Silent no-op for other samplers,
+        which do not set it.
+        """
+        y = getattr(self, "_sampled_yaw", None)
+        buf = getattr(self, "cap_grasp_initial_yaw", None)
+        if y is None or buf is None:
+            return
+        if env_ids is None:
+            if y.numel() == buf.numel():
+                buf[:] = y
+        elif y.numel() == env_ids.numel():
+            buf[env_ids] = y
+
+    def _resample_cap_grasp_wrist(self, env_ids):
+        # obj_trajectory holds the *actor root*, and in tumbler mode that is the
+        # fixed body at the table, not the cap -- 225 mm below it. Sampling
+        # against it put every resampled wrist that far down: measured -168 mm
+        # relative to the cap where +50..65 mm was intended, which is the hand
+        # lying on the table. Only shows up with RESAMPLE_WRIST=1, since the
+        # env-creation path (see _setup_cap_grasp_demo) builds cap_pos properly.
+        if self.cap_grasp_tumbler:
+            # Built the same way _setup_cap_grasp_demo does, not read back from
+            # cap_grasp_initial_cap_pos -- that is written later in reset_idx, so
+            # reading it here gets the previous episode's value, or zeros on the
+            # first reset. Zeros put the sampled wrist 551 mm below the cap.
+            cap_pos = torch.zeros((env_ids.numel(), 3), dtype=torch.float32, device=self.device)
+            cap_pos[:, 2] = float(self._table_surface_z + self.cap_grasp_cap_z)
+        else:
+            cap_pos = self.demo_data["obj_trajectory"][env_ids, 0, :3, 3]
+        wrist_pos, wrist_quat_wxyz, ok = self._sample_cap_grasp_wrist(cap_pos)
+        self._store_sampled_yaw(env_ids)
+        if getattr(self, "_diag_rise_peak", None) is not None:
+            self._diag_rise_peak[env_ids] = 0.0
+        if not bool(ok.all()):
+            bad = int((~ok).sum().item())
+            raise RuntimeError(f"CAP_GRASP_MODE wrist_init reset failed for {bad}/{env_ids.numel()} envs")
+
+        wrist_aa = quat_to_aa(wrist_quat_wxyz)
+        T = self.demo_data["wrist_pos"].shape[1]
+        self.demo_data["wrist_pos"][env_ids] = wrist_pos[:, None, :].repeat(1, T, 1)
+        self.demo_data["wrist_pos"][env_ids, :, 2] += self._cap_grasp_lift_profile(T, float(self.dt))[None, :]
+        self.demo_data["wrist_rot"][env_ids] = wrist_aa[:, None, :].repeat(1, T, 1)
+        self.demo_data["wrist_velocity"][env_ids] = 0.0
+        self.demo_data["wrist_angular_velocity"][env_ids] = 0.0
+        self.demo_data["opt_wrist_pos"][env_ids] = self.demo_data["wrist_pos"][env_ids]
+        self.demo_data["opt_wrist_rot"][env_ids] = self.demo_data["wrist_rot"][env_ids]
+        self.demo_data["opt_wrist_velocity"][env_ids] = 0.0
+        self.demo_data["opt_wrist_angular_velocity"][env_ids] = 0.0
+        self.cap_grasp_target_wrist_pos[env_ids] = wrist_pos
+        self.cap_grasp_target_wrist_quat_wxyz[env_ids] = wrist_quat_wxyz
+
+    def _clamp_unscrew_wrist(self):
+        """Keep the policy-driven wrist finite and inside a workspace.
+
+        With wrist_servo off the hand's base is a free body pushed by
+        base_action * dt * translation_scale * 500, with nothing damping it. A
+        few envs ran away and their base state went non-finite -- measured as
+        wrist_cap_radius = nan, which poisoned the leash term and the whole
+        reward for those envs. nan_to_num on the reward hid the symptom while
+        the rollouts stayed garbage.
+        """
+        if not self.cap_grasp_tumbler:
+            return
+        cap = self._cap_src[:, :3]
+        st = self._base_state
+        bad = ~torch.isfinite(st).all(dim=-1)
+        if bool(bad.any()):
+            # Nothing sane to recover to: put it back at the sampled start pose.
+            st[bad, :3] = self.cap_grasp_initial_wrist_pos[bad]
+            st[bad, 3:7] = self.cap_grasp_initial_wrist_quat[bad]
+            st[bad, 7:13] = 0.0
+
+        rel = st[:, :3] - cap
+        dist = torch.linalg.norm(rel, dim=-1, keepdim=True).clamp_min(1e-6)
+        over = dist > self.cap_wrist_clamp_radius
+        st[:, :3] = torch.where(
+            over, cap + rel / dist * self.cap_wrist_clamp_radius, st[:, :3]
+        )
+        st[:, 7:10] = st[:, 7:10].clamp(-self.cap_wrist_max_lin_vel, self.cap_wrist_max_lin_vel)
+        st[:, 10:13] = st[:, 10:13].clamp(-self.cap_wrist_max_ang_vel, self.cap_wrist_max_ang_vel)
+
+        # Keep the palm facing down. Position and velocity were already clamped,
+        # but orientation was not, and the tail of the distribution rolled right
+        # over: the palm-angle mean read 6 deg while a 40-deg-threshold penalty
+        # came out at -0.62, which only happens if some envs are fully inverted.
+        # A rolled palm sweeps the fingers across the cap's top face instead of
+        # its wall, which is outside the scored band and cannot turn anything.
+        q = st[:, 3:7]
+        palm = torch_jit_utils.quat_rotate(q, self._palm_local_w)
+        cos_down = (-palm[:, 2]).clamp(-1.0, 1.0)
+        ang = torch.arccos(cos_down)
+        excess = (ang - self.cap_wrist_palm_max_rad).clamp_min(0.0)
+        rolled = excess > 0
+        if bool(rolled.any()):
+            down = torch.zeros_like(palm)
+            down[:, 2] = -1.0
+            axis = torch.cross(palm, down, dim=-1)
+            n = torch.linalg.norm(axis, dim=-1, keepdim=True)
+            # palm exactly inverted: the rotation axis is undefined, any
+            # horizontal one will do.
+            fallback = torch.zeros_like(axis)
+            fallback[:, 0] = 1.0
+            axis = torch.where(n > 1e-6, axis / n.clamp_min(1e-6), fallback)
+            q_corr = torch_jit_utils.quat_from_angle_axis(excess, axis)
+            st[:, 3:7] = torch.where(rolled[:, None], torch_jit_utils.quat_mul(q_corr, q), q)
+            # Drop the tilting part of the spin, keep yaw -- unscrewing needs
+            # rotation about the vertical, just not about a horizontal axis.
+            w = st[:, 10:13]
+            w_yaw = torch.zeros_like(w)
+            w_yaw[:, 2] = w[:, 2]
+            st[:, 10:13] = torch.where(rolled[:, None], w_yaw, w)
+
+        idx = self._global_dexhand_indices.flatten().to(torch.int32)
+        self.gym.set_actor_root_state_tensor_indexed(
+            self.sim, gymtorch.unwrap_tensor(self._root_state),
+            gymtorch.unwrap_tensor(idx), len(idx),
+        )
+
+    def _lock_cap_grasp_wrist_state(self, env_ids=None, push_to_sim=True):
+        if not (self.cap_grasp_mode and self.cap_grasp_lock_wrist):
+            return
+
+        if env_ids is None:
+            env_ids_state = torch.arange(self.num_envs, device=self.device, dtype=torch.long)
+            env_ids_actor = torch.arange(
+                self.num_envs,
+                device=self._global_dexhand_indices.device,
+                dtype=torch.long,
+            )
+        else:
+            env_ids_state = env_ids.to(device=self.device, dtype=torch.long)
+            env_ids_actor = env_ids.to(device=self._global_dexhand_indices.device, dtype=torch.long)
+
+        if env_ids_state.numel() == 0:
+            return
+
+        self._base_state[env_ids_state, :3] = self.cap_grasp_initial_wrist_pos[env_ids_state]
+        self._base_state[env_ids_state, 3:7] = self.cap_grasp_initial_wrist_quat[env_ids_state]
+        self._base_state[env_ids_state, 7:13] = 0.0
+
+        if self.cap_grasp_pedestal:
+            # Drive the lift kinematically off the *initial* wrist pose so it is
+            # exactly lift_height, independent of contact loads. The force servo
+            # (usePIDControl=False, max ~8.3 N) has no integral term, so finger
+            # reaction forces leave a steady-state offset: a commanded 6 cm came
+            # out as ~4 cm of actual travel starting 2 cm high.
+            t = self.running_progress_buf[env_ids_state].to(torch.float32) * self.dt
+            a = ((t - self.cap_grasp_lift_start) / max(self.cap_grasp_lift_time, 1e-6)).clamp(0.0, 1.0)
+            self._base_state[env_ids_state, 2] = (
+                self.cap_grasp_initial_wrist_pos[env_ids_state, 2] + a * self.cap_grasp_lift_height
+            )
+            moving = (a > 0.0) & (a < 1.0)
+            self._base_state[env_ids_state, 9] = torch.where(
+                moving,
+                torch.full_like(a, self.cap_grasp_lift_height / max(self.cap_grasp_lift_time, 1e-6)),
+                torch.zeros_like(a),
+            )
+
+        if push_to_sim:
+            dexhand_indices = self._global_dexhand_indices[env_ids_actor].flatten().to(torch.int32)
+            self.gym.set_actor_root_state_tensor_indexed(
+                self.sim,
+                gymtorch.unwrap_tensor(self._root_state),
+                gymtorch.unwrap_tensor(dexhand_indices),
+                len(dexhand_indices),
+            )
+
+    def _lock_cap_grasp_cap_until_gravity(self, push_to_sim=True, apply_soft_force=True):
+        # In pedestal mode the cap is physically supported, so it is never pinned.
+        if self.cap_grasp_pedestal:
+            return
+        # 팔 모드 한정 게이트: teleport 쓰기가 obj "루트"(고정 몸체)를 캡
+        # 위치로 옮겨 텀블러를 225mm 띄운다 (팔 GUI 에서 발견). 단 hand-only
+        # 텀블러(Al9 등)는 이 lock 이 "켜진 채" 훈련돼 100% 를 달성했으므로
+        # 전면 게이트는 기존 체크포인트의 물리를 바꿔 재현을 깨뜨린다
+        # (2026-08-07 실측: 게이트 후 Al9 재개 sr 0%). 팔 모드만 막는다.
+        if self.cap_grasp_tumbler and self.cap_arm_mode:
+            return
+        if not (self.cap_grasp_mode and self.cap_grasp_lock_cap_before_gravity):
+            return
+
+        gravity_scale = self.cap_grasp_gravity_scale_fn(
+            self.running_progress_buf,
+            self.dt,
+            self.cap_grasp_cfg,
+        ).to(device=self.device, dtype=torch.float32)
+        # Release the pin as soon as gravity starts ramping, not when it reaches
+        # full strength. Pinning while `gravity_scale < 1.0` held the cap rigid
+        # for the entire ramp window and then dropped it at full weight in a
+        # single frame, which made CAP_GRAVITY_RAMP_TIME a no-op in teleport
+        # mode -- the load step the ramp exists to soften happened anyway.
+        # With `<= 0` the cap is pinned only before onset, so the ramp actually
+        # applies a gradually increasing load. For gravity_ramp_time = 0 both
+        # conditions are identical, so unramped configs are unaffected.
+        env_ids_state = torch.nonzero(gravity_scale <= 0.0, as_tuple=False).flatten()
+        if env_ids_state.numel() == 0:
+            return
+
+        if self.cap_grasp_cap_lock_mode != "teleport":
+            if not apply_soft_force:
+                return
+            pos_err = self.cap_grasp_initial_cap_pos[env_ids_state] - self._manip_obj_root_state[env_ids_state, :3]
+            lin_vel = self._manip_obj_root_state[env_ids_state, 7:10]
+            force = (
+                self.cap_grasp_cap_lock_pos_kp * pos_err
+                - self.cap_grasp_cap_lock_pos_kd * lin_vel
+            )
+            force_norm = torch.linalg.norm(force, dim=-1, keepdim=True)
+            force_scale = (self.cap_grasp_cap_lock_max_force / force_norm.clamp_min(1e-6)).clamp(max=1.0)
+            force = force * force_scale
+
+            target_quat = self.cap_grasp_initial_cap_quat[env_ids_state]
+            current_quat = self._manip_obj_root_state[env_ids_state, 3:7]
+            rel_quat = quat_mul(target_quat, quat_conjugate(current_quat))
+            rel_quat = torch.nn.functional.normalize(rel_quat, dim=-1)
+            rel_quat = torch.where(rel_quat[:, 3:4] < 0.0, -rel_quat, rel_quat)
+            rel_xyz = rel_quat[:, :3]
+            rel_sin = torch.linalg.norm(rel_xyz, dim=-1, keepdim=True)
+            rel_ang = 2.0 * torch.atan2(rel_sin, rel_quat[:, 3:4].clamp_min(1e-6))
+            rel_axis = rel_xyz / rel_sin.clamp_min(1e-6)
+            rotvec = torch.where(rel_sin > 1e-6, rel_axis * rel_ang, torch.zeros_like(rel_xyz))
+            ang_vel = self._manip_obj_root_state[env_ids_state, 10:13]
+            torque = (
+                self.cap_grasp_cap_lock_rot_kp * rotvec
+                - self.cap_grasp_cap_lock_rot_kd * ang_vel
+            )
+            torque_norm = torch.linalg.norm(torque, dim=-1, keepdim=True)
+            torque_scale = (self.cap_grasp_cap_lock_max_torque / torque_norm.clamp_min(1e-6)).clamp(max=1.0)
+            torque = torque * torque_scale
+
+            self.apply_forces[env_ids_state, self._manip_obj_rigid_body_handle, :] += force
+            self.apply_torque[env_ids_state, self._manip_obj_rigid_body_handle, :] += torque
+            return
+
+        self._manip_obj_root_state[env_ids_state, :3] = self.cap_grasp_initial_cap_pos[env_ids_state]
+        self._manip_obj_root_state[env_ids_state, 3:7] = self.cap_grasp_initial_cap_quat[env_ids_state]
+        self._manip_obj_root_state[env_ids_state, 7:13] = 0.0
+
+        if push_to_sim:
+            env_ids_actor = env_ids_state.to(device=self._global_manip_obj_indices.device, dtype=torch.long)
+            obj_indices = self._global_manip_obj_indices[env_ids_actor].flatten().to(torch.int32)
+            self.gym.set_actor_root_state_tensor_indexed(
+                self.sim,
+                gymtorch.unwrap_tensor(self._root_state),
+                gymtorch.unwrap_tensor(obj_indices),
+                len(obj_indices),
+            )
+
+    def _apply_cap_constraint(self, push_to_sim=True, apply_damp=False):
+        # 회전-모드 구속: 뚜껑 위치 고정 + 나사축 1-DOF 회전 (텀블링/이동 제거).
+        # apply_damp=True(_refresh에서만)면 나사축 각속도에 수동 감쇠 적용(빡빡함, 1회/스텝).
+        # push_to_sim=True면 sim에도 반영(렌더·다음 스텝 정합). tensor는 항상 수정(관측·reward 정합).
+        if not (self.cap_rot_only and self._cap_lock_pos is not None):
+            return
+        n = self._cap_screw_axis  # (E,3) or None
+        # 원본(물리 결과) 보관 — 이탈(released) env는 이 값을 그대로 둠(자유강체)
+        orig_pos = self._manip_obj_root_state[:, :3].clone()
+        orig_lin = self._manip_obj_root_state[:, 7:10].clone()
+        orig_quat = self._manip_obj_root_state[:, 3:7].clone()
+        orig_angvel = self._manip_obj_root_state[:, 10:13].clone()
+
+        # 회전 구속값 먼저 계산 (나사축 정렬 + 축스핀만 유지 + 감쇠/클램프)
+        if n is not None:
+            z_world = torch_jit_utils.quat_rotate(orig_quat, self._cap_local_z)
+            dot = (z_world * n).sum(-1).clamp(-1.0, 1.0)
+            axis = torch.cross(z_world, n, dim=-1)
+            axis_norm = torch.norm(axis, dim=-1, keepdim=True)
+            axis = torch.where(axis_norm > 1e-6, axis / axis_norm.clamp_min(1e-6), n)
+            q_corr = torch_jit_utils.quat_from_angle_axis(torch.acos(dot), axis)
+            c_quat = torch_jit_utils.quat_mul(q_corr, orig_quat)
+            w_n = (orig_angvel * n).sum(-1, keepdim=True)
+            if apply_damp and self.cap_ang_damp > 0.0:
+                w_n = w_n / (1.0 + self.cap_ang_damp * self.dt)
+            w_n = torch.clamp(w_n, -self.cap_max_spin, self.cap_max_spin)
+            c_angvel = w_n * n
+            # 풀림 방향 각속도(부호): unscrew_axis 없으면 나사축(+) 사용
+            _ua = self._cap_unscrew_axis if self._cap_unscrew_axis is not None else n
+            spin_unscrew = (c_angvel * _ua).sum(-1, keepdim=True)  # (E,1) +면 풀림
+        else:
+            c_quat = orig_quat
+            c_angvel = orig_angvel
+            spin_unscrew = torch.zeros((self.num_envs, 1), device=self.device)
+
+        # 위치/선속도 = 나사산 커플링 (축이동 d = pitch × 누적회전각/2π)
+        if self.cap_axial_trans and n is not None:
+            if self.cap_thread_pitch > 0.0 and self._cap_screw_angle is not None:
+                # 누적 풀림각 적분 (감쇠 적용 스텝에서만 = _refresh, 1회/스텝)
+                if apply_damp:
+                    theta_max = self.cap_max_lift * 2.0 * math.pi / self.cap_thread_pitch
+                    self._cap_screw_angle = (self._cap_screw_angle + spin_unscrew.squeeze(-1) * self.dt).clamp(0.0, theta_max)
+                d_par = (self.cap_thread_pitch / (2.0 * math.pi) * self._cap_screw_angle).clamp(0.0, self.cap_max_lift).unsqueeze(-1)
+                c_pos = self._cap_lock_pos + d_par * n
+                # 축 선속도 = pitch·각속도/2π (병진과 회전 맞물림)
+                c_lin = (self.cap_thread_pitch / (2.0 * math.pi) * spin_unscrew) * n
+            else:
+                # pitch=0: 비커플(축이동 자유, 기존 동작)
+                delta = orig_pos - self._cap_lock_pos
+                d_par = (delta * n).sum(-1, keepdim=True).clamp(0.0, self.cap_max_lift)
+                v_par = (orig_lin * n).sum(-1, keepdim=True)
+                if apply_damp and self.cap_lin_damp > 0.0:
+                    v_par = v_par / (1.0 + self.cap_lin_damp * self.dt)
+                c_pos = self._cap_lock_pos + d_par * n
+                c_lin = v_par * n
+        else:
+            c_pos = self._cap_lock_pos
+            c_lin = torch.zeros_like(orig_lin)
+
+        # 이탈 래치 갱신: 축이동 d >= free_lift 이면(나사산 끝까지 풀림) 이후 구속 해제
+        if n is not None and self.cap_free_lift > 0.0 and self._cap_released is not None:
+            if self.cap_thread_pitch > 0.0 and self._cap_screw_angle is not None:
+                d_now = self.cap_thread_pitch / (2.0 * math.pi) * self._cap_screw_angle  # (E,)
+            else:
+                d_now = ((orig_pos - self._cap_lock_pos) * n).sum(-1)
+            self._cap_released = self._cap_released | (d_now >= self.cap_free_lift)
+
+        # 이탈 env는 구속 미적용(자유강체): con=1이면 구속값, con=0이면 원본. (con은 0/1이라 quat select 안전)
+        if self._cap_released is not None:
+            con = (~self._cap_released).to(orig_pos.dtype).unsqueeze(-1)
+        else:
+            con = torch.ones((self.num_envs, 1), dtype=orig_pos.dtype, device=self.device)
+        self._manip_obj_root_state[:, :3] = con * c_pos + (1 - con) * orig_pos
+        self._manip_obj_root_state[:, 7:10] = con * c_lin + (1 - con) * orig_lin
+        self._manip_obj_root_state[:, 3:7] = con * c_quat + (1 - con) * orig_quat
+        self._manip_obj_root_state[:, 10:13] = con * c_angvel + (1 - con) * orig_angvel
+
+        if push_to_sim and getattr(self, "_global_manip_obj_indices", None) is not None:
+            obj_idx = self._global_manip_obj_indices.flatten().to(torch.int32)
+            self.gym.set_actor_root_state_tensor_indexed(
+                self.sim,
+                gymtorch.unwrap_tensor(self._root_state),
+                gymtorch.unwrap_tensor(obj_idx),
+                len(obj_idx),
+            )
+
+    def _refresh(self):
+
+        self.gym.refresh_dof_state_tensor(self.sim)
+        self.gym.refresh_actor_root_state_tensor(self.sim)
+        self.gym.refresh_rigid_body_state_tensor(self.sim)
+        self.gym.refresh_force_sensor_tensor(self.sim)
+        self.gym.refresh_dof_force_tensor(self.sim)
+        self.gym.refresh_net_contact_force_tensor(self.sim)
+
+        # 회전-모드: refresh로 읽은 뚜껑 상태(틀어짐)를 축 정렬로 보정 → 관측·reward·렌더 정합.
+        # 감쇠는 여기서 1회/스텝 적용(시뮬 결과 각속도에 적용해야 물리적으로 맞음).
+        self._apply_cap_constraint(push_to_sim=True, apply_damp=True)
+
+        # Refresh states
+        self._update_states()
+
+    def _diag_angle_spread(self, terms=None):
+        """Where each env stopped, and where its fingers are when it stops.
+
+        The mean turn angle sat at ~170 deg for 28000 epochs, which reads like a
+        wall but need not be one: 6% of envs release, so it could equally be a
+        spread of stalls. Percentiles tell those apart.
+
+        The azimuths are here because the tumbler never moves -- it is a fixed
+        base at the same yaw every episode -- so the handle is always at world
+        -8..+13 deg. A policy can memorise that and stop short of it without
+        ever touching it, which is what removing the handle collision (-3.8 deg,
+        no better) already hints at. If the fingertips pile up against that
+        window, the limit is learned, not mechanical.
+        """
+        def pct(a, q):
+            return float(a.kthvalue(max(1, min(a.numel(), int(q * a.numel()))))[0])
+        ang = torch.rad2deg(self.cap_grasp_screw.angle().to(self.device)).flatten()
+        # Read the target off the config: it was hardcoded to 199 and stayed there
+        # when the thread was retuned from 200 to 180 deg, so the line read 0%
+        # while envs were finishing.
+        tgt_deg = math.degrees(self.cap_unscrew_cfg.unscrew_target_rad)
+        tips = torch.stack(
+            [self._rigid_body_state[:, h, :3] for h in self.cap_grasp_tip_handles], dim=1
+        )
+        rel = tips[:, :, :2] - self._cap_src[:, None, :2]
+        az = torch.rad2deg(torch.atan2(rel[..., 1], rel[..., 0]))
+        names = ("엄지", "검지", "중지", "약지", "새끼")
+        per = "  ".join(
+            "%s %.0f(%.0f~%.0f)" % (names[k], az[:, k].median(),
+                                    pct(az[:, k].flatten(), .25), pct(az[:, k].flatten(), .75))
+            for k in range(5)
+        )
+        # Adjacent-pair tip separations. tip_gap only reports the minimum over all
+        # pairs, so a ring/pinky overlap and a thumb/index one look identical.
+        gaps = torch.linalg.norm(tips[:, 1:, :] - tips[:, :-1, :], dim=-1)
+        per_gap = "  ".join(
+            "%s-%s %.0f" % (names[k], names[k + 1], 1000 * gaps[:, k].median())
+            for k in range(4)
+        )
+        thumb, index = az[:, 0].flatten(), az[:, 1].flatten()
+        # Does where an episode starts decide how far it gets? The stop azimuth
+        # is fixed (thumb 161 deg, IQR 159-162) but wrist yaw is an action, not
+        # a constant -- the policy is free to spin to a better start before it
+        # grips. If it does, these buckets are flat; if it grips where it landed,
+        # they slope, and the init distribution is what caps the turn.
+        # Contacts split by which body reported them. The force reading sums
+        # link_X_4 and link_X_tip per finger, so "contacts went up" says nothing
+        # about where on the finger -- and nothing in the reward asks for the tip
+        # specifically: dist is a min over probes spanning both bodies, and press
+        # carries no band or palm mask at all. If the rise is all middle phalanx,
+        # the wrap is getting deeper rather than the fingertips landing.
+        # Highest the cap got this episode, against where it sits now. The
+        # release floor is set from the height at the moment the angle crosses
+        # the target, so if the cap has not actually risen by then the floor is
+        # planted low and the cap can sink back -- which is what "released, mean
+        # cap_lift 8.90mm" looks like when release is at 10mm. Peak tells the two
+        # apart: reached 10 and fell back, or never reached 10.
+        rise_now = self.cap_grasp_screw.lift(self._q).clamp_min(0.0).flatten()
+        pk = getattr(self, "_diag_rise_peak", None)
+        if pk is None or pk.numel() != rise_now.numel():
+            pk = torch.zeros_like(rise_now)
+        self._diag_rise_peak = torch.maximum(pk, rise_now)
+        peak = self._diag_rise_peak
+        peak_s = ("\n[unscrew-diag]   에피소드 최고 상승: 중앙 %.2fmm  최대 %.2fmm"
+                  "  10mm 도달 %.0f%%  현재 대비 %+.2fmm\n[unscrew-diag] "
+                  % (peak.median() * 1000, peak.max() * 1000,
+                     (peak >= 0.0099).float().mean() * 100,
+                     (rise_now.mean() - peak.mean()) * 1000))
+        # Per finger, because the aggregate cannot answer "is the thumb on the
+        # cap" -- and that is the one contact the gate cannot do without.
+        per_contact = ""
+        g = (lambda k: getattr(self, "_diag_per_finger", {}).get(k))
+        cpf, pcf, dpf = g("contact_per_finger"), g("palm_cos_per_finger"), g("dist_per_finger")
+        zpf = g("z_per_finger")   # 캡 프레임 높이. 밴드 14.3~30.0mm, 윗면 30mm
+        if getattr(cpf, "dim", lambda: 0)() == 2 and cpf.shape[1] == 5:
+            names = ("엄지", "검지", "중지", "약지", "새끼")
+            per_contact = ("\n[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: "
+                   + "  ".join("%s %.0f%%/%+.2f/%.1f/%.1f"
+                               % (names[k], 100 * cpf[:, k].mean(),
+                                  pcf[:, k].mean() if pcf.dim() == 2 else 0.0,
+                                  1000 * dpf[:, k].mean() if dpf.dim() == 2 else 0.0,
+                                  1000 * zpf[:, k].mean() if zpf is not None and zpf.dim() == 2 else 0.0)
+                               for k in range(5))
+                   + "\n[unscrew-diag] ")
+        # How much finger travel is left. Three fingers sitting in the band,
+        # correctly oriented, 5mm off the wall and generating no force at all is
+        # not a reward problem -- closing that gap is worth about +6.6 and the
+        # gradient for it is continuous. So either the joints have run out of
+        # range from this wrist pose, or the wrist is not bringing them closer.
+        # This says which.
+        # Is the cap being pulled up before the thread lets go?
+        #
+        # reward_lift keys on cap_rise > 10mm and never checks `released`, and
+        # cap_lift's limit is 130mm, so nothing stops the hand hauling the cap
+        # past the thread end while it is still screwed on. If that is happening
+        # the policy has a way to collect the lift reward without finishing the
+        # turn -- which would explain a wrist that stops rotating at 176 deg and
+        # starts oscillating instead.
+        pre = ""
+        sc3 = self.cap_grasp_screw
+        if sc3 is not None and getattr(sc3, "follower_idx", None):
+            rise = self._q[:, sc3.follower_idx[0]]
+            rel = sc3.released
+            over = rise > self.cap_unscrew_cfg.lift_release_height
+            pre_pull = over & (~rel)
+            pre = ("\n[unscrew-diag]   분리 전 들어올림: %.1f%% (10mm 초과 & 미해제)"
+                   "  그 env 평균 %.2fmm  전체 최대 %.2fmm  해제 %.1f%%"
+                   % (100 * pre_pull.float().mean(),
+                      1000 * (rise * pre_pull).sum() / pre_pull.float().sum().clamp_min(1.0),
+                      1000 * rise.max(), 100 * rel.float().mean())
+                   + "\n[unscrew-diag] ")
+        # How much of the hand's turn the cap is actually receiving.
+        #
+        # The wrist keeps commanding torque and keeps yawing -- 0.5 rad/s even at
+        # the stall -- while the cap angle stops moving, so the two have come
+        # apart somewhere. Comparing each fingertip's tangential speed with the
+        # cap surface speed under it says where: matched speeds mean the cap is
+        # simply not being driven, a gap means the pads are sliding across it.
+        slip = ""
+        sc2 = self.cap_grasp_screw
+        if sc2 is not None and getattr(sc2, "source_idx", None):
+            tp = torch.stack(
+                [self._rigid_body_state[:, h, :3] for h in self.cap_grasp_tip_handles], dim=1
+            )
+            tv = torch.stack(
+                [self._rigid_body_state[:, h, 7:10] for h in self.cap_grasp_tip_handles], dim=1
+            )
+            rel_xy = tp[..., :2] - self._cap_src[:, None, :2]
+            rad = torch.linalg.norm(rel_xy, dim=-1).clamp_min(1e-6)
+            u = rel_xy / rad[..., None]
+            tang = torch.stack([-u[..., 1], u[..., 0]], dim=-1)          # 접선 단위벡터
+            v_tip = (tv[..., :2] * tang).sum(dim=-1)                     # 손끝 접선속도
+            w_cap = self._qd[:, sc2.source_idx[0]][:, None]              # 캡 각속도
+            v_cap = w_cap * rad                                          # 캡 표면 접선속도
+            on = getattr(self, "_diag_per_finger", {}).get("contact_per_finger")
+            m = on > 0.5 if on is not None else torch.ones_like(v_tip, dtype=torch.bool)
+            n = m.float().sum().clamp_min(1.0)
+            slip = ("\n[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 %.3fm/s  캡 표면 %.3fm/s"
+                    "  차이 %.3fm/s  전달률 %.0f%%"
+                    % ((v_tip * m).sum() / n, (v_cap * m).sum() / n,
+                       ((v_tip - v_cap) * m).sum() / n,
+                       100 * float((v_cap * m).sum() / (v_tip * m).sum().clamp_min(1e-6)))
+                    + "\n[unscrew-diag] ")
+        # Is the wrist pushing and being stopped, or not pushing at all?
+        #
+        # The stall looks like a hard constraint -- height, radius and palm angle
+        # all sit unchanged for five seconds while the grasp holds -- but every
+        # constraint checked so far (time, handle, palm clamp, yaw, screw drive)
+        # came back clear, and adding a 3.0 release bonus made the policy
+        # collapse rather than push through. Commanded torque against actual
+        # angular velocity separates the two: torque with no motion means
+        # something is holding it, no torque means the policy is choosing to
+        # stop, and the reason has to be looked for in the reward instead.
+        cmd = ""
+        wh = self.dexhand_handles.get(self.dexhand.to_dex("wrist")[0]) \
+            if hasattr(self.dexhand_handles, "get") else None
+        if wh is not None and getattr(self, "apply_torque", None) is not None:
+            tq = self.apply_torque[:, wh, :]
+            fc = self.apply_forces[:, wh, :]
+            w = self._base_state[:, 10:13]
+            v = self._base_state[:, 7:10]
+            # Signed, not magnitude. The first version took absolute values and
+            # could not tell a wrist turning steadily from one shaking in place;
+            # with the fingers confirmed not to slip, that distinction is the
+            # whole question -- if the pads hold and the cap does not turn, the
+            # hand is not turning either, and |0.5 rad/s| of yaw would be
+            # oscillation rather than progress.
+            yaw_signed = w[:, 2].mean()
+            yaw_abs = w[:, 2].abs().mean()
+            cmd = ("\n[unscrew-diag]   손목 yaw: 부호평균 %+.3f rad/s  절대평균 %.3f  비율 %.2f"
+                   "   (1.0=순회전, 0=제자리 진동)"
+                   % (yaw_signed, yaw_abs, float(yaw_signed.abs() / yaw_abs.clamp_min(1e-6)))
+                   + "\n[unscrew-diag]   손목 명령: 토크 %.3fNm (yaw %+.3f)  힘 %.1fN   캡 각속도 %+.3frad/s"
+                   % (tq.norm(dim=-1).mean(), tq[:, 2].mean(), fc.norm(dim=-1).mean(),
+                      self._qd[:, sc2.source_idx[0]].mean() if sc2 is not None
+                      and getattr(sc2, "source_idx", None) else 0.0)
+                   + "\n[unscrew-diag] ")
+        # Orbit or spin? The rotation plateaus at the same relative angle no
+        # matter which yaw the wrist started at (six 60-deg bins, medians within
+        # 3 deg of each other), which points at how far the hand can carry the
+        # cap in one grasp rather than at any absolute limit. Turning the cap
+        # requires the hand to travel around the cap's axis; a wrist that only
+        # yaws about its own axis while sitting 50-75mm off that axis drags the
+        # pads off the wall after roughly a quarter turn. Comparing how far the
+        # wrist's azimuth about the cap axis has moved with how far the cap has
+        # turned separates the two: ~1.0 is the hand orbiting with the cap, ~0
+        # is the hand twisting in place and the contact doing the rest.
+        orb = ""
+        if sc2 is not None and getattr(sc2, "source_idx", None) \
+                and getattr(self, "cap_grasp_initial_wrist_pos", None) is not None:
+            cxy = self._cap_src[:, :2]
+            az = torch.atan2(*(self._base_state[:, :2] - cxy).flip(-1).unbind(-1))
+            az0 = torch.atan2(*(self.cap_grasp_initial_wrist_pos[:, :2] - cxy).flip(-1).unbind(-1))
+            d_az = (az - az0 + math.pi) % (2 * math.pi) - math.pi
+            cap_ang = self._q[:, sc2.source_idx[0]]
+            turned = cap_ang > math.radians(10.0)      # 아직 안 돈 env 는 비율이 무의미
+            n = turned.float().sum().clamp_min(1.0)
+            orb = ("\n[unscrew-diag]   손목 공전: 방위각 이동 %+.1fdeg  캡 회전 %.1fdeg  공전비 %.2f"
+                   "   (1.0=캡과 함께 공전, 0=제자리 자전)   n=%d"
+                   % (math.degrees(float((d_az * turned).sum() / n)),
+                      math.degrees(float((cap_ang * turned).sum() / n)),
+                      float((d_az * turned).sum() / (cap_ang * turned).sum().clamp_min(1e-6)),
+                      int(turned.sum()))
+                   + "\n[unscrew-diag] ")
+        cmd = cmd + orb
+        # Force balance at the stall. Rotation, lift and the hand all freeze
+        # together at 176.5 deg / 9.77mm with the grasp still on and five seconds
+        # of episode left, and every external explanation has been ruled out --
+        # time, grip, the handle, the palm clamp, wrist yaw. What is left is the
+        # screw drive itself: cap_lift is a position drive chasing angle x pitch,
+        # so if the hand is pressing down as hard as the drive can push up, the
+        # joint stops, and the thread stops the rotation with it.
+        #
+        # drive force is inferred from the tracking error, which is what a
+        # position drive applies: k * (target - actual), capped at the effort
+        # limit. cap_z is the vertical component of everything touching the cap.
+        bal = ""
+        sc = self.cap_grasp_screw
+        cbh = getattr(self, "_cap_body_handle", None)
+        if sc is not None and cbh is not None and getattr(sc, "follower_idx", None):
+            fi = sc.follower_idx[0]
+            now = self._q[:, fi]
+            tgt = sc.targets(self._q)[:, 0]
+            err = tgt - now
+            f_drive = (sc.stiffness * err).clamp(-sc.max_effort, sc.max_effort)
+            f_cap_z = self.net_cf[:, cbh, 2]
+            bal = ("\n[unscrew-diag]   나사 힘균형: 목표 %.2fmm 실제 %.2fmm 오차 %.3fmm"
+                   "  드라이브 %+.1fN (한계 %.0fN)  캡 z힘 %+.1fN"
+                   % (1000 * tgt.mean(), 1000 * now.mean(), 1000 * err.mean(),
+                      f_drive.mean(), sc.max_effort, f_cap_z.mean())
+                   + "\n[unscrew-diag] ")
+            # Does the hand ride up with the cap, or hold station and press it
+            # back down? The cap rises 10mm over the stroke, and everything piles
+            # up 0.09mm short of that: five consecutive batches reported a best
+            # rise of 9.91mm against a 10.00mm release. Axial load on a screw is
+            # torque -- 7N down through a 20mm/rev thread is 0.022Nm back-driving
+            # it -- so a wrist that stays put while the cap climbs is winding the
+            # thread closed with the same grasp it is trying to open it with.
+            #
+            # Split by angle, because the global mean mixes envs that have not
+            # started turning with the ones sitting at the wall. follow is the
+            # wrist's rise over the cap's: 1.0 is riding along, 0 is holding
+            # station, negative is pushing down into it.
+            ang = self._q[:, sc.source_idx[0]] if getattr(sc, "source_idx", None) else None
+            if ang is not None:
+                # Measured against the cap, not against where the wrist started.
+                # The first version differenced the wrist's world z from its
+                # sampled reset pose and read +103mm of "rise" against 5.9mm of
+                # cap travel -- that number was the approach, not the tracking.
+                #
+                # gap is the wrist above the cap's own frame, so it moves with
+                # the cap. A hand riding up with the thread holds gap constant
+                # across the angle bins; a hand holding station sees gap shrink
+                # by the full 10mm of stroke, and is pressing down by exactly
+                # that much at the end.
+                gap = self._base_state[:, 2] - self._cap_src[:, 2]
+                rise = sc.lift(self._q).to(self.device)      # (N,) 축방향 이동
+                # Fine bins past 170: the wall sits at 178-179 and 170~200 as one
+                # bucket smears both sides of it into a single number.
+                edges = (0.0, 45.0, 90.0, 135.0, 170.0, 175.0, 178.0, 400.0)
+                # Commanded yaw against the cap's actual angular velocity, per
+                # bin. This is the test that separates the two live explanations
+                # for the wall, and they call for opposite fixes:
+                #
+                #   command flips sign near 178  -> a learned switch. The policy
+                #     can see exactly where the end is (turn, remain, released)
+                #     and has learned to back off as it arrives; remain in
+                #     particular was added for "resolution at the end" and moves
+                #     hardest over precisely the stalling degrees. Taking the
+                #     angle out of the observation is then the fix.
+                #   command stays positive, cap does not follow -> physics. The
+                #     hand is pushing the right way and the thread is winning,
+                #     and hiding the angle changes nothing.
+                #
+                # Global means already showed yaw -0.05 and cap -0.3 rad/s, but
+                # over every env at every angle, which cannot tell a policy that
+                # reverses at the wall from one that never got there.
+                wq = self.apply_torque[:, wh, 2] if (wh is not None and
+                     getattr(self, "apply_torque", None) is not None) else None
+                wyaw = self._base_state[:, 12]
+                wcap = self._qd[:, sc.source_idx[0]]
+                rows = []
+                for a, b in zip(edges[:-1], edges[1:]):
+                    m = (ang >= math.radians(a)) & (ang < math.radians(b))
+                    n = m.float().sum()
+                    if float(n) < 5:
+                        continue
+                    av = lambda t: float((t * m).sum() / n)
+                    rows.append("%3.0f~%-3.0f도 n=%-3d 캡상승 %5.2fmm 간격 %6.1fmm 캡z힘 %+5.1fN"
+                                "  |  손목yaw %+.2frad/s 토크 %+.3fNm  캡각속도 %+.3frad/s"
+                                % (a, min(b, 200), int(m.sum()),
+                                   1000 * av(rise), 1000 * av(gap), av(f_cap_z),
+                                   av(wyaw), av(wq) if wq is not None else 0.0, av(wcap)))
+                if rows:
+                    bal = bal + "\n".join(
+                        "[unscrew-diag]   손목 추종: " + s for s in rows
+                    ) + "\n[unscrew-diag] "
+        sat = ""
+        q = self._q
+        if q is not None and q.shape[-1] >= self.num_dexhand_dofs:
+            lo = self.dexhand_dof_lower_limits[: self.num_dexhand_dofs]
+            hi = self.dexhand_dof_upper_limits[: self.num_dexhand_dofs]
+            qq = q[:, : self.num_dexhand_dofs]
+            # fraction of the way to whichever end is the flexed one
+            flex_hi = hi.abs() >= lo.abs()
+            frac = torch.where(flex_hi, (qq - 0) / hi.clamp_min(1e-6),
+                               (qq - 0) / lo.clamp(max=-1e-6))
+            frac = frac.clamp(0.0, 1.5)
+            names = ("엄지", "검지", "중지", "약지", "새끼")
+            per_flex = "  ".join("%s %.0f%%" % (names[k], 100 * frac[:, 4 * k:4 * k + 4].mean())
+                                 for k in range(5))
+            sat = ("\n[unscrew-diag]   굽힘 소진율(가동범위 대비): " + per_flex
+                   + "  전체 %.0f%%\n[unscrew-diag] " % (100 * frac.mean()))
+        f = getattr(self, "_diag_tip_force", None)
+        by_body = ""
+        if f is not None and f.dim() == 4:
+            thr = self.cap_unscrew_cfg.contact_force_threshold
+            mag = torch.linalg.norm(f, dim=-1)                     # (E,5,2)
+            d_n = (mag[..., 0] > thr).float().sum(-1).mean()
+            t_n = (mag[..., 1] > thr).float().sum(-1).mean()
+            by_body = ("\n[unscrew-diag]   접촉 위치: 중위마디 %.2f개  손끝 %.2f개"
+                       "  (손끝 비중 %.0f%%)\n[unscrew-diag] "
+                       % (d_n, t_n, 100 * t_n / max(float(d_n + t_n), 1e-6)))
+        yaw0 = getattr(self, "cap_grasp_initial_yaw", None)
+        by_yaw = ""
+        if yaw0 is not None and yaw0.numel() == ang.numel():
+            y = torch.rad2deg(yaw0).flatten()
+            rows = []
+            for lo in range(0, 360, 60):
+                m = (y >= lo) & (y < lo + 60)
+                if int(m.sum()) >= 5:
+                    rows.append("%d~%d도 n=%d 풀림중앙 %.0f" % (lo, lo + 60, int(m.sum()), ang[m].median()))
+            by_yaw = "\n[unscrew-diag]   초기yaw별: " + " | ".join(rows) + "\n[unscrew-diag] "
+        return (
+            pre + slip + cmd + bal + sat + per_contact + peak_s + by_body + by_yaw +
+            f"\n[unscrew-diag]   풀림 분포: 최소 {ang.min():.0f} / 25% {pct(ang, .25):.0f}"
+            f" / 중앙 {ang.median():.0f} / 75% {pct(ang, .75):.0f} / 최대 {ang.max():.0f}deg"
+            f"   {tgt_deg:.0f}도 도달 {(ang >= tgt_deg - 1.0).float().mean() * 100:.1f}%\n"
+            f"[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): {per}   손잡이 -8~+13deg\n"
+            f"[unscrew-diag]   인접 손끝 간격mm: {per_gap}\n"
+            f"[unscrew-diag] "
+        )
+
+    def _log_unscrew_breakdown(self, terms, reward):
+        """Periodically print the *weighted* reward decomposition.
+
+        rl_games only surfaces reward_dict as an aggregate, so a negative total
+        gives no clue which term is responsible. Weighted, because the raw term
+        values say nothing about how much each one actually moves the total.
+        """
+        if self.cap_diag_every <= 0:
+            return
+        # Closest pair of fingertips. If the policy is piling every finger onto
+        # one spot this collapses toward zero, and "N contacts" means N readings
+        # of the same contact -- which is why opposition can sit at 0% while the
+        # accepted contact count looks healthy.
+        self._last_band_contact = terms["band_contact_count"]
+        tp = self._cap_grasp_contact_probes()[:, :, -1, :]  # (E,5,3) tip ends
+        d = torch.cdist(tp, tp)
+        d = d + torch.eye(5, device=d.device)[None] * 1e3
+        # Does the release floor actually hold? Once the thread lets go the drive
+        # is zeroed and only the joint's lower limit keeps the cap up, so a
+        # released env whose lift has fallen below the release height means the
+        # floor is not doing its job.
+        rel = self.cap_grasp_screw.released
+        if bool(rel.any()):
+            lift_r = self.cap_grasp_screw.lift(self._q)[rel]
+            self._diag_release = (int(rel.sum()), float(lift_r.min()) * 1000,
+                                  float(lift_r.mean()) * 1000)
+        else:
+            self._diag_release = None
+        gap = d.amin(dim=(1, 2))
+        self._diag_tip_gap = float(gap.mean())
+        # Split by how far the wrist has drifted off the cap axis. If the tips
+        # bunch only when the hand is out beyond the rim, the cause is the wrist
+        # wandering (every finger's nearest wall point becomes the same point),
+        # not the shape of the approach reward.
+        self._diag_split = None
+        wr = self.states["manip_obj_pos"][:, :2] - self._base_state[:, :2]
+        wr = torch.linalg.norm(wr, dim=-1)
+        inside = wr < self.cap_unscrew_cfg.cap_radius_hi
+        if bool(inside.any()) and bool((~inside).any()):
+            bc = self._last_band_contact
+            self._diag_split = (
+                float(gap[inside].mean()) * 1000, float(bc[inside].mean()), int(inside.sum()),
+                float(gap[~inside].mean()) * 1000, float(bc[~inside].mean()), int((~inside).sum()),
+            )
+        c = self.cap_unscrew_cfg
+        # The two reward modules expose different term sets, so look both the
+        # weights and the values up defensively.
+        z = torch.zeros_like(reward)
+        def w(name, default=0.0):
+            return float(getattr(c, name, default))
+        def t(name):
+            return terms.get(name, z)
+        parts = [
+            ("unscrew", w("unscrew_weight"), t("reward_unscrew")),
+            # reward_hold when the module exports it: the timer alone misses the
+            # thumb gate the payout now carries.
+            ("hold", w("hold_weight"),
+             terms["reward_hold"] if "reward_hold" in terms
+             else t("hold_timer") / max(c.hold_time, 1e-6)),
+            ("lift", w("lift_weight"), t("reward_lift")),
+            ("release", w("release_weight"), t("reward_release")),
+            # The grasp terms are deficits now -- shown as what they cost, so a
+            # perfect grasp prints 0 and a missing one prints its full weight.
+            ("-ghold", -w("grasp_hold_weight"), 1.0 - t("grasp_hold")),
+            ("near", w("near_weight"),
+             terms["reward_near"] if "reward_near" in terms
+             else torch.exp(-t("tip_surface_dist") / c.tip_dist_scale)),
+            ("pinch", w("pinch_weight"), t("reward_pinch")),
+            ("press", w("press_weight"), t("reward_press")),
+            ("-oppose", -w("opposition_penalty_weight"), t("opposition_deficit")),
+            ("-quality", -w("grasp_quality_weight"), 1.0 - t("grasp_quality")),
+            ("grasp", w("grasp_contact_weight"), t("grasp_contact")),
+            ("closure", w("closure_weight"), 1.0 - t("closure_err")),
+            ("-grip", -w("grip_weight"), 1.0 - t("reward_grip")),
+            ("thumb", w("thumb_contact_weight"), t("thumb_contact")),
+            ("2tip", w("two_tip_contact_weight"),
+             (t("contact_count") >= c.min_contact_tips).to(reward.dtype)),
+            ("-pen", -w("penetration_penalty_weight"), t("penetration_penalty")),
+            ("-reverse", -w("reverse_penalty_weight"), t("reverse_penalty")),
+            ("-revang", -w("reverse_angle_penalty_weight"), t("reverse_angle_penalty")),
+            ("-leash", -w("wrist_leash_weight"), t("leash_penalty")),
+            ("-palm", -w("palm_down_penalty_weight"), t("palm_down_penalty")),
+            ("-tpair", -w("thumb_pair_penalty_weight"), t("thumb_pair_penalty")),
+        ]
+        parts = [x for x in parts if x[1] != 0.0]
+        # Constraint terms are scaled by kc in the reward, so print them scaled
+        # too. Unscaled they read ~3x their real size early on (kc starts at
+        # 0.3) and the penalties look far stronger than they are against the
+        # unscaled objective terms.
+        if "kc" in terms:
+            kc_now = float(terms["kc"].mean())
+            parts = [
+                (k, w * (kc_now if k.startswith("-") or k in ("quality_c",) else 1.0), v)
+                for k, w, v in parts
+            ]
+        if self._diag_acc is None:
+            self._diag_acc = {k: 0.0 for k, _, _ in parts}
+            self._diag_acc["TOTAL"] = 0.0
+            self._diag_n = 0
+        for k, w, v in parts:
+            self._diag_acc[k] += float((w * v).mean())
+        self._diag_acc["TOTAL"] += float(reward.mean())
+        self._diag_n += 1
+        if self._diag_n < self.cap_diag_every:
+            return
+        n = self._diag_n
+        line = "  ".join(f"{k}={self._diag_acc[k] / n:+.3f}" for k, _, _ in parts)
+        m = lambda k: float(terms[k].mean()) if k in terms else float("nan")
+        kc = f"  kc={m('kc'):.3f}" if "kc" in terms else ""
+        if int(os.environ.get("CAP_ARM_DEBUG", "0")) and not hasattr(self, "_arm_dbg_done"):
+            self._arm_dbg_done = True
+            _h = self.dexhand_handles
+            print("[arm-debug] base_link handle:", _h.get("base_link"),
+                  " link0:", _h.get("link0"), " thumb tip:", _h.get("link_15.0_tip"), flush=True)
+            print("[arm-debug] wrist(_wrist_state_arm):",
+                  [round(float(v), 3) for v in self._wrist_state_arm()[0, :3]], flush=True)
+            print("[arm-debug] rigid[base_link h]:",
+                  [round(float(v), 3) for v in self._rigid_body_state[0, _h["base_link"], :3]], flush=True)
+            print("[arm-debug] cap pos:", [round(float(v), 3) for v in self.states["manip_obj_pos"][0]],
+                  " thumb tip:", [round(float(v), 3) for v in self._rigid_body_state[0, _h["link_15.0_tip"], :3]], flush=True)
+            print("[arm-debug] rbs shape:", tuple(self._rigid_body_state.shape), flush=True)
+            print("[arm-debug] _cap_body_state None?:", self._cap_body_state is None, flush=True)
+            print("[arm-debug] tumbler root:", [round(float(v),3) for v in self._manip_obj_root_state[0,:3]], flush=True)
+            _e0 = self.envs[0]
+            _oa = self.cap_grasp_obj_actors[0] if hasattr(self, "cap_grasp_obj_actors") else None
+            if _oa is not None:
+                import isaacgym.gymapi as _ga
+                _ci = self.gym.find_actor_rigid_body_index(_e0, _oa, "cap", _ga.DOMAIN_ENV)
+                print("[arm-debug] cap env-domain idx:", _ci, " 실제 캡 위치:",
+                      [round(float(v),3) for v in self._rigid_body_state[0, _ci, :3]], flush=True)
+        if int(os.environ.get("CAP_JAM_DEBUG", "0")):
+            # 잠김 가설 검증: 캡 순접촉력 / lift 목표 오차 / 스핀 각.
+            _capf = float(self._manip_obj_cf.norm(dim=-1).mean())
+            _sc = self.cap_grasp_screw
+            _lift = self._q[:, _sc.follower_idx[0]]
+            _theta = _sc.angle()
+            _err = (_sc.multiplier[0] * _theta.clamp(min=0) - _lift).clamp(min=0)
+            _spin_raw = self._q[:, _sc.source_idx[0]]
+            _all6 = " ".join(
+                f"{n}={float(self._q[0, _sc.source_idx[0] - _sc._source_local[0] + k]):+.4f}"
+                for k, n in enumerate(("spin", "lift", "tx", "ty", "rx", "ry"))
+            )
+            print(
+                f"[jam-debug] 캡 순접촉력 {_capf:.1f}N  lift 오차 {float(_err.mean())*1000:.2f}mm "
+                f"(드라이브 힘 ~{min(2e5*float(_err.mean()), 200):.0f}N)  "
+                f"누적각 {float(_theta.mean())*57.3:.1f}도  스핀raw {float(_spin_raw.mean())*57.3:.1f}도\n"
+                f"[jam-debug] env0 원시DOF: {_all6}",
+                flush=True,
+            )
+        print(
+            f"[unscrew-diag] {n} steps  TOTAL={self._diag_acc['TOTAL'] / n:+.3f}/step{kc}  |  {line}\n"
+            f"[unscrew-diag] raw접촉={m('raw_contact_count'):.2f} "
+            f"밴드내={m('band_contact_count'):.2f} "
+            + (f"손바닥면={m('palm_facing_count'):.2f}(cos {m('palm_facing_cos'):+.2f}) "
+               if "palm_facing_count" in terms else "")
+            + f"인정={m('contact_count'):.2f} "
+            f"대향={m('opposed') * 100:.0f}%  "
+            f"풀림={m('unscrew_angle_deg'):.1f}deg "
+            f"상승={m('cap_rise') * 1000:.2f}mm "
+            f"손목거리={m('wrist_cap_radius') * 1000:.0f}mm "
+            f"손목높이={float((self._base_state[:, 2] - self._cap_src[:, 2]).mean()) * 1000:+.0f}mm "
+            f"(초기 캡윗면기준 {(lambda d: '%.0f~%.0f 평균 %.0f' % (d.min(), d.max(), d.mean()))((self.cap_grasp_initial_wrist_pos[:, 2] - self.cap_grasp_initial_cap_pos[:, 2] - self.cap_unscrew_cfg.cap_height) * 1000)}mm) "
+            + self._diag_angle_spread(terms)
+            + f"손끝거리={m('tip_surface_dist') * 1000:.1f}mm "
+            + (f"(엄지 {m('thumb_surface_dist') * 1000:.1f}mm 최근접 {m('other_surface_dist') * 1000:.1f}mm) "
+               if "thumb_surface_dist" in terms else "")
+            + f"손바닥각={m('palm_down_deg'):.0f}deg\n"
+            f"[unscrew-diag] tip최소간격={self._diag_tip_gap * 1000:.1f}mm "
+            f"엄지-검지={m('thumb_index_dist') * 1000:.1f}mm "
+            f"엄지-중지={m('thumb_middle_dist') * 1000:.1f}mm "
+            + (f"방위각 엄지-검지 {m('thumb_index_sep_deg'):.0f}deg 엄지-중지 {m('thumb_middle_sep_deg'):.0f}deg"
+               f" (기준 {c.thumb_pair_min_sep_deg:.0f}deg)"
+               if "thumb_index_sep_deg" in terms
+               else f"(기준 {c.thumb_pair_dist_factor * c.cap_radius_hi * 1000:.0f}mm)")
+            + (f"  품질={m('grasp_quality'):.3f} 파지유지={m('grasp_hold'):.2f}"
+               if "grasp_quality" in terms else ""),
+            flush=True,
+        )
+        if self._diag_release is not None:
+            n_r, lo_r, mu_r = self._diag_release
+            print(f"[unscrew-diag]   해제된 env {n_r}개: cap_lift 최소 {lo_r:.2f}mm 평균 {mu_r:.2f}mm "
+                  f"(해제 높이 ~10mm 아래로 내려가면 바닥 실패)", flush=True)
+        if self._diag_split is not None:
+            gi, bi, ni, go, bo, no = self._diag_split
+            print(
+                f"[unscrew-diag]   손목 캡 안({ni}개): tip간격 {gi:.1f}mm 밴드접촉 {bi:.2f}  |  "
+                f"캡 밖({no}개): tip간격 {go:.1f}mm 밴드접촉 {bo:.2f}",
+                flush=True,
+            )
+        self._diag_acc = None
+        self._diag_n = 0
+
+    def _cap_grasp_contact_probes(self):
+        """Probe points (E,5,P,3) sampling each finger's distal contact segment."""
+        distal_pos = torch.stack(
+            [self._rigid_body_state[:, h, :3] for h in self.cap_grasp_distal_handles], dim=1
+        )  # (E,5,3)
+        tip_pos = torch.stack(
+            [self._rigid_body_state[:, h, :3] for h in self.cap_grasp_tip_handles], dim=1
+        )  # (E,5,3)
+        axis = tip_pos - distal_pos
+        axis_dir = axis / torch.linalg.norm(axis, dim=-1, keepdim=True).clamp_min(1e-6)
+        seg_end = tip_pos + self.cap_grasp_tip_extension * axis_dir
+        # Where the probes start decides what "on the band" means. With
+        # CAP_CONTACT_TIP_ONLY the segment is the tip link alone, so band
+        # membership is judged where the force is read; spanning back to the
+        # distal origin would let a middle-phalanx probe satisfy the band while
+        # the fingertip sits somewhere else entirely.
+        start = tip_pos if self.cap_contact_tip_only else distal_pos
+        return start[:, :, None, :] + self.cap_grasp_probe_t * (seg_end - start)[:, :, None, :]
+
+    def _compute_cap_grasp_reward(self, actions):
+        tip_pos = self._cap_grasp_contact_probes()
+        # Which bodies count as "the finger touched the cap".
+        #
+        # Both link_X_4 and link_X_tip carry collision meshes, and reading both
+        # is what made fingertip contact visible at all. But it also means a
+        # deep wrap that only ever presses with the middle phalanx scores like a
+        # fingertip grasp: measured 3.36 middle-phalanx contacts against 2.68 tip
+        # ones while the viewer showed the thumb rolling onto its side.
+        # CAP_CONTACT_TIP_ONLY reads link_X_tip alone, so only the pad counts.
+        if self.cap_contact_tip_only:
+            tip_force = torch.stack(
+                [self.net_cf[:, ht, :] for ht in self.cap_grasp_tip_handles], dim=1
+            )  # (E,5,3)
+        else:
+            tip_force = torch.stack(
+                [
+                    torch.stack(
+                        [self.net_cf[:, hd, :], self.net_cf[:, ht, :]], dim=1
+                    )
+                    for hd, ht in zip(self.cap_grasp_distal_handles, self.cap_grasp_tip_handles)
+                ],
+                dim=1,
+            )  # (E,5,2,3)
+        self._diag_tip_force = tip_force
+        if self.cap_grasp_tumbler:
+            angle = self.cap_grasp_screw.angle().to(self.device)
+            extra = {}
+            if self.cap_unscrew_curriculum:
+                self._kc_step += 1
+                if self._kc_step >= self.cap_kc_period:
+                    self._kc_step = 0
+                    self.cap_kc = self.cap_unscrew_advance_kc(self.cap_kc, self.cap_unscrew_cfg)
+                # Each finger's palmar direction in world: its own local axis
+                # rotated by its own distal-link orientation, recomputed each step.
+                fq = torch.stack(
+                    [self._rigid_body_state[:, h, 3:7] for h in self.cap_grasp_distal_handles], dim=1
+                )  # (E,5,4)
+                palm_dir = torch_jit_utils.quat_rotate(
+                    fq.reshape(-1, 4), self.cap_palm_local.reshape(-1, 3)
+                ).view(self.num_envs, 5, 3)
+                extra = {
+                    "kc": self.cap_kc,
+                    "cap_rise": self.cap_grasp_screw.lift(self._q).clamp_min(0.0),
+                    "tip_palm_dir_w": palm_dir,
+                    "grasp_timer": self.cap_grasp_stable_timer,
+                    # 나사 해제 래치. 해제 후 자유로워진 캡이 되감겨 각도가
+                    # 내려가도 이 값은 유지된다 -- 보상이 "해제했다" 는 사실에
+                    # 지급할 수 있게 (tools2 의 unscrew 래치와 hold 항이 쓴다).
+                    "released_latch": self.cap_grasp_screw.released.to(
+                        device=self.device, dtype=angle.dtype
+                    ),
+                }
+            _hwm_mode = bool(int(os.environ.get("CAP_TURN_PROGRESS_HWM", "0")))
+            if _hwm_mode:
+                # 속도지급 래칫 착취 차단: pay=(angle-prev)/dt 에 prev=min(hwm,angle)
+                # 을 넣으면 지급 = max(0, angle-hwm)/dt -- 신기록 갱신분만 지급,
+                # 재파지 후 신기록 이하 구간 회전은 0 (음수 처벌 아님).
+                _prev_for_pay = torch.minimum(self.cap_unscrew_hwm, angle)
+            else:
+                _prev_for_pay = self.cap_unscrew_prev_angle
+            reward, success, self.cap_grasp_hold_timer, terms = self.cap_unscrew_reward_fn(
+                **extra,
+                unscrew_angle=angle,
+                prev_unscrew_angle=_prev_for_pay,
+                **({} if self.cap_unscrew_curriculum
+                   else {"cap_rise": self.cap_grasp_screw.lift(self._q).clamp_min(0.0)}),
+                hold_timer=self.cap_grasp_hold_timer,
+                dt=self.dt,
+                tip_pos_w=tip_pos,
+                cap_pos_w=self.states["manip_obj_pos"],
+                cap_quat_xyzw=self.states["manip_obj_quat"],
+                wrist_pos_w=self._wrist_state_arm()[:, :3],
+                wrist_quat_xyzw=self._wrist_state_arm()[:, 3:7],
+                tip_forces_w=tip_force,
+                actions=actions,
+                cfg=self.cap_unscrew_cfg,
+            )
+            # Per-finger arrays are (E,5); everything else in terms is (E,).
+            # They go to the diagnostic only -- the trainer feeds this dict
+            # straight to add_scalars, which asserts 0-D after mean().
+            self._diag_per_finger = {
+                k: terms.pop(k) for k in
+                ("contact_per_finger", "palm_cos_per_finger", "dist_per_finger", "z_per_finger")
+                if k in terms
+            }
+            self.cap_unscrew_prev_angle = angle.clone()
+            self.cap_unscrew_hwm = torch.maximum(self.cap_unscrew_hwm, angle)
+            self.cap_grasp_stable_timer = terms["grasp_timer"]
+            terms["released"] = self.cap_grasp_screw.released.to(dtype=reward.dtype)
+            # No early termination: a cap still screwed on is simply unfinished.
+            # Ending the episode there throws away the retries that made the
+            # pedestal runs sample-efficient.
+            drop_fail = torch.zeros_like(success)
+            if self.cap_unscrew_drop_fail_z > 0.0:
+                home = getattr(self, "cap_grasp_cap_home_pos", None)
+                if home is not None:
+                    drop_fail = self._cap_src[:, 2] < (home[:, 2] - self.cap_unscrew_drop_fail_z)
+                    if self.cap_drop_fail_penalty > 0.0:
+                        reward = reward - self.cap_drop_fail_penalty * drop_fail.to(reward.dtype)
+            self._log_unscrew_breakdown(terms, reward)
+            _dump = os.environ.get("CAP_WRIST_TRAJ_DUMP", "")
+            if _dump:
+                # env0 의 손목 자세를 캡 상대 좌표로 기록 -- 팔 IK 도달성 분석용.
+                if not hasattr(self, "_wtraj_f"):
+                    self._wtraj_f = open(_dump, "w")
+                    self._wtraj_f.write("step,px,py,pz,qx,qy,qz,qw\n")
+                _bs = (self._wrist_state_arm()[0] if self.cap_arm_mode
+                       else self._base_state[0])
+                # 캡 "홈" 기준 -- 라이브 캡은 회전 중 상승/이동하므로, 텀블러
+                # 배치 최적화에는 고정 기준점이 맞다.
+                _cp = self.cap_grasp_cap_home_pos[0]
+                self._wtraj_f.write(
+                    f"{int(self.running_progress_buf[0])},"
+                    f"{float(_bs[0]-_cp[0]):.6f},{float(_bs[1]-_cp[1]):.6f},{float(_bs[2]-_cp[2]):.6f},"
+                    f"{float(_bs[3]):.6f},{float(_bs[4]):.6f},{float(_bs[5]):.6f},{float(_bs[6]):.6f}\n"
+                )
+                self._wtraj_f.flush()
+        else:
+            reward, success, self.cap_grasp_hold_timer, terms = self.cap_grasp_reward_fn(
+                progress_buf=self.running_progress_buf,
+                hold_timer=self.cap_grasp_hold_timer,
+                dt=self.dt,
+                tip_pos_w=tip_pos,
+                cap_pos_w=self.states["manip_obj_pos"],
+                cap_initial_pos_w=self.cap_grasp_initial_cap_pos,
+                cap_lin_vel_w=self.states["manip_obj_vel"],
+                tip_forces_w=tip_force,
+                actions=actions,
+                cap_quat_xyzw=self.states["manip_obj_quat"],
+                cfg=self.cap_grasp_cfg,
+            )
+            if self.cap_grasp_pedestal:
+                # A failed grasp that leaves the cap on the pedestal is fine: the
+                # episode runs on and the policy can try again. But once the cap
+                # has been knocked off it is on the table, far below the hand and
+                # out of reach, so the rest of the rollout cannot be won; end it
+                # rather than spending ~50% of samples on dead episodes.
+                drop_fail = terms["fallen"] > 0.5
+            else:
+                # Check the drop as soon as any gravity is applied. Gating this on
+                # full gravity let the cap slip away during the ramp without
+                # terminating, so the episode ran on already-doomed and then failed
+                # the instant the check switched on -- measured drop at failure
+                # 0.049 m against a 0.040 m threshold.
+                gravity_on = terms["gravity_scale"] > 0.0
+                drop_fail = gravity_on & (terms["drop"] > self.cap_grasp_cfg.drop_threshold)
+        timeout = self.running_progress_buf >= (self.demo_data["seq_len"] - 2).clamp_min(1)
+        if self.cap_no_reset_on_success:
+            # 성공 순간이 아니라 timeout 에 끝난다. 해제 뒤 캡이 되밀려 각도가
+            # 180 아래로 내려가도 성공으로 남도록 에피소드 안에서 래치한다
+            # (success_buf 는 reset_idx 가 0 으로 지운다).
+            success = success | (self.success_buf > 0.5)
+            reset = drop_fail | timeout
+        else:
+            reset = success | drop_fail | timeout
+
+        reward = torch.nan_to_num(reward, nan=0.0, posinf=0.0, neginf=0.0)
+        terms = {k: torch.nan_to_num(v, nan=0.0, posinf=0.0, neginf=0.0) for k, v in terms.items()}
+        if "pedestal_depth" in terms:
+            self.cap_grasp_pedestal_depth_max = torch.maximum(
+                self.cap_grasp_pedestal_depth_max, terms["pedestal_depth"]
+            )
+            terms["pedestal_depth_max"] = self.cap_grasp_pedestal_depth_max
+
+        if getattr(self, "cap_resist_curriculum", False):
+            # 성공률 게이트 저항 전진: 끝난 에피소드만 센다. 창을 다 채우면
+            # 판정 후 창을 비운다 (전진 여부와 무관하게 -- 오래된 실패가
+            # 새 저항 단계의 성공률을 영영 누르는 일이 없도록).
+            fin = reset
+            n_fin = int(fin.sum())
+            if n_fin and self.cap_resist_now < self.cap_resist_end - 1e-9:
+                self._resist_ep_count += n_fin
+                self._resist_succ_count += int((success & fin).sum())
+                if self._resist_ep_count >= self.cap_resist_min_eps:
+                    sr = self._resist_succ_count / self._resist_ep_count
+                    if sr >= self.cap_resist_sr_gate:
+                        self.cap_resist_now = min(
+                            self.cap_resist_now + self.cap_resist_step_nm, self.cap_resist_end
+                        )
+                        self.cap_grasp_screw.set_resistance(
+                            self.gym, self.envs, self.cap_grasp_obj_actors, self.cap_resist_now
+                        )
+                        print(
+                            f"[resist-curriculum] sr {sr:.3f} >= {self.cap_resist_sr_gate:.2f} "
+                            f"-> 저항 {self.cap_resist_now:.2f}Nm",
+                            flush=True,
+                        )
+                    self._resist_ep_count = 0
+                    self._resist_succ_count = 0
+            _re_ = getattr(self.cap_grasp_screw, "resist_env", None)
+            terms["resist_nm"] = (
+                _re_.to(device=reward.device, dtype=reward.dtype)
+                if _re_ is not None
+                else torch.full_like(reward, self.cap_resist_now)
+            )
+
+        if not hasattr(self, "_energy_cfg"):
+            self._energy_cfg = (
+                float(os.environ.get("CAP_ENERGY_W_HAND", "0")),
+                float(os.environ.get("CAP_ENERGY_W_ARM", "0")),
+                float(os.environ.get("CAP_ENERGY_ALPHA", "0.3")),
+                bool(int(os.environ.get("CAP_POWER_DEBUG", "0"))),
+            )
+            if self._energy_cfg[0] > 0 or self._energy_cfg[1] > 0:
+                print(
+                    f"[energy] 페널티 활성: w_hand={self._energy_cfg[0]} "
+                    f"w_arm={self._energy_cfg[1]} alpha={self._energy_cfg[2]} "
+                    f"(기계일/정격W + alpha·(τ/정격τ)², 손 0.48Nm/120W, 팔 effort/200W)",
+                    flush=True,
+                )
+        _ew_h, _ew_a, _e_alpha, _pwr_print = self._energy_cfg
+        if _pwr_print or _ew_h > 0 or _ew_a > 0:
+            # PD 추정 토크 기반 전력 계측. 기계적 일 |tau·qdot| 을 관절군별로
+            # 적분하고, 등척성 부하는 정격 대비 토크 이용률(tau_util)로 본다
+            # (동손 W 환산은 모터 상수 미보유라 무차원 유지).
+            if not hasattr(self, "_pwr_init"):
+                self._pwr_init = True
+                _dev = self.device
+                self._pwr_k = torch.tensor(self._power_kde[0], device=_dev)
+                self._pwr_d = torch.tensor(self._power_kde[1], device=_dev)
+                self._pwr_e = torch.tensor(self._power_kde[2], device=_dev)
+                self._pwr_arm_n = 6 if self.cap_arm_mode else 0
+                E = self.num_envs
+                self._pwr_E_arm = torch.zeros(E, device=_dev)   # J
+                self._pwr_E_hand = torch.zeros(E, device=_dev)  # J
+                self._pwr_peak_arm = torch.zeros(E, device=_dev)   # W
+                self._pwr_peak_hand = torch.zeros(E, device=_dev)  # W
+                self._pwr_u2_hand = torch.zeros(E, device=_dev)  # Σ(τ/0.48)² 평균용
+                self._pwr_steps = torch.zeros(E, device=_dev)
+            _tgt = self._pos_control[:, : self.n_hand_dofs]
+            _q = self._q[:, : self.n_hand_dofs]
+            _qd = self._qd[:, : self.n_hand_dofs]
+            _tau = torch.clamp(self._pwr_k * (_tgt - _q) - self._pwr_d * _qd, -self._pwr_e, self._pwr_e)
+            _pm = (_tau * _qd).abs()  # (E, n) W
+            _an = self._pwr_arm_n
+            _pa = _pm[:, :_an].sum(-1)
+            _ph = _pm[:, _an:].sum(-1)
+            self._pwr_E_arm += _pa * self.dt
+            self._pwr_E_hand += _ph * self.dt
+            self._pwr_peak_arm = torch.maximum(self._pwr_peak_arm, _pa)
+            self._pwr_peak_hand = torch.maximum(self._pwr_peak_hand, _ph)
+            self._pwr_u2_hand += (_tau[:, _an:] / 0.48).square().mean(-1)
+            self._pwr_steps += 1
+            if _ew_h > 0 or _ew_a > 0:
+                _u2h = (_tau[:, _an:] / 0.48).square().mean(-1)
+                _pen = _ew_h * (_ph / 120.0 + _e_alpha * _u2h)
+                if _an:
+                    _u2a = (_tau[:, :_an] / self._pwr_e[:_an]).square().mean(-1)
+                    _pen = _pen + _ew_a * (_pa / 200.0 + _e_alpha * _u2a)
+                # 성공률 게이트 램프: 과제를 배우기 전(성공률 EMA < 기준)에는
+                # 페널티를 줄여 부트스트랩을 보호한다. A17 실측: 램프 없이는
+                # "안 만지면 공짜" 호버링이 회전 수입보다 먼저 학습된다.
+                if not hasattr(self, "_energy_sr_ema"):
+                    self._energy_sr_ema = 0.0
+                    self._energy_sr_ref = float(os.environ.get("CAP_ENERGY_SR_RAMP", "0.5"))
+                if self._energy_sr_ref > 0:
+                    _pen = _pen * min(1.0, self._energy_sr_ema / self._energy_sr_ref)
+                reward = reward - _pen
+                terms["energy_cost"] = _pen
+                _fin0 = reset
+                if _fin0.any():
+                    _batch_sr = float((success & _fin0).sum()) / float(_fin0.sum())
+                    self._energy_sr_ema = 0.98 * self._energy_sr_ema + 0.02 * _batch_sr
+            _fin = torch.nonzero(reset, as_tuple=False).flatten()
+            if _pwr_print and _fin.numel():
+                _n = self._pwr_steps[_fin].clamp_min(1)
+                print(
+                    f"[power] ep종료 {int(_fin.numel())}env | "
+                    f"팔 E {float(self._pwr_E_arm[_fin].mean()):.1f}J "
+                    f"(평균 {float((self._pwr_E_arm[_fin]/(_n*self.dt)).mean()):.1f}W, "
+                    f"피크 {float(self._pwr_peak_arm[_fin].mean()):.1f}W) | "
+                    f"손 E {float(self._pwr_E_hand[_fin].mean()):.2f}J "
+                    f"(평균 {float((self._pwr_E_hand[_fin]/(_n*self.dt)).mean()):.2f}W, "
+                    f"피크 {float(self._pwr_peak_hand[_fin].mean()):.2f}W) | "
+                    f"손 τ이용률² {float((self._pwr_u2_hand[_fin]/_n).mean()):.3f} (1=연속정격 0.48Nm)",
+                    flush=True,
+                )
+            if _fin.numel():
+                self._pwr_E_arm[_fin] = 0; self._pwr_E_hand[_fin] = 0
+                self._pwr_peak_arm[_fin] = 0; self._pwr_peak_hand[_fin] = 0
+                self._pwr_u2_hand[_fin] = 0; self._pwr_steps[_fin] = 0
+
+        if int(os.environ.get("CAP_FINGER_CONTACT_DUMP", "0")) and "thumb_contact" in terms:
+            # 회전(해제 전) / 유지(해제 후) 구간을 갈라 엄지 접촉률을 본다.
+            if not hasattr(self, "_fcd_step"):
+                self._fcd_step = 0
+                self._fcd = [0.0] * 6  # rot: th,cc,n / hold: th,cc,n
+            _rel = terms["released"].float() > 0.5
+            _th = terms["thumb_contact"].float()
+            _cc = terms["contact_count"].float()
+            _rot = ~_rel
+            self._fcd[0] += float((_th * _rot).sum()); self._fcd[1] += float((_cc * _rot).sum())
+            self._fcd[2] += float(_rot.sum())
+            self._fcd[3] += float((_th * _rel).sum()); self._fcd[4] += float((_cc * _rel).sum())
+            self._fcd[5] += float(_rel.sum())
+            self._fcd_step += 1
+            if self._fcd_step >= 360:
+                rn = max(self._fcd[2], 1.0); hn = max(self._fcd[5], 1.0)
+                print(f"[finger-contact] 회전구간(n={int(self._fcd[2])}): "
+                      f"엄지 {self._fcd[0]/rn:.2f} 총 {self._fcd[1]/rn:.2f} | "
+                      f"유지구간(n={int(self._fcd[5])}): "
+                      f"엄지 {self._fcd[3]/hn:.2f} 총 {self._fcd[4]/hn:.2f}", flush=True)
+                self._fcd = [0.0] * 6
+                self._fcd_step = 0
+
+        if int(os.environ.get("CAP_ANGLE_DUMP", "0")) and self.cap_grasp_tumbler:
+            fin = torch.nonzero(reset, as_tuple=False).flatten()
+            if fin.numel():
+                ang = torch.rad2deg(self.cap_grasp_screw.angle())
+                rc = getattr(self.cap_grasp_screw, "release_count", torch.zeros_like(ang, dtype=torch.long))
+                rows = [f"e{int(i)}:{float(ang[i]):.0f}°/r{int(rc[i])}" for i in fin[:64]]
+                print("[angle-dump] " + " ".join(rows), flush=True)
+
+        self.rew_buf[:] = reward
+        self.success_buf[:] = success
+        self.failure_buf[:] = (~success) & reset
+        self.error_buf[:] = drop_fail
+        self.reset_buf[:] = reset.to(dtype=self.reset_buf.dtype)
+        self.reward_dict = terms
+        self.total_rew_buf += self.rew_buf
+
+    def compute_reward(self, actions):
+        if self.cap_grasp_mode:
+            self._compute_cap_grasp_reward(actions)
+            return
+
+        target_state = {}
+        max_length = torch.clip(self.demo_data["seq_len"], 0, self.max_episode_length).float()
+        cur_idx = self.progress_buf
+        cur_wrist_pos = self.demo_data["wrist_pos"][torch.arange(self.num_envs), cur_idx]
+        target_state["wrist_pos"] = cur_wrist_pos
+        cur_wrist_rot = self.demo_data["wrist_rot"][torch.arange(self.num_envs), cur_idx]
+        target_state["wrist_quat"] = aa_to_quat(cur_wrist_rot)[:, [1, 2, 3, 0]]
+
+        target_state["wrist_vel"] = self.demo_data["wrist_velocity"][torch.arange(self.num_envs), cur_idx]
+        target_state["wrist_ang_vel"] = self.demo_data["wrist_angular_velocity"][torch.arange(self.num_envs), cur_idx]
+
+        target_state["tips_distance"] = self.demo_data["tips_distance"][torch.arange(self.num_envs), cur_idx]
+
+        cur_joints_pos = self.demo_data["mano_joints"][torch.arange(self.num_envs), cur_idx]
+        target_state["joints_pos"] = cur_joints_pos.reshape(self.num_envs, -1, 3)
+        target_state["joints_vel"] = self.demo_data["mano_joints_velocity"][
+            torch.arange(self.num_envs), cur_idx
+        ].reshape(self.num_envs, -1, 3)
+
+        cur_obj_transf = self.demo_data["obj_trajectory"][torch.arange(self.num_envs), cur_idx]
+        target_state["manip_obj_pos"] = cur_obj_transf[:, :3, 3]
+        target_state["manip_obj_quat"] = rotmat_to_quat(cur_obj_transf[:, :3, :3])[:, [1, 2, 3, 0]]
+
+        target_state["manip_obj_vel"] = self.demo_data["obj_velocity"][torch.arange(self.num_envs), cur_idx]
+        target_state["manip_obj_ang_vel"] = self.demo_data["obj_angular_velocity"][torch.arange(self.num_envs), cur_idx]
+
+        # 나사풀림 보상용 방향축 (없으면 0 → 보상 0). jit가 항상 참조하므로 항상 채움.
+        if self.cap_unscrew_rew and self._cap_unscrew_axis is not None:
+            target_state["unscrew_axis"] = self._cap_unscrew_axis
+        else:
+            target_state["unscrew_axis"] = torch.zeros((self.num_envs, 3), device=self.device)
+
+        target_state["tip_force"] = torch.stack(
+            [self.net_cf[:, self.dexhand_handles[k], :] for k in self.dexhand.contact_body_names],
+            axis=1,
+        )
+        _in_contact = torch.norm(target_state["tip_force"], dim=-1) > 0  # (E,5) 현재 접촉 여부
+        self.tips_contact_history = torch.concat(
+            [
+                self.tips_contact_history[:, 1:],
+                _in_contact[:, None],
+            ],
+            dim=1,
+        )
+        target_state["tip_contact_state"] = self.tips_contact_history
+        # 연속 접촉 시간: 접촉 유지 시 +1, 놓으면 0으로 리셋
+        self.tips_contact_duration = torch.where(
+            _in_contact, self.tips_contact_duration + 1.0, torch.zeros_like(self.tips_contact_duration)
+        )
+        target_state["contact_duration"] = self.tips_contact_duration
+
+        power = torch.abs(torch.multiply(self.dof_force, self.states["dq"])).sum(dim=-1)
+        target_state["power"] = power
+
+        wrist_power = torch.abs(
+            torch.sum(
+                self.apply_forces[:, self.dexhand_handles[self.dexhand.to_dex("wrist")[0]], :]
+                * self.states["base_state"][:, 7:10],
+                dim=-1,
+            )
+        )  # ? linear force * linear velocity
+        wrist_power += torch.abs(
+            torch.sum(
+                self.apply_torque[:, self.dexhand_handles[self.dexhand.to_dex("wrist")[0]], :]
+                * self.states["base_state"][:, 10:],
+                dim=-1,
+            )
+        )  # ? torque * angular velocity
+        target_state["wrist_power"] = wrist_power
+
+        if self.training:
+            last_step = self.gym.get_frame_count(self.sim)
+            if self.tighten_method == "None":
+                scale_factor = 1.0
+            elif self.tighten_method == "const":
+                scale_factor = self.tighten_factor
+            elif self.tighten_method == "linear_decay":
+                scale_factor = 1 - (1 - self.tighten_factor) / self.tighten_steps * min(last_step, self.tighten_steps)
+            elif self.tighten_method == "exp_decay":
+                scale_factor = (np.e * 2) ** (-1 * last_step / self.tighten_steps) * (
+                    1 - self.tighten_factor
+                ) + self.tighten_factor
+            elif self.tighten_method == "cos":
+                scale_factor = (self.tighten_factor) + np.abs(
+                    -1 * (1 - self.tighten_factor) * np.cos(last_step / self.tighten_steps * np.pi)
+                ) * (2 ** (-1 * last_step / self.tighten_steps))
+            else:
+                raise NotImplementedError
+        else:
+            scale_factor = 1.0
+
+        assert not self.headless or isinstance(compute_imitation_reward, torch.jit.ScriptFunction)
+
+        if self.rollout_len is not None:
+            max_length = torch.clamp(max_length, 0, self.rollout_len + self.rollout_begin + 3 + 1)
+
+        (
+            self.rew_buf[:],
+            self.reset_buf[:],
+            self.success_buf[:],
+            self.failure_buf[:],
+            self.reward_dict,
+            self.error_buf[:],
+        ) = compute_imitation_reward(
+            self.reset_buf,
+            self.progress_buf,
+            self.running_progress_buf,
+            self.actions,
+            self.states,
+            target_state,
+            max_length,
+            scale_factor,
+            self.dexhand.weight_idx,
+            self.obj_pos_rew_w,
+            self.obj_rot_rew_w,
+            self.unscrew_rew_w if self.cap_unscrew_rew else 0.0,
+            self.unscrew_rev_w if self.cap_unscrew_rew else 0.0,
+            self._cap_unscrew_ref,
+            self.contact_time_w,
+            self.contact_time_ref,
+            self.cap_unscrew_rew,  # True면 회전-추종 종료조건 비활성
+            self.cap_axial_trans,  # True(축이동 허용)면 물체 위치이탈 종료조건 비활성
+            float(self.tracking_reward_scale),  # 궤적-추종 보상 annealing scale (curriculum)
+        )
+        self.total_rew_buf += self.rew_buf
+
+    @staticmethod
+    def _curriculum_sched(progress, start, end, v0, v1, kind):
+        """progress<start → v0, [start,end] 보간(linear/cosine), progress>=end → v1. constant는 start에서 step."""
+        if kind == "constant":
+            return v1 if progress >= start else v0
+        if end <= start:
+            a = 1.0 if progress >= end else 0.0
+        else:
+            a = min(max((progress - start) / (end - start), 0.0), 1.0)
+            if kind == "cosine":
+                a = 0.5 - 0.5 * math.cos(math.pi * a)
+        return v0 + (v1 - v0) * a
+
+    def set_train_info(self, env_frames, *args, **kwargs):
+        """학습 루프(rl_games)가 매 update마다 호출 → 전체 진행률로 dropout 확률·tracking scale 갱신.
+        progress = env_frames / curriculum_total_frames (0~1). config에 total 없으면 진행률 0 유지(비활성)."""
+        self.total_train_env_frames = env_frames
+        total = float((self.cfg["env"].get("trajectory_dropout", {}) or {}).get("curriculum_total_frames", 0) or 0)
+        if total > 0:
+            self._curriculum_progress = min(max(float(env_frames) / total, 0.0), 1.0)
+        if self.traj_dropout_enabled:
+            p = self._curriculum_sched(
+                self._curriculum_progress, self.traj_dropout_start, self.traj_dropout_end,
+                0.0, self.traj_dropout_final_p, self.traj_dropout_schedule,
+            )
+            # performance-gate: 최근 성공률이 임계 미만이면 dropout 확률 증가를 멈춤
+            if self.traj_gate_enabled and self._last_success_rate < self.traj_gate_thresh:
+                p = min(p, self.trajectory_dropout_probability)
+            self.trajectory_dropout_probability = p
+        if self.track_anneal_enabled:
+            self.tracking_reward_scale = self._curriculum_sched(
+                self._curriculum_progress, self.track_anneal_start, self.track_anneal_end,
+                1.0, self.track_anneal_final, self.track_anneal_schedule,
+            )
+
+    def compute_observations(self):
+        self._refresh()
+        # obs_keys: q, cos_q, sin_q, base_state
+        obs_values = []
+        _hand_obs = self.cap_arm_hand_obs
+        for ob in self._obs_keys:
+            if ob == "base_state":
+                _bs = self._wrist_state_arm() if (_hand_obs or self.cap_arm_mode) else self.states[ob]
+                obs_values.append(
+                    torch.cat([torch.zeros_like(_bs[:, :3]), _bs[:, 3:]], dim=-1)
+                )  # ! ignore base position
+            elif _hand_obs and ob in ("q", "cos_q", "sin_q"):
+                obs_values.append(self.states[ob][:, 6:])
+            else:
+                obs_values.append(self.states[ob])
+        _prop = torch.cat(obs_values, dim=-1)
+        if self.cap_obs_history > 0:
+            if not hasattr(self, "_hist_buf"):
+                self._hist_buf = torch.zeros(
+                    self.num_envs, self.cap_obs_history, self._hist_feat_dim, device=self.device
+                )
+            _qd_h = self._qd[:, : self.n_hand_dofs]
+            _cav = self.states["manip_obj_ang_vel"]
+            _act = (
+                self.actions[:, : self.n_hand_dofs]
+                if self.actions is not None
+                else torch.zeros(self.num_envs, self.n_hand_dofs, device=self.device)
+            )
+            _frame = torch.cat([_qd_h, _cav, _act], dim=-1)
+            self._hist_buf = torch.roll(self._hist_buf, shifts=-1, dims=1)
+            self._hist_buf[:, -1] = _frame
+            _prop = torch.cat([_prop, self._hist_buf.reshape(self.num_envs, -1)], dim=-1)
+        self.obs_dict["proprioception"][:] = _prop
+        _odump = os.environ.get("CAP_OBS_DUMP", "")
+        if _odump and int(self.progress_buf[0].item()) == 0 and not getattr(self, "_obs_dumped", False):
+            self._obs_dump_pending = _odump  # target 조립 후 저장
+        # privileged_obs_keys: dq, manip_obj_pos, manip_obj_quat, manip_obj_vel, manip_obj_ang_vel
+        if len(self._privileged_obs_keys) > 0:
+            pri_obs_values = []
+            _pbase = (self._wrist_state_arm()[:, :3] if (_hand_obs or self.cap_arm_mode)
+                      else self.states["base_state"][:, :3])
+            for ob in self._privileged_obs_keys:
+                if ob == "manip_obj_pos":
+                    pri_obs_values.append(self.states[ob] - _pbase)
+                elif ob == "manip_obj_com":
+                    cur_com_pos = (
+                        quat_to_rotmat(self.states["manip_obj_quat"][:, [1, 2, 3, 0]])
+                        @ self.manip_obj_com.unsqueeze(-1)
+                    ).squeeze(-1) + self.states["manip_obj_pos"]
+                    pri_obs_values.append(cur_com_pos - _pbase)
+                elif ob == "manip_obj_weight":
+                    prop = self.gym.get_sim_params(self.sim)
+                    pri_obs_values.append((self.manip_obj_mass * -1 * prop.gravity.z).unsqueeze(-1))
+                elif ob == "manip_obj_vel" and self.cap_hide_rise:
+                    # 상승 속도 차단 (tools2, CAP_HIDE_RISE=1). z 성분만 0 --
+                    # 수평 속도는 접근·추적에 쓰이는 원시 관측이라 남긴다.
+                    v = self.states[ob].clone()
+                    v[:, 2] = 0.0
+                    pri_obs_values.append(v)
+                elif ob == "manip_obj_vel" and self.cap_hide_rise:
+                    # 상승 속도 차단 (CAP_HIDE_RISE=1, tools2 기본). z 성분만 0 --
+                    # 수평 속도는 접근·추적에 쓰이는 원시 관측이라 남긴다.
+                    v = self.states[ob].clone()
+                    v[:, 2] = 0.0
+                    pri_obs_values.append(v)
+                elif ob == "tip_force":
+                    tip_force = torch.stack(
+                        [self.net_cf[:, self.dexhand_handles[k], :] for k in self.dexhand.contact_body_names],
+                        axis=1,
+                    )
+                    tip_force = torch.cat(
+                        [tip_force, torch.norm(tip_force, dim=-1, keepdim=True)], dim=-1
+                    )  # add force magnitude
+                    pri_obs_values.append(tip_force.reshape(self.num_envs, -1))
+                elif _hand_obs and ob == "dq":
+                    pri_obs_values.append(self.states[ob][:, 6:])
+                else:
+                    pri_obs_values.append(self.states[ob])
+            if getattr(self, "cap_priv_resist", False):
+                _re = (
+                    getattr(self.cap_grasp_screw, "resist_env", None)
+                    if getattr(self, "cap_grasp_screw", None) is not None
+                    else None
+                )
+                if _re is not None:
+                    _rv = _re.to(device=self.device, dtype=torch.float32)
+                else:
+                    _rv = torch.full(
+                        (self.num_envs,), float(getattr(self, "cap_resist_now", 0.0)),
+                        device=self.device,
+                    )
+                pri_obs_values.append((_rv / 1.2).unsqueeze(-1))
+            self.obs_dict["privileged"][:] = torch.cat(pri_obs_values, dim=-1)
+
+        next_target_state = {}
+
+        cur_idx = self.progress_buf + 1
+        cur_idx = torch.clamp(cur_idx, torch.zeros_like(self.demo_data["seq_len"]), self.demo_data["seq_len"] - 1)
+
+        cur_idx = torch.stack(
+            [cur_idx + t for t in range(self.obs_future_length)], dim=-1
+        )  # [B, K], K = obs_future_length
+        nE, nT = self.demo_data["wrist_pos"].shape[:2]
+        nF = self.obs_future_length
+
+        def indicing(data, idx):
+            assert data.shape[0] == nE and data.shape[1] == nT
+            remaining_shape = data.shape[2:]
+            expanded_idx = idx
+            for _ in remaining_shape:
+                expanded_idx = expanded_idx.unsqueeze(-1)
+            expanded_idx = expanded_idx.expand(-1, -1, *remaining_shape)
+            return torch.gather(data, 1, expanded_idx)
+
+        target_wrist_pos = indicing(self.demo_data["wrist_pos"], cur_idx)  # [B, K, 3]
+        # 팔 모드의 "손목" 은 고정 루트가 아니라 base_link 몸체다. 여기 네 항이
+        # 고정 루트를 참조하면 target 23차원에 상수 쓰레기(0.6m급 델타)가 들어가
+        # 정책이 존재하지 않는 손목 오차를 보정하려 든다 (Arm6~8 오염, Al9
+        # 웜스타트 이탈의 원인).
+        _cur_wrist13 = (self._wrist_state_arm() if self.cap_arm_mode
+                        else self.states["base_state"])
+        cur_wrist_pos = _cur_wrist13[:, :3]  # [B, 3]
+        next_target_state["delta_wrist_pos"] = (target_wrist_pos - cur_wrist_pos[:, None]).reshape(nE, -1)
+
+        target_wrist_vel = indicing(self.demo_data["wrist_velocity"], cur_idx)
+        cur_wrist_vel = _cur_wrist13[:, 7:10]
+        next_target_state["wrist_vel"] = target_wrist_vel.reshape(nE, -1)
+        next_target_state["delta_wrist_vel"] = (target_wrist_vel - cur_wrist_vel[:, None]).reshape(nE, -1)
+
+        target_wrist_rot = indicing(self.demo_data["wrist_rot"], cur_idx)
+        cur_wrist_rot = _cur_wrist13[:, 3:7]
+
+        next_target_state["wrist_quat"] = aa_to_quat(target_wrist_rot.reshape(nE * nF, -1))[:, [1, 2, 3, 0]]
+        next_target_state["delta_wrist_quat"] = quat_mul(
+            cur_wrist_rot[:, None].repeat(1, nF, 1).reshape(nE * nF, -1),
+            quat_conjugate(next_target_state["wrist_quat"]),
+        ).reshape(nE, -1)
+        next_target_state["wrist_quat"] = next_target_state["wrist_quat"].reshape(nE, -1)
+
+        target_wrist_ang_vel = indicing(self.demo_data["wrist_angular_velocity"], cur_idx)
+        cur_wrist_ang_vel = _cur_wrist13[:, 10:13]
+        next_target_state["wrist_ang_vel"] = target_wrist_ang_vel.reshape(nE, -1)
+        next_target_state["delta_wrist_ang_vel"] = (target_wrist_ang_vel - cur_wrist_ang_vel[:, None]).reshape(nE, -1)
+
+        target_joints_pos = indicing(self.demo_data["mano_joints"], cur_idx).reshape(nE, nF, -1, 3)
+        cur_joint_pos = self.states["joints_state"][:, 1:, :3]  # skip the base joint
+        next_target_state["delta_joints_pos"] = (target_joints_pos - cur_joint_pos[:, None]).reshape(self.num_envs, -1)
+
+        target_joints_vel = indicing(self.demo_data["mano_joints_velocity"], cur_idx).reshape(nE, nF, -1, 3)
+        cur_joint_vel = self.states["joints_state"][:, 1:, 7:10]  # skip the base joint
+        next_target_state["joints_vel"] = target_joints_vel.reshape(self.num_envs, -1)
+        next_target_state["delta_joints_vel"] = (target_joints_vel - cur_joint_vel[:, None]).reshape(self.num_envs, -1)
+
+        target_obj_transf = indicing(self.demo_data["obj_trajectory"], cur_idx)
+        target_obj_transf = target_obj_transf.reshape(nE * nF, 4, 4)
+        next_target_state["delta_manip_obj_pos"] = (
+            target_obj_transf[:, :3, 3].reshape(nE, nF, -1) - self.states["manip_obj_pos"][:, None]
+        ).reshape(nE, -1)
+
+        target_obj_vel = indicing(self.demo_data["obj_velocity"], cur_idx)
+        cur_obj_vel = self.states["manip_obj_vel"]
+        next_target_state["manip_obj_vel"] = target_obj_vel.reshape(nE, -1)
+        next_target_state["delta_manip_obj_vel"] = (target_obj_vel - cur_obj_vel[:, None]).reshape(nE, -1)
+
+        next_target_state["manip_obj_quat"] = rotmat_to_quat(target_obj_transf[:, :3, :3])[:, [1, 2, 3, 0]]
+        next_target_state["delta_manip_obj_quat"] = quat_mul(
+            self.states["manip_obj_quat"][:, None].repeat(1, nF, 1).reshape(nE * nF, -1),
+            quat_conjugate(next_target_state["manip_obj_quat"]),
+        ).reshape(nE, -1)
+        next_target_state["manip_obj_quat"] = next_target_state["manip_obj_quat"].reshape(nE, -1)
+
+        target_obj_ang_vel = indicing(self.demo_data["obj_angular_velocity"], cur_idx)
+        cur_obj_ang_vel = self.states["manip_obj_ang_vel"]
+        next_target_state["manip_obj_ang_vel"] = target_obj_ang_vel.reshape(nE, -1)
+        next_target_state["delta_manip_obj_ang_vel"] = (target_obj_ang_vel - cur_obj_ang_vel[:, None]).reshape(nE, -1)
+
+        _js = self.states["joints_state"]
+        if self.cap_arm_mode:
+            _js = _js[:, len(self.dexhand.ARM_BODIES):]
+        next_target_state["obj_to_joints"] = torch.norm(
+            self.states["manip_obj_pos"][:, None] - _js[:, :, :3], dim=-1
+        ).reshape(self.num_envs, -1)
+
+        next_target_state["gt_tips_distance"] = indicing(self.demo_data["tips_distance"], cur_idx).reshape(nE, -1)
+
+        next_target_state["bps"] = self.obj_bps
+        # target 구성: (이름, is_trajectory). 순서는 절대 바꾸지 말 것(checkpoint 호환).
+        # is_trajectory=True인 세그먼트만 dropout 마스킹. obj_to_joints(현재상태)·bps(객체feature)는 유지.
+        if self.objcentric_obs:
+            # 논문식 object-centric: 손목(플래너)+물체목표+obj_to_joints+bps. 데모 손가락·gt_tips 제외.
+            TARGET_ORDER = [
+                ("delta_wrist_pos", True), ("wrist_vel", True), ("delta_wrist_vel", True),
+                ("wrist_quat", True), ("delta_wrist_quat", True), ("wrist_ang_vel", True), ("delta_wrist_ang_vel", True),
+                ("delta_manip_obj_pos", True), ("manip_obj_vel", True), ("delta_manip_obj_vel", True),
+                ("manip_obj_quat", True), ("delta_manip_obj_quat", True), ("manip_obj_ang_vel", True),
+                ("delta_manip_obj_ang_vel", True),
+                ("obj_to_joints", False),
+                ("bps", False),
+            ]
+        else:
+            TARGET_ORDER = [
+                ("delta_wrist_pos", True), ("wrist_vel", True), ("delta_wrist_vel", True),
+                ("wrist_quat", True), ("delta_wrist_quat", True), ("wrist_ang_vel", True), ("delta_wrist_ang_vel", True),
+                ("delta_joints_pos", True), ("joints_vel", True), ("delta_joints_vel", True),
+                ("delta_manip_obj_pos", True), ("manip_obj_vel", True), ("delta_manip_obj_vel", True),
+                ("manip_obj_quat", True), ("delta_manip_obj_quat", True), ("manip_obj_ang_vel", True),
+                ("delta_manip_obj_ang_vel", True),
+                ("obj_to_joints", False),      # 현재 물체↔관절 거리 (궤적 아님)
+                ("gt_tips_distance", True),    # 데모 손끝거리 (궤적)
+                ("bps", False),               # 객체 BPS feature (유지)
+            ]
+        if self.cap_grasp_mode and self.CAP_PHASE_DIM:
+            # [t/T, sin, cos, gravity_scale, 중력까지 남은 시간, hold 진척도]
+            # 궤적이 아니므로 traj_dropout 대상에서 제외(False).
+            cfg = self.cap_grasp_cfg
+            t = self.running_progress_buf.to(torch.float32) * self.dt
+            horizon = (self.demo_data["seq_len"].to(torch.float32) * self.dt).clamp_min(1e-6)
+            frac = (t / horizon).clamp(0.0, 1.0)
+            to_gravity = ((cfg.gravity_on_time - t) / max(cfg.gravity_on_time, 1e-6)).clamp(-1.0, 1.0)
+            if self.cap_grasp_tumbler:
+                # Unscrew has no gravity schedule, so those two slots carried no
+                # information. What the policy actually lacked was its own
+                # progress: the reward is driven by the unscrew fraction, but
+                # nothing in the observation exposed it. manip_obj_quat wraps at
+                # 2*pi and cannot represent 200 deg of cumulative turn, so a
+                # memoryless MLP saw identical states paying different rewards.
+                uc = self.cap_unscrew_cfg
+                turn = (
+                    self.cap_grasp_screw.angle().to(self.device)
+                    / max(uc.unscrew_target_rad, 1e-6)
+                ).clamp(0.0, 1.0)
+                released = self.cap_grasp_screw.released.to(
+                    device=self.device, dtype=torch.float32
+                )
+                hold_frac = (self.cap_grasp_hold_timer / max(uc.hold_time, 1e-6)).clamp(0.0, 1.0)
+                # CAP_HIDE_ANGLE: the policy is not told how far it has turned.
+                # turn and remain are the two observations that encode "180 deg
+                # is the finish line", and they are also the two a real hand
+                # cannot measure -- cumulative rotation past a half turn needs
+                # unwrapped tracking that never drops a frame. Zeroed rather
+                # than removed so the observation width, and every dim formula
+                # in the rl_train config that derives from it, stays put; a
+                # constant input carries no information either way.
+                released_raw = released
+                if self.cap_hide_angle:
+                    turn = torch.zeros_like(turn)
+                    released = torch.zeros_like(released)
+                    hold_frac = torch.zeros_like(hold_frac)
+                if self.CAP_PHASE_DIM in (10, 11):
+                    # 각도류 없음 -- 시간 3개만. 회전 정보는 privileged 의 캡
+                    # 쿼터니언(원시 자세)으로만 들어간다. 11 은 해제 여부를
+                    # 원값으로 추가한다 (HIDE_ANGLE 의 영향을 받지 않음).
+                    phase = [frac, torch.sin(2 * np.pi * frac), torch.cos(2 * np.pi * frac)]
+                    if self.CAP_PHASE_DIM == 11:
+                        phase.append(released_raw)
+                else:
+                    phase = [frac, torch.sin(2 * np.pi * frac), torch.cos(2 * np.pi * frac),
+                             turn, released, hold_frac]
+                cap_phase = torch.stack(phase, dim=-1)
+                if self.CAP_PHASE_DIM in (10, 11) or self.CAP_PHASE_DIM >= 13:
+                    cap_pos = self.states["manip_obj_pos"]
+                    cap_quat = self.states["manip_obj_quat"]      # xyzw
+                    wrist_pos = self._wrist_state_arm()[:, :3]
+                    wrist_quat = self._wrist_state_arm()[:, 3:7]  # xyzw
+                    rel_pos = torch_jit_utils.quat_rotate_inverse(cap_quat, wrist_pos - cap_pos)
+                    rel_quat = torch_jit_utils.quat_mul(
+                        torch_jit_utils.quat_conjugate(cap_quat), wrist_quat
+                    )
+                    cap_phase = torch.cat([cap_phase, rel_pos, rel_quat], dim=-1)
+                if self.CAP_PHASE_DIM >= 14:
+                    lift_frac = (
+                        self.cap_grasp_screw.lift(self._q).to(self.device)
+                        / max(uc.lift_success_height, 1e-6)
+                    ).clamp(0.0, 1.0)
+                    if self.cap_hide_angle:
+                        # The thread makes lift a linear function of the angle
+                        # (10.0mm at 180 deg), so lift_frac is turn scaled by
+                        # 0.625 and leaks exactly what zeroing turn was meant to
+                        # hide. hold_frac goes with it: in turn-only mode the
+                        # timer is not part of success, and it only ever moves
+                        # once the cap is already above the lift height.
+                        lift_frac = torch.zeros_like(lift_frac)
+                    cap_phase = torch.cat([cap_phase, lift_frac[:, None]], dim=-1)
+                if self.CAP_PHASE_DIM >= 15:
+                    # Degrees left, over 10. Deliberately not normalised by the
+                    # full stroke -- the point is resolution at the end, where a
+                    # fraction of the whole is flat.
+                    remain = (
+                        (uc.unscrew_target_rad - self.cap_grasp_screw.angle().to(self.device))
+                        .clamp_min(0.0) * (180.0 / np.pi) / 10.0
+                    ).clamp(0.0, 1.0)
+                    if self.cap_hide_angle:
+                        remain = torch.zeros_like(remain)
+                    cap_phase = torch.cat([cap_phase, remain[:, None]], dim=-1)
+                next_target_state["cap_phase"] = cap_phase
+            else:
+                if self.CAP_PHASE_DIM in (10, 11):
+                    raise ValueError(f"CAP_GRASP_PHASE_DIM={self.CAP_PHASE_DIM} 은 tumbler 모드 전용")
+                next_target_state["cap_phase"] = torch.stack(
+                    [
+                        frac,
+                        torch.sin(2 * np.pi * frac),
+                        torch.cos(2 * np.pi * frac),
+                        self.cap_grasp_gravity_scale_fn(self.running_progress_buf, self.dt, cfg).to(
+                            device=self.device, dtype=torch.float32
+                        ),
+                        to_gravity,
+                        (self.cap_grasp_hold_timer / max(cfg.hold_time, 1e-6)).clamp(0.0, 1.0),
+                    ],
+                    dim=-1,
+                )
+            TARGET_ORDER = TARGET_ORDER + [("cap_phase", False)]
+        self.obs_dict["target"][:] = torch.cat([next_target_state[ob] for ob, _ in TARGET_ORDER], dim=-1)
+        if getattr(self, "_obs_dump_pending", None):
+            _parts = {ob: next_target_state[ob][0].detach().cpu() for ob, _ in TARGET_ORDER}
+            torch.save({
+                "proprioception": self.obs_dict["proprioception"][0].detach().cpu(),
+                "privileged": self.obs_dict["privileged"][0].detach().cpu(),
+                "target": self.obs_dict["target"][0].detach().cpu(),
+                "target_parts": _parts,
+                "target_order": [ob for ob, _ in TARGET_ORDER],
+            }, self._obs_dump_pending)
+            print(f"[obs-dump] saved {self._obs_dump_pending}", flush=True)
+            self._obs_dump_pending = None
+            self._obs_dumped = True
+
+        # trajectory 컬럼 마스크(bool, target dim 길이) 1회 생성해 캐시
+        if getattr(self, "_traj_col_mask", None) is None:
+            segs = []
+            for ob, is_traj in TARGET_ORDER:
+                d = next_target_state[ob].shape[-1]
+                segs.append(torch.full((d,), bool(is_traj), dtype=torch.bool, device=self.device))
+            self._traj_col_mask = torch.cat(segs)  # (target_dim,), True=trajectory
+            n_traj = int(self._traj_col_mask.sum().item())
+            print(f"[traj_dropout] target dim={self._traj_col_mask.numel()}, trajectory cols={n_traj}, "
+                  f"keep(obj/bps)={self._traj_col_mask.numel()-n_traj}, mode={self.traj_dropout_mode}", flush=True)
+
+        # ===== Mode B: env에서 마스킹 → base_obs_dict(앞 슬라이스)·residual 양쪽 궤적 0 (진짜 trajectory-free) =====
+        if self.traj_dropout_enabled and self.traj_dropout_mode == "full_trajectory_free":
+            self.obs_dict["target"][:, self._traj_col_mask] = (
+                self.obs_dict["target"][:, self._traj_col_mask] * self.trajectory_available
+            )
+        # Mode A(stage2_only_dropout)는 base action에 궤적이 남으므로 trajectory-free가 아님 → 모델 레벨 마스킹 필요.
+
+        if self.cap_grasp_mode:
+            for key in self.obs_dict:
+                self.obs_dict[key][:] = torch.nan_to_num(
+                    self.obs_dict[key],
+                    nan=0.0,
+                    posinf=float(self.clip_obs),
+                    neginf=-float(self.clip_obs),
+                )
+
+        # update fields to dump
+        # prop fields
+        if not self.training:
+            for prop_name in self._prop_dump_info.keys():
+                if prop_name == "state_rh" or prop_name == "state_lh":
+                    self.dump_fileds[prop_name][:] = self.states["base_state"]
+                elif prop_name == "state_manip_obj_rh" or prop_name == "state_manip_obj_lh":
+                    self.dump_fileds[prop_name][:] = self._manip_obj_root_state
+                elif prop_name == "joint_state_rh" or prop_name == "joint_state_lh":
+                    self.dump_fileds[prop_name][:] = torch.stack(
+                        [self._rigid_body_state[:, self.dexhand_handles[k], :] for k in self.dexhand.body_names],
+                        dim=1,
+                    ).reshape(self.num_envs, -1)
+                elif prop_name == "tip_force_rh" or prop_name == "tip_force_lh":
+                    tip_force = torch.stack(
+                        [self.net_cf[:, self.dexhand_handles[k], :] for k in self.dexhand.contact_body_names],
+                        axis=1,
+                    )
+                    self.dump_fileds[prop_name][:] = tip_force.reshape(self.num_envs, -1)
+                elif prop_name == "q_rh" or prop_name == "q_lh":
+                    self.dump_fileds[prop_name][:] = self.states["q"][:]
+                elif prop_name == "dq_rh" or prop_name == "dq_lh":
+                    self.dump_fileds[prop_name][:] = self.states["dq"][:]
+                elif prop_name == "reward":
+                    self.dump_fileds[prop_name][:] = self.rew_buf.reshape(self.num_envs, -1).detach()
+                else:  # [q, dq]
+                    self.dump_fileds[prop_name][:] = self.states[prop_name][:]
+        return self.obs_dict
+
+    def _reset_default(self, env_ids):
+        if self.cap_grasp_mode:
+            seq_idx = torch.zeros_like(self.demo_data["seq_len"][env_ids].long())
+        elif self.random_state_init:
+            if self.rollout_begin is not None:
+                seq_idx = (
+                    torch.floor(
+                        self.rollout_len * 0.98 * torch.rand_like(self.demo_data["seq_len"][env_ids].float())
+                    ).long()
+                    + self.rollout_begin
+                )
+                seq_idx = torch.clamp(
+                    seq_idx,
+                    torch.zeros(1, device=self.device).long(),
+                    torch.floor(self.demo_data["seq_len"][env_ids] * 0.98).long(),
+                )
+            else:
+                seq_idx = torch.floor(
+                    self.demo_data["seq_len"][env_ids]
+                    * 0.98
+                    * torch.rand_like(self.demo_data["seq_len"][env_ids].float())
+                ).long()
+        else:
+            if self.rollout_begin is not None:
+                seq_idx = self.rollout_begin * torch.ones_like(self.demo_data["seq_len"][env_ids].long())
+            else:
+                seq_idx = torch.zeros_like(self.demo_data["seq_len"][env_ids].long())
+
+        if self.cap_grasp_mode and self.cap_grasp_resample_wrist_on_reset:
+            self._resample_cap_grasp_wrist(env_ids)
+
+        dof_pos = self.demo_data["opt_dof_pos"][env_ids, seq_idx]
+        if self.cap_arm_mode and dof_pos.shape[-1] < self.num_dexhand_dofs:
+            # 데모는 손 16관절(allegro 데이터 재사용) -- 팔 6칸을 0 으로 패딩.
+            # 어차피 grasp_init(FRAC=1.0)이 전체 22관절을 덮어쓴다.
+            _pad = torch.zeros(
+                (dof_pos.shape[0], self.num_dexhand_dofs - dof_pos.shape[-1]),
+                device=dof_pos.device, dtype=dof_pos.dtype)
+            dof_pos = torch.cat([_pad, dof_pos], dim=-1)
+        dof_pos = torch_jit_utils.tensor_clamp(
+            dof_pos,
+            self.dexhand_dof_lower_limits.unsqueeze(0),
+            self.dexhand_dof_upper_limits.unsqueeze(0),
+        )
+        dof_vel = self.demo_data["opt_dof_velocity"][env_ids, seq_idx]
+        if self.cap_arm_mode and dof_vel.shape[-1] < self.num_dexhand_dofs:
+            _padv = torch.zeros(
+                (dof_vel.shape[0], self.num_dexhand_dofs - dof_vel.shape[-1]),
+                device=dof_vel.device, dtype=dof_vel.dtype)
+            dof_vel = torch.cat([_padv, dof_vel], dim=-1)
+        dof_vel = torch_jit_utils.tensor_clamp(
+            dof_vel,
+            -1 * self._dexhand_dof_speed_limits.unsqueeze(0),
+            self._dexhand_dof_speed_limits.unsqueeze(0),
+        )
+
+        opt_wrist_pos = self.demo_data["opt_wrist_pos"][env_ids, seq_idx]
+        opt_wrist_rot = aa_to_quat(self.demo_data["opt_wrist_rot"][env_ids, seq_idx])
+        opt_wrist_rot = opt_wrist_rot[:, [1, 2, 3, 0]]
+
+        opt_wrist_vel = self.demo_data["opt_wrist_velocity"][env_ids, seq_idx]
+        opt_wrist_ang_vel = self.demo_data["opt_wrist_angular_velocity"][env_ids, seq_idx]
+
+        opt_hand_pose_vel = torch.concat([opt_wrist_pos, opt_wrist_rot, opt_wrist_vel, opt_wrist_ang_vel], dim=-1)
+
+        if not self.cap_arm_mode:   # 팔 모드: 베이스 고정 -- 루트 쓰기 무의미
+            self._base_state[env_ids, :] = opt_hand_pose_vel
+
+        # 일부 환경은 이미 잡은 자세에서 출발시킨다. dof_pos/base_state 를
+        # 여기서 덮어써야 아래 _pos_control 과 조인트 상태가 함께 따라간다.
+        gi = getattr(self, "cap_grasp_init", None)
+        if self.cap_grasp_tumbler and not hasattr(self, "cap_grasp_cap_home_pos"):
+            # 리셋 시점의 rigid body 텐서는 이전 에피소드가 끝난 캡 위치다. DOF
+            # 리셋으로 캡은 홈으로 돌아가지만 텐서는 다음 simulate 까지 낡은
+            # 값이라, 캡을 옮긴 채 끝난 판(free6 에서 흔함) 다음의 손목이
+            # 엉뚱한 곳에 놓였다. 텀블러는 고정이라 캡 홈은 불변 -- 첫 리셋
+            # (스폰 직후, 캡이 아직 홈에 있음)에 한 번 떠서 계속 쓴다.
+            self.gym.refresh_rigid_body_state_tensor(self.sim)
+            self.cap_grasp_cap_home_pos = self._cap_src[:, :3].clone()
+            self.cap_grasp_cap_home_quat = self._cap_src[:, 3:7].clone()
+        if gi is not None and gi.enabled and self.cap_grasp_tumbler:
+            picked = gi.pick(env_ids)
+            if picked.numel():
+                full_q = torch.zeros(
+                    (self.num_envs, self.n_hand_dofs), device=dof_pos.device, dtype=dof_pos.dtype
+                )
+                full_q[env_ids] = dof_pos
+                gi.apply(picked, full_q, self._base_state, self.cap_grasp_cap_home_pos, write_base=not self.cap_arm_mode)
+                dof_pos = full_q[env_ids]
+                dof_vel = torch.where(
+                    torch.isin(env_ids, picked).unsqueeze(-1), torch.zeros_like(dof_vel), dof_vel
+                )
+
+        if int(os.environ.get("CAP_GRASP_INIT_DEBUG", "0")):
+            gi_ = getattr(self, "cap_grasp_init", None)
+            print("[init-debug] reset env_ids=%d  gi=%s enabled=%s  base0=%s  q0[:4]=%s" % (
+                len(env_ids),
+                "None" if gi_ is None else "ok",
+                None if gi_ is None else gi_.enabled,
+                [round(float(v), 4) for v in self._base_state[env_ids[0], :3]],
+                [round(float(v), 3) for v in dof_pos[0, :4]],
+            ), flush=True)
+        # 손목 델타 목표를 리셋 자세에 맞춘다. grasp_init 이 덮어쓴 경우
+        # 그 자세가 곧 목표가 되므로, 액션 0 이면 손목이 거기 머문다.
+        if self.cap_arm_mode:
+            # 팔 모드의 손목 = base_link 몸체. 고정 루트로 초기화하면 IK 래퍼
+            # 가상 목표가 팔 베이스를 가리켜 첫 스텝부터 큰 오차를 만든다.
+            _w13r = self._wrist_state_arm()
+            self.cap_wrist_target_pos[env_ids] = _w13r[env_ids, :3]
+            self.cap_wrist_target_quat[env_ids] = _w13r[env_ids, 3:7]
+        else:
+            self.cap_wrist_target_pos[env_ids] = self._base_state[env_ids, :3]
+            self.cap_wrist_target_quat[env_ids] = self._base_state[env_ids, 3:7]
+
+        self._q[env_ids, : self.n_hand_dofs] = dof_pos
+        self._qd[env_ids, : self.n_hand_dofs] = dof_vel
+        self._pos_control[env_ids, : self.n_hand_dofs] = dof_pos
+        # 유지형 델타(base=target)의 기준점. 리셋 자세가 곧 첫 목표가 되어
+        # 액션 0 이면 그 자세를 서보가 지킨다.
+        self.prev_targets[env_ids] = dof_pos
+        self.curr_targets[env_ids] = dof_pos
+        if self.cap_grasp_tumbler:
+            # Screw back to fully closed and drop the accumulated unscrew angle.
+            self._q[env_ids, self.n_hand_dofs :] = 0.0
+            self._qd[env_ids, self.n_hand_dofs :] = 0.0
+            self._pos_control[env_ids, self.n_hand_dofs :] = 0.0
+
+        # reset manip obj
+        obj_pos_init = self.demo_data["obj_trajectory"][env_ids, seq_idx, :3, 3]
+        obj_rot_init = self.demo_data["obj_trajectory"][env_ids, seq_idx, :3, :3]
+        obj_rot_init = rotmat_to_quat(obj_rot_init)
+        # [w, x, y, z] to [x, y, z, w]
+        obj_rot_init = obj_rot_init[:, [1, 2, 3, 0]]
+
+        obj_vel = self.demo_data["obj_velocity"][env_ids, seq_idx]
+        obj_ang_vel = self.demo_data["obj_angular_velocity"][env_ids, seq_idx]
+
+        # 주의: Al9 등 기존 hand-only 체크포인트는 이 강제 쓰기가 없던 시절,
+        # 리셋 푸시가 텀블러를 데모 위치 (0,0,0.64) 로 옮긴 세계에서 훈련됐다.
+        # CAP_TUMBLER_RESET_CREATION=0 으로 그 세계를 재현할 수 있다.
+        _reset_creation = bool(int(os.environ.get("CAP_TUMBLER_RESET_CREATION", "0")))
+        if self.cap_grasp_tumbler and _reset_creation and hasattr(self, "_tumbler_creation_pose"):
+            # 고정 텀블러의 루트는 생성 자세 그대로여야 한다. 데모 obj 궤적으로
+            # 쓰면 리셋 푸시가 고정체를 텔레포트시켜 (코드베이스에 기록된
+            # "몸체가 떠오르는" 버그와 같은 계열) TUMBLER_POS 오버라이드가
+            # 무효화된다 -- 팔 모드 초기위치 불일치의 원인이었다.
+            _tcp_ = self._tumbler_creation_pose
+            self._manip_obj_root_state[env_ids, 0] = _tcp_[0]
+            self._manip_obj_root_state[env_ids, 1] = _tcp_[1]
+            self._manip_obj_root_state[env_ids, 2] = _tcp_[2]
+            self._manip_obj_root_state[env_ids, 3] = _tcp_[3]
+            self._manip_obj_root_state[env_ids, 4] = _tcp_[4]
+            self._manip_obj_root_state[env_ids, 5] = _tcp_[5]
+            self._manip_obj_root_state[env_ids, 6] = _tcp_[6]
+            self._manip_obj_root_state[env_ids, 7:13] = 0.0
+        else:
+            self._manip_obj_root_state[env_ids, :3] = obj_pos_init
+            self._manip_obj_root_state[env_ids, 3:7] = obj_rot_init
+            self._manip_obj_root_state[env_ids, 7:10] = obj_vel
+            self._manip_obj_root_state[env_ids, 10:13] = obj_ang_vel
+        if os.environ.get("CAP_FRAME_DEBUG", ""):
+            for _e in range(min(4, self.num_envs)):
+                print(f"[frame-debug] env{_e} obj_root {self._manip_obj_root_state[_e,:3].cpu().numpy().round(3)} "
+                      f"cap {self._cap_src[_e,:3].cpu().numpy().round(3)} "
+                      f"wrist {self._base_state[_e,:3].cpu().numpy().round(3)}", flush=True)
+        if self.cap_grasp_screw is not None:
+            self.cap_grasp_screw.rebind_engaged(self.gym, self.envs, self.cap_grasp_obj_actors, env_ids)
+            if getattr(self, "cap_resist_random", False):
+                _lo = self.cap_resist_lo
+                _hi = max(float(self.cap_resist_now), _lo)
+                _t = _lo + (_hi - _lo) * torch.rand(env_ids.numel())
+                self.cap_grasp_screw.set_resistance_envs(
+                    self.gym, self.envs, self.cap_grasp_obj_actors,
+                    env_ids.tolist(), _t.tolist(),
+                )
+            # Wind the screw back before re-seeding the accumulator. reset() only
+            # clears the running total; the joints themselves keep last episode's
+            # angle and lift, so an unscrewed cap started the next episode still
+            # unscrewed -- and reset() then read those stale positions as the new
+            # zero. Both go through _dof_state, which is pushed to the sim at the
+            # end of this function.
+            self.cap_grasp_screw.zero_dofs(self._dof_state, env_ids)
+            self.cap_grasp_screw.reset(self._q, env_ids)
+            self.cap_unscrew_prev_angle[env_ids] = 0.0
+            if hasattr(self, "cap_unscrew_hwm"):
+                self.cap_unscrew_hwm[env_ids] = 0.0
+            if self.cap_grasp_stable_timer is not None:
+                self.cap_grasp_stable_timer[env_ids] = 0.0
+
+        if self.cap_grasp_mode:
+            self.cap_grasp_initial_wrist_pos[env_ids] = self._base_state[env_ids, :3]
+            self.cap_grasp_initial_wrist_quat[env_ids] = self._base_state[env_ids, 3:7]
+            # _cap_src, not the actor root: in tumbler mode the root is the fixed
+            # body at the table, so cap_rise/drop would be measured against the
+            # wrong datum and read ~0.225 m from the first frame.
+            # 캡 홈 좌표를 쓴다. _cap_src 를 그대로 뜨면 리셋 전(이전 에피소드
+            # 끝)의 낡은 캡 자세가 이번 에피소드의 기준점이 된다.
+            self.cap_grasp_initial_cap_pos[env_ids] = self.cap_grasp_cap_home_pos[env_ids]
+            self.cap_grasp_initial_cap_quat[env_ids] = self.cap_grasp_cap_home_quat[env_ids]
+            self.cap_grasp_hold_timer[env_ids] = 0.0
+            self.cap_grasp_episode_id[env_ids] += 1
+            self.cap_grasp_pedestal_depth_max[env_ids] = 0.0
+
+        if self._cap_released is not None:  # 이탈 래치 초기화(재파지 시작)
+            self._cap_released[env_ids] = False
+        if self._cap_screw_angle is not None:  # 누적 회전각 초기화
+            self._cap_screw_angle[env_ids] = 0.0
+        if getattr(self, "_hist_buf", None) is not None:  # 관측 이력, 에피소드 경계 차단
+            self._hist_buf[env_ids] = 0.0
+
+        dexhand_multi_env_ids_int32 = self._global_dexhand_indices[env_ids].flatten()
+        manip_obj_multi_env_ids_int32 = self._global_manip_obj_indices[env_ids].flatten()
+
+        # The tumbler is an articulation too -- cap_spin and cap_lift live on it,
+        # not on the hand -- so its actor has to be in this call or the screw
+        # keeps last episode's angle no matter what _dof_state says. Only the
+        # root state was being reset for it, which moves the fixed body and
+        # leaves the cap where the last episode unscrewed it to.
+        dof_reset_ids = dexhand_multi_env_ids_int32
+        if self.cap_grasp_tumbler and self.cap_grasp_screw is not None:
+            dof_reset_ids = torch.concat([dof_reset_ids, manip_obj_multi_env_ids_int32])
+        self.gym.set_dof_state_tensor_indexed(
+            self.sim,
+            gymtorch.unwrap_tensor(self._dof_state),
+            gymtorch.unwrap_tensor(dof_reset_ids),
+            len(dof_reset_ids),
+        )
+        self.gym.set_actor_root_state_tensor_indexed(
+            self.sim,
+            gymtorch.unwrap_tensor(self._root_state),
+            gymtorch.unwrap_tensor(torch.concat([dexhand_multi_env_ids_int32, manip_obj_multi_env_ids_int32])),
+            len(torch.concat([dexhand_multi_env_ids_int32, manip_obj_multi_env_ids_int32])),
+        )
+        self.gym.set_dof_position_target_tensor_indexed(
+            self.sim,
+            gymtorch.unwrap_tensor(self._pos_control),
+            gymtorch.unwrap_tensor(dexhand_multi_env_ids_int32),
+            len(dexhand_multi_env_ids_int32),
+        )
+
+        self.progress_buf[env_ids] = seq_idx
+        self.running_progress_buf[env_ids] = 0
+        self.reset_buf[env_ids] = 0
+        self.success_buf[env_ids] = 0
+        self.failure_buf[env_ids] = 0
+        self.error_buf[env_ids] = 0
+        self.total_rew_buf[env_ids] = 0
+        self.apply_forces[env_ids] = 0
+        self.apply_torque[env_ids] = 0
+        self.curr_targets[env_ids] = 0
+        self.prev_targets[env_ids] = 0
+        if self.cap_arm_mode:
+            # 위쪽에서 세팅한 타깃을 여기가 0 으로 덮는다. 팔 6관절은 항상
+            # 복원 (0-타깃이면 캔들로 낚아채는 재앙). 손가락은 기본적으로
+            # hand-only 버릇(0-타깃 과도)을 유지하되, CAP_RESET_FINGER_TARGETS=1
+            # 이면 손가락 타깃도 초기자세로 복원 -- 스크래치 학습에서 리셋
+            # 직후 파지가 벌어져 "파지 공짜 제공" 이점이 사라지는 문제의 처방.
+            if bool(int(os.environ.get("CAP_RESET_FINGER_TARGETS", "0"))):
+                self.curr_targets[env_ids] = dof_pos
+                self.prev_targets[env_ids] = dof_pos
+            else:
+                self.curr_targets[env_ids, :6] = dof_pos[:, :6]
+                self.prev_targets[env_ids, :6] = dof_pos[:, :6]
+
+        if self.use_pid_control:
+            self.prev_pos_error[env_ids] = 0
+            self.prev_rot_error[env_ids] = 0
+            self.pos_error_integral[env_ids] = 0
+            self.rot_error_integral[env_ids] = 0
+
+        self.tips_contact_history[env_ids] = torch.ones_like(self.tips_contact_history[env_ids]).bool()
+        self.tips_contact_duration[env_ids] = 0.0
+        # trajectory dropout mask: reset된 env만 새 마스크 샘플 (episode 도중엔 고정 유지).
+        # available=1(궤적 제공)일 확률 = 1 - dropout_probability.
+        if self.traj_dropout_enabled:
+            new_avail = (
+                torch.rand(len(env_ids), 1, device=self.device) > self.trajectory_dropout_probability
+            ).float()
+            self.trajectory_available[env_ids] = new_avail
+
+    def reset_idx(self, env_ids):
+        self._refresh()
+        if self.randomize:
+            self.apply_randomizations(self.dr_randomizations)
+
+        last_step = self.gym.get_frame_count(self.sim)
+        if self.training and len(self.dataIndices) == 1 and last_step >= self.tighten_steps:
+            running_steps = self.running_progress_buf[env_ids] - 1
+            max_running_steps, max_running_idx = running_steps.max(dim=0)
+            max_running_env_id = env_ids[max_running_idx]
+            if max_running_steps > self.best_rollout_len:
+                self.best_rollout_len = max_running_steps
+                self.best_rollout_begin = self.progress_buf[max_running_env_id] - 1 - max_running_steps
+
+        self._reset_default(env_ids)
+
+    def reset_done(self):
+        done_env_ids = self.reset_buf.nonzero(as_tuple=False).flatten()
+        if len(done_env_ids) > 0:
+            self.reset_idx(done_env_ids)
+            self.compute_observations()
+
+        if not self.dict_obs_cls:
+            self.obs_dict["obs"] = torch.clamp(self.obs_buf, -self.clip_obs, self.clip_obs).to(self.rl_device)
+
+            # asymmetric actor-critic
+            if self.num_states > 0:
+                self.obs_dict["states"] = self.get_state()
+
+        return self.obs_dict, done_env_ids
+
+    def step(self, actions):
+        obs, rew, done, info = super().step(actions)
+        info["reward_dict"] = self.reward_dict
+        info["total_rewards"] = self.total_rew_buf
+        info["total_steps"] = self.progress_buf
+        return obs, rew, done, info
+
+    def pre_physics_step(self, actions):
+
+        # ? >>> for visualization
+        if not self.headless:
+
+            cur_idx = self.progress_buf
+
+            self.gym.clear_lines(self.viewer)
+
+            # Which contacts the reward would accept, drawn where they happen.
+            #
+            # Three tests have to pass at once -- force, the 14.3-30.0mm band,
+            # and the pad facing the wall within palm_facing_min_cos -- and from
+            # the outside a finger that fails one looks identical to a finger
+            # that passes. Colour says which: green accepted, yellow in the band
+            # but turned too far, red outside the band. The band itself is drawn
+            # on the cap so the target region is visible rather than inferred.
+            if self.cap_grasp_mode and int(os.environ.get("CAP_DEBUG_DRAW", "1")):
+                import math as _m
+                from cap_unscrew_rl_terms import cap_wall_radius as _cwr
+                uc = self.cap_unscrew_cfg
+                cpos = self._cap_src[:, :3]
+                probes = self._cap_grasp_contact_probes()          # (E,5,P,3)
+                tips = probes[:, :, -1, :]
+                fq = torch.stack(
+                    [self._rigid_body_state[:, h, 3:7] for h in self.cap_grasp_distal_handles], dim=1
+                )
+                palm_w = torch_jit_utils.quat_rotate(
+                    fq.reshape(-1, 4), self.cap_palm_local.reshape(-1, 3)
+                ).view(self.num_envs, 5, 3)
+                rel = tips - cpos[:, None, :]
+                rad = torch.linalg.norm(rel[..., :2], dim=-1).clamp_min(1e-6)
+                outward = torch.zeros_like(rel)
+                outward[..., :2] = rel[..., :2] / rad[..., None]
+                cosv = (palm_w * (-outward)).sum(-1)
+                zc = rel[..., 2]
+                fr = uc.finger_radius
+                inband = (zc >= uc.band_lo - fr) & (zc <= uc.cap_height + fr)
+                for e in range(min(self.num_envs, 4)):
+                    ep = self.envs[e]
+                    # band rings on the cap wall
+                    # Two rings per band edge. The inner one is the wall as the
+                    # collision mesh has it -- wider than the visual mesh by up
+                    # to 5.6mm, which is why it reads as too big against what is
+                    # drawn. The outer one is where a fingertip's centre has to
+                    # arrive for the distance test to read zero, wall plus
+                    # finger_radius; that is the ring the probe crosses should
+                    # land on.
+                    rings = []
+                    for zz in (uc.band_lo, uc.cap_height):
+                        rw = float(_cwr(torch.tensor([zz]), uc))
+                        rings.append((zz, rw, (0.2, 0.6, 1.0)))
+                        rings.append((zz, rw + uc.finger_radius, (0.55, 0.35, 0.9)))
+                    for zz, rr, col in rings:
+                        seg, cols = [], []
+                        for k in range(24):
+                            a0, a1 = 2 * _m.pi * k / 24, 2 * _m.pi * (k + 1) / 24
+                            seg.append([float(cpos[e, 0]) + rr * _m.cos(a0), float(cpos[e, 1]) + rr * _m.sin(a0),
+                                        float(cpos[e, 2]) + zz,
+                                        float(cpos[e, 0]) + rr * _m.cos(a1), float(cpos[e, 1]) + rr * _m.sin(a1),
+                                        float(cpos[e, 2]) + zz])
+                            cols.append(list(col))
+                        self.gym.add_lines(self.viewer, ep, len(seg),
+                                           np.array(seg, dtype=np.float32), np.array(cols, dtype=np.float32))
+                    # per-finger palmar axis, coloured by verdict
+                    # Force is the third test and was missing here: a finger
+                    # parked in the band at the right angle but not touching
+                    # anything was drawn green, which is the opposite of what the
+                    # colour is for. Green now means the reward would actually
+                    # count it.
+                    fmag = torch.stack(
+                        [torch.linalg.norm(self.net_cf[:, hd], dim=-1)
+                         + torch.linalg.norm(self.net_cf[:, ht], dim=-1)
+                         for hd, ht in zip(self.cap_grasp_distal_handles, self.cap_grasp_tip_handles)],
+                        dim=1,
+                    )
+                    seg, cols = [], []
+                    for k in range(5):
+                        ok_c = bool(cosv[e, k] >= uc.palm_facing_min_cos)
+                        ok_b = bool(inband[e, k])
+                        ok_f = bool(fmag[e, k] > uc.contact_force_threshold)
+                        if ok_f and ok_b and ok_c:
+                            c = (0.1, 1.0, 0.1)      # 인정
+                        elif ok_b and ok_c:
+                            c = (0.1, 0.7, 1.0)      # 위치·각도 OK, 안 닿음
+                        elif ok_b:
+                            c = (1.0, 0.9, 0.1)      # 밴드 안, 각도 부족
+                        else:
+                            c = (1.0, 0.15, 0.15)    # 밴드 밖
+                        t0 = tips[e, k]
+                        t1 = t0 + palm_w[e, k] * 0.02
+                        seg.append([float(t0[0]), float(t0[1]), float(t0[2]),
+                                    float(t1[0]), float(t1[1]), float(t1[2])])
+                        cols.append(list(c))
+                    self.gym.add_lines(self.viewer, ep, len(seg),
+                                       np.array(seg, dtype=np.float32), np.array(cols, dtype=np.float32))
+
+            cur_wrist_pos = self.demo_data["wrist_pos"][torch.arange(self.num_envs), cur_idx]
+
+            cur_mano_joint_pos = self.demo_data["mano_joints"][torch.arange(self.num_envs), cur_idx].reshape(
+                self.num_envs, -1, 3
+            )
+            cur_mano_joint_pos = torch.concat([cur_wrist_pos[:, None], cur_mano_joint_pos], dim=1)
+            for k in range(len(self.mano_joint_points)):
+                self.mano_joint_points[k][:, :3] = cur_mano_joint_pos[:, k]
+            for env_id, env_ptr in enumerate(self.envs):
+                for k in self.dexhand.body_names:
+                    self.set_force_vis(
+                        env_ptr, k, torch.norm(self.net_cf[env_id, self.dexhand_handles[k]], dim=-1) != 0
+                    )
+
+                def add_lines(viewer, env_ptr, hand_joints, color):
+                    assert hand_joints.shape[0] == self.dexhand.n_bodies and hand_joints.shape[1] == 3
+                    hand_joints = hand_joints.cpu().numpy()
+                    lines = np.array([[hand_joints[b[0]], hand_joints[b[1]]] for b in self.dexhand.bone_links])
+                    for line in lines:
+                        self.gym.add_lines(viewer, env_ptr, 1, line, color)
+
+                color = np.array([[0.0, 1.0, 0.0]], dtype=np.float32)
+                add_lines(self.viewer, env_ptr, cur_mano_joint_pos[env_id].cpu(), color)
+
+        # ? <<< for visualization
+        root_control_dim = 9 if self.use_pid_control else 6
+        res_split_idx = (
+            actions.shape[1] // 2
+            if not self.use_pid_control
+            else ((actions.shape[1] - (root_control_dim - 6)) // 2 + (root_control_dim - 6))
+        )
+        servo_pos_err = None
+        servo_rot_err = None
+        if self.single_policy and self.wrist_servo:
+            # 손목 서보: 정책 action = 손가락(n_dofs)만. 손목은 플래너 손목궤적으로 PID 서보.
+            if os.environ.get("CAP_ZERO_ACTIONS", ""):
+                actions = torch.zeros_like(actions)   # 정적 진단: 정책 무시
+            if self.cap_arm_mode and os.environ.get("CAP_FINGER_DEBUG", "") \
+               and int(self.progress_buf[0].item()) < 12:
+                _fq = self._q[0, 6:10]  # 검지 4관절
+                _tq = self.curr_targets[0, 6:10] if hasattr(self, "curr_targets") else _fq
+                print(f"[finger] step {int(self.progress_buf[0].item())} "
+                      f"검지q {[round(float(v),3) for v in _fq]} "
+                      f"타깃 {[round(float(v),3) for v in _tq]}", flush=True)
+            if self.cap_arm_mode and os.environ.get("CAP_ARM_Q_DEBUG", "") \
+               and int(self.progress_buf[0].item()) % 30 == 0:
+                _ag = float(torch.rad2deg(self.cap_grasp_screw.angle().to(self.device))[0])
+                _wq13 = self._wrist_state_arm()[0]
+                print(f"[arm-q] step {int(self.progress_buf[0].item())} 풀림 {_ag:.0f}도 "
+                      f"q(도) {[round(float(torch.rad2deg(v)),1) for v in self._q[0,:6]]} "
+                      f"손목 ({float(_wq13[0]):.4f},{float(_wq13[1]):.4f},{float(_wq13[2]):.4f})", flush=True)
+            base_action = None
+            residual_action = torch.zeros_like(actions)  # width n_dofs; [0:3]/[3:6] = 0
+            dof_pos = actions[:, : self.num_dexhand_dofs]
+            if self.cap_arm_mode and self.cap_arm_ik_wrapper:
+                # 앞 6 = 손목 작업공간 델타. hand-only(4297~4333행)와 같은 규약:
+                # 가상 목표를 적분하되 err_max 리쉬로 현재 손목 근처에 묶고,
+                # 목표 오차를 자코비안 DLS 로 팔 관절 델타로 환산해 추종한다.
+                # (초기 구현은 리쉬 없는 속도 적분이라 포화 액션에 무한 도주 --
+                # Al9 웜스타트가 스텝 0부터 발사된 원인.)
+                _ik_test = os.environ.get("CAP_ARM_IK_TEST", "").strip()
+                if _ik_test:
+                    _tv = torch.tensor([float(x) for x in _ik_test.split(",")],
+                                       device=self.device)
+                    actions = actions.clone()
+                    actions[:, :6] = _tv
+                    if int(self.progress_buf[0].item()) % 60 == 0:
+                        _ws = self._rigid_body_state[0, self.dexhand_handles["base_link"], :7]
+                        print(f"[ik-test] step {int(self.progress_buf[0].item())} "
+                              f"wrist {_ws[0].item():.4f} {_ws[1].item():.4f} {_ws[2].item():.4f}  "
+                              f"quat {_ws[3].item():.3f} {_ws[4].item():.3f} {_ws[5].item():.3f} {_ws[6].item():.3f}",
+                              flush=True)
+                if os.environ.get("CAP_ARM_Q_DEBUG", "") and int(self.progress_buf[0].item()) % 30 == 0:
+                    _ag = float(torch.rad2deg(self.cap_grasp_screw.angle().to(self.device))[0])
+                    _wq13 = self._wrist_state_arm()[0]
+                    print(f"[arm-q] step {int(self.progress_buf[0].item())} 풀림 {_ag:.0f}도 "
+                          f"q(도) {[round(float(torch.rad2deg(v)),1) for v in self._q[0,:6]]} "
+                          f"손목 ({float(_wq13[0]):.4f},{float(_wq13[1]):.4f},{float(_wq13[2]):.4f})", flush=True)
+                if os.environ.get("CAP_ARM_IK_ACT_DEBUG", "") and int(self.progress_buf[0].item()) < 12:
+                    _w13 = self._wrist_state_arm()[0]
+                    print(f"[ik-act] step {int(self.progress_buf[0].item())} "
+                          f"wrist_act {actions[0,:6].cpu().numpy().round(3)} "
+                          f"|w_vel| {float(_w13[7:10].norm()):.2f} |w_angvel| {float(_w13[10:13].norm()):.2f} "
+                          f"|obj_angvel| {float(self.states['manip_obj_ang_vel'][0].norm()):.2f}", flush=True)
+                self.gym.refresh_jacobian_tensors(self.sim)
+                J = self._jacobian[:, self._jac_bl_row, :, :6]          # (E,6,6)
+                _w13 = self._wrist_state_arm()
+                _wp, _wq = _w13[:, :3], _w13[:, 3:7]
+                # 리셋 직후 첫 스텝: 가상 목표를 갱신된 실제 손목 자세로 스냅.
+                # 리셋 시점의 몸체 상태는 스테일(이전 에피소드 자세)이라, 그걸
+                # 목표로 두면 리쉬(3cm) 한도까지 끌려가 FK 대비 최대 30mm
+                # 오프셋에 주차한다 (정적 실측 +22mm 의 원인).
+                _fresh = self.running_progress_buf <= 1
+                if bool(_fresh.any()):
+                    self.cap_wrist_target_pos[_fresh] = _wp[_fresh]
+                    self.cap_wrist_target_quat[_fresh] = _wq[_fresh]
+                # nan 복구 (hand-only 4287행 규약)
+                bad = ~torch.isfinite(self.cap_wrist_target_pos).all(dim=-1)
+                bad |= ~torch.isfinite(self.cap_wrist_target_quat).all(dim=-1)
+                if bool(bad.any()):
+                    self.cap_wrist_target_pos[bad] = torch.nan_to_num(_wp[bad])
+                    self.cap_wrist_target_quat[bad] = torch.nan_to_num(_wq[bad])
+                # 목표 적분
+                dpos = actions[:, 0:3].clamp(-1, 1) * self.cap_arm_ik_dpos
+                drot = actions[:, 3:6].clamp(-1, 1) * self.cap_arm_ik_drot
+                if os.environ.get("CAP_ARM_CMD_TRACK", ""):
+                    # 명령 vs 실현 추적: 직전 스텝 명령이 이번 스텝 손목 변위로
+                    # 얼마나 실현됐는지 (크기 비율 + 방향 코사인).
+                    if not hasattr(self, "_ct_prev_wp"):
+                        self._ct_prev_wp = _wp.clone(); self._ct_prev_wq = _wq.clone()
+                        self._ct_prev_cmd = torch.zeros(self.num_envs, 6, device=self.device)
+                        self._ct_sum = torch.zeros(6, device=self.device); self._ct_n = 0
+                    _real_dp = _wp - self._ct_prev_wp
+                    _qrel = torch_jit_utils.quat_mul(_wq, torch_jit_utils.quat_conjugate(self._ct_prev_wq))
+                    _ra, _rx = torch_jit_utils.quat_to_angle_axis(_qrel)
+                    _real_dr = _rx * _ra.unsqueeze(-1)
+                    _c = self._ct_prev_cmd
+                    _cp, _cr = _c[:, :3], _c[:, 3:]
+                    _cpn = _cp.norm(dim=-1); _crn = _cr.norm(dim=-1)
+                    _rpn = _real_dp.norm(dim=-1); _rrn = _real_dr.norm(dim=-1)
+                    _mask_p = _cpn > 1e-4; _mask_r = _crn > 1e-3
+                    def _cos(a, b, m):
+                        if int(m.sum()) == 0: return float("nan")
+                        return float(((a[m]*b[m]).sum(-1) / (a[m].norm(dim=-1)*b[m].norm(dim=-1)).clamp_min(1e-9)).mean())
+                    if int(self.progress_buf[0].item()) % 60 == 0 and self._ct_n > 0:
+                        print(f"[cmd-track] step {int(self.progress_buf[0].item())} "
+                              f"위치: 명령 {float(_cpn.mean())*1000:.2f}mm 실현 {float(_rpn.mean())*1000:.2f}mm "
+                              f"비율 {float((_rpn/_cpn.clamp_min(1e-9))[_mask_p].mean()) if int(_mask_p.sum())>0 else float('nan'):.2f} "
+                              f"방향cos {_cos(_real_dp,_cp,_mask_p):.2f} | "
+                              f"회전: 명령 {float(torch.rad2deg(_crn).mean()):.2f}도 실현 {float(torch.rad2deg(_rrn).mean()):.2f}도 "
+                              f"비율 {float((_rrn/_crn.clamp_min(1e-9))[_mask_r].mean()) if int(_mask_r.sum())>0 else float('nan'):.2f} "
+                              f"방향cos {_cos(_real_dr,_cr,_mask_r):.2f}", flush=True)
+                    self._ct_prev_wp = _wp.clone(); self._ct_prev_wq = _wq.clone()
+                    self._ct_prev_cmd = torch.cat([dpos, drot], dim=-1).clone()
+                    self._ct_n += 1
+                if self.cap_arm_ik_cmd_ema > 0.0:
+                    if self._ik_cmd_filt is None:
+                        self._ik_cmd_filt = torch.zeros(self.num_envs, 6, device=self.device)
+                    a = self.cap_arm_ik_cmd_ema
+                    self._ik_cmd_filt = (1 - a) * self._ik_cmd_filt + a * torch.cat([dpos, drot], dim=-1)
+                    self._ik_cmd_filt[_fresh] = 0.0
+                    dpos = self._ik_cmd_filt[:, :3]
+                    drot = self._ik_cmd_filt[:, 3:6]
+                self.cap_wrist_target_pos += dpos
+                _ang = torch.linalg.norm(drot, dim=-1).clamp_min(1e-9)
+                _dq4 = torch_jit_utils.quat_from_angle_axis(_ang, drot / _ang.unsqueeze(-1))
+                self.cap_wrist_target_quat = torch_jit_utils.quat_mul(_dq4, self.cap_wrist_target_quat)
+                self.cap_wrist_target_quat = self.cap_wrist_target_quat / torch.linalg.norm(
+                    self.cap_wrist_target_quat, dim=-1, keepdim=True).clamp_min(1e-9)
+                # 위치 리쉬 (err_max, hand-only 와 동일 기본 0.03m)
+                perr = self.cap_wrist_target_pos - _wp
+                pn = torch.linalg.norm(perr, dim=-1, keepdim=True)
+                over = (pn > self.cap_wrist_err_max).squeeze(-1)
+                if bool(over.any()):
+                    self.cap_wrist_target_pos[over] = (
+                        _wp[over] + perr[over] / pn[over] * self.cap_wrist_err_max
+                    )
+                    perr = self.cap_wrist_target_pos - _wp
+                # 회전 리쉬 (hand-only 는 토크 클램프가 그 역할 -- 여기선 각도로)
+                qerr = torch_jit_utils.quat_mul(
+                    self.cap_wrist_target_quat, torch_jit_utils.quat_conjugate(_wq)
+                )
+                rang, raxis = torch_jit_utils.quat_to_angle_axis(qerr)
+                _rmax = float(os.environ.get("CAP_ARM_IK_ROT_ERR_MAX", "0.15"))
+                _rover = rang.abs() > _rmax
+                if bool(_rover.any()):
+                    _rc = torch.clamp(rang[_rover], -_rmax, _rmax)
+                    _q4 = torch_jit_utils.quat_from_angle_axis(_rc, raxis[_rover])
+                    self.cap_wrist_target_quat[_rover] = torch_jit_utils.quat_mul(_q4, _wq[_rover])
+                    rang = torch.clamp(rang, -_rmax, _rmax)
+                rerr = raxis * rang.unsqueeze(-1)
+                if os.environ.get("CAP_ARM_IK_ERR_DEBUG", "") and int(self.progress_buf[0].item()) % 30 == 0:
+                    _pn_d = torch.linalg.norm(perr, dim=-1)
+                    _rn_d = rang.abs()
+                    _ag_d = float(torch.rad2deg(self.cap_grasp_screw.angle().to(self.device)).mean())
+                    print(f"[ik-err] step {int(self.progress_buf[0].item())} 풀림평균 {_ag_d:.0f}도 "
+                          f"pos오차 평균 {float(_pn_d.mean())*1000:.1f}/최대 {float(_pn_d.max())*1000:.1f}mm "
+                          f"rot오차 평균 {float(torch.rad2deg(_rn_d).mean()):.1f}/최대 {float(torch.rad2deg(_rn_d).max()):.1f}도",
+                          flush=True)
+                # 추종 속도 상한: 스텝당 이동을 액션 스케일로 캡. 없으면 리쉬
+                # 잔차(3cm/0.15rad)를 한 스텝에 소화하려 들어 손목 각속도가
+                # 5rad/s 대로 튄다 (hand-only 는 20N/1.5Nm 클램프가 이 역할).
+                _pn2 = torch.linalg.norm(perr, dim=-1, keepdim=True).clamp_min(1e-9)
+                perr = perr * (_pn2.clamp(max=self.cap_arm_ik_pursuit_dpos) / _pn2)
+                _rn2 = torch.linalg.norm(rerr, dim=-1, keepdim=True).clamp_min(1e-9)
+                rerr = rerr * (_rn2.clamp(max=self.cap_arm_ik_pursuit_drot) / _rn2)
+                # 목표 오차 -> DLS -> 관절 델타 (방향보존 스케일링)
+                _pw = self.cap_arm_ik_pos_weight
+                if _pw != 1.0:
+                    J = torch.cat([J[:, :3] * _pw, J[:, 3:]], dim=1)
+                    twist = torch.cat([perr * _pw, rerr], dim=-1).unsqueeze(-1)
+                else:
+                    twist = torch.cat([perr, rerr], dim=-1).unsqueeze(-1)   # (E,6,1)
+                JT = J.transpose(1, 2)
+                lam2 = self.cap_arm_ik_lambda ** 2
+                A = J @ JT + lam2 * torch.eye(6, device=self.device).unsqueeze(0)
+                dq = (JT @ torch.linalg.solve(A, twist)).squeeze(-1)    # (E,6)
+                dq = torch.nan_to_num(dq, nan=0.0)
+                _sc = (0.05 / dq.abs().max(dim=-1, keepdim=True).values.clamp_min(1e-9)).clamp(max=1.0)
+                dq = dq * _sc
+                if os.environ.get("CAP_ARM_IK_ACT_DEBUG", "") and int(self.progress_buf[0].item()) < 6:
+                    print(f"[ik-dq] step {int(self.progress_buf[0].item())} "
+                          f"dq {dq[0].cpu().numpy().round(4)} "
+                          f"tgt {self.prev_targets[0,:6].cpu().numpy().round(3)} "
+                          f"q {self._q[0,:6].cpu().numpy().round(3)}", flush=True)
+                _sv = self._delta_scale()[:6].clamp_min(1e-6)
+                dof_pos = dof_pos.clone()
+                dof_pos[:, :6] = (dq / _sv.unsqueeze(0)).clamp(-1, 1)
+            _cur = self.progress_buf
+            _ar = torch.arange(self.num_envs, device=self.device)
+            _tgt_pos = self.demo_data["wrist_pos"][_ar, _cur]           # 플래너 손목 위치
+            _tgt_aa = self.demo_data["wrist_rot"][_ar, _cur]            # 플래너 손목 회전(aa)
+            _cur_pos = self.states["base_state"][:, :3]
+            _cur_quat = self.states["base_state"][:, 3:7]
+            servo_pos_err = torch.clamp((_tgt_pos - _cur_pos) / self.wrist_servo_pos_scale, -1, 1)
+            _tgt_quat = aa_to_quat(_tgt_aa)[:, [1, 2, 3, 0]]
+            _rel = quat_mul(_tgt_quat, quat_conjugate(_cur_quat))
+            _rel = torch.nn.functional.normalize(_rel, dim=-1)
+            _rel = torch.nan_to_num(_rel, nan=0.0, posinf=0.0, neginf=0.0)
+            _rel[:, 3] = torch.clamp(_rel[:, 3], -1.0, 1.0)
+            _xyz = _rel[:, :3]
+            _sin = torch.norm(_xyz, dim=-1, keepdim=True)
+            _ang = 2.0 * torch.atan2(_sin, _rel[:, 3:4])
+            _axis = _xyz / _sin.clamp_min(1e-6)
+            _rotvec = torch.where(_sin > 1e-6, _axis * _ang, torch.zeros_like(_xyz))
+            servo_rot_err = torch.clamp(_rotvec / self.wrist_servo_rot_scale, -1, 1)
+            if self.cap_arm_mode:
+                # 손목은 팔 관절이 결정한다. 서보 오차를 0 으로 두면 아래
+                # 렌치 계산이 자동으로 0 -- base_link 에 힘이 가해지지 않는다.
+                servo_pos_err = torch.zeros_like(servo_pos_err)
+                servo_rot_err = torch.zeros_like(servo_rot_err)
+        elif self.single_policy:
+            base_action = actions
+            residual_action = torch.zeros_like(actions)
+            dof_pos = (
+                1.0 * base_action[:, root_control_dim : root_control_dim + self.num_dexhand_dofs]
+                + residual_action[:, 6 : 6 + self.num_dexhand_dofs]
+            )
+        else:
+            base_action = actions[:, :res_split_idx]  # ? in the range of [-1, 1]
+            residual_action = actions[:, res_split_idx:] * 2  # ? the delta action is theoritically in the range of [-2, 2]
+            dof_pos = (
+                1.0 * base_action[:, root_control_dim : root_control_dim + self.num_dexhand_dofs]
+                + residual_action[:, 6 : 6 + self.num_dexhand_dofs]
+            )
+        dof_pos = torch.clamp(dof_pos, -1, 1)
+
+        curr_act_moving_average = self.act_moving_average
+
+        if self.cap_action_delta:
+            # 변화량 모드: target = 전 스텝 실측 관절각 + action * scale.
+            # EMA 는 안 거친다 -- 델타에 이동평균을 걸면 "이만큼 움직여라" 가
+            # "예전 목표와 섞어라" 로 바뀌어 의미가 흐려진다. 스무딩은 델타
+            # 크기 제한(scale, 기본 0.05rad/step = 172도/s)이 대신한다.
+            # 실측 q 기준이라 접촉에 막힌 손가락의 목표가 q 에서 scale 이상
+            # 벌어질 수 없고, 위치 드라이브가 낼 수 있는 힘도 k*scale 로
+            # 유계다 -- 절대 방식처럼 목표를 반대편 끝에 두고 최대토크로
+            # 미는 일이 없다.
+            cur_q = self._q[:, : self.num_dexhand_dofs]
+            if self.cap_action_delta_base == "target":
+                # 실제 서보형: 목표는 명령의 적분이고 외력이 관절을 밀어도
+                # 제자리를 지킨다. 변위 x 강성이 곧 반력 (7.5Nm 클램프).
+                tgt = self.prev_targets + dof_pos * self._delta_scale()
+                tgt = torch.clamp(
+                    tgt,
+                    cur_q - self.cap_action_delta_lag,
+                    cur_q + self.cap_action_delta_lag,
+                )
+            else:
+                tgt = cur_q + dof_pos * self._delta_scale()
+            self.curr_targets = torch_jit_utils.tensor_clamp(
+                tgt,
+                self.dexhand_dof_lower_limits,
+                self.dexhand_dof_upper_limits,
+            )
+        else:
+            self.curr_targets = torch_jit_utils.scale(
+                dof_pos,  # ! actions must in [-1, 1]
+                self.dexhand_dof_lower_limits,
+                self.dexhand_dof_upper_limits,
+            )
+            self.curr_targets = (
+                curr_act_moving_average * self.curr_targets + (1.0 - curr_act_moving_average) * self.prev_targets
+            )
+            self.curr_targets = torch_jit_utils.tensor_clamp(
+                self.curr_targets,
+                self.dexhand_dof_lower_limits,
+                self.dexhand_dof_upper_limits,
+            )
+
+        if self.use_pid_control:
+            position_error = servo_pos_err if self.wrist_servo else base_action[:, 0:3]
+            self.pos_error_integral += position_error * self.dt
+            self.pos_error_integral = torch.clamp(self.pos_error_integral, -1, 1)
+            pos_derivative = (position_error - self.prev_pos_error) / self.dt
+            force = self.Kp_pos * position_error + self.Ki_pos * self.pos_error_integral + self.Kd_pos * pos_derivative
+            self.prev_pos_error = position_error
+
+            force = force + residual_action[:, 0:3] * self.dt * self.translation_scale * 500
+            self.apply_forces[:, self.dexhand_handles[self.dexhand.to_dex("wrist")[0]], :] = (
+                curr_act_moving_average * force
+                + (1.0 - curr_act_moving_average)
+                * self.apply_forces[:, self.dexhand_handles[self.dexhand.to_dex("wrist")[0]], :]
+            )
+
+            if self.wrist_servo:
+                rotation_error = servo_rot_err
+            else:
+                rotation_error = base_action[:, 3:root_control_dim]
+                rotation_error = rot6d_to_aa(rotation_error)
+            self.rot_error_integral += rotation_error * self.dt
+            self.rot_error_integral = torch.clamp(self.rot_error_integral, -1, 1)
+            rot_derivative = (rotation_error - self.prev_rot_error) / self.dt
+            torque = self.Kp_rot * rotation_error + self.Ki_rot * self.rot_error_integral + self.Kd_rot * rot_derivative
+            self.prev_rot_error = rotation_error
+
+            torque = torque + residual_action[:, 3:6] * self.dt * self.orientation_scale * 200
+            self.apply_torque[:, self.dexhand_handles[self.dexhand.to_dex("wrist")[0]], :] = (
+                curr_act_moving_average * torque
+                + (1.0 - curr_act_moving_average)
+                * self.apply_torque[:, self.dexhand_handles[self.dexhand.to_dex("wrist")[0]], :]
+            )
+
+        elif self.cap_wrist_delta:
+            # 목표를 옮기고, 목표를 향해 PD. base_action 위치 3 + 회전 3 을
+            # 스텝당 변화량으로 해석한다 (잔여 6 채널은 델타 모드에서 무시 --
+            # 힘 직결 채널을 남겨두면 그리로 다시 손목을 밀 수 있다).
+            # 물리가 터져 base_state 가 nan 이면 목표도 오염된다. 리셋 자세로
+            # 복구되는 base(_clamp_unscrew_wrist)에 목표를 다시 붙인다.
+            bad = ~torch.isfinite(self.cap_wrist_target_pos).all(dim=-1)
+            bad |= ~torch.isfinite(self._base_state[:, :3]).all(dim=-1)
+            if bool(bad.any()):
+                self.cap_wrist_target_pos[bad] = torch.nan_to_num(self._base_state[bad, :3])
+                self.cap_wrist_target_quat[bad] = torch.nan_to_num(self._base_state[bad, 3:7])
+                self.cap_wrist_target_quat[bad, 3] = torch.where(
+                    self.cap_wrist_target_quat[bad].norm(dim=-1) < 0.5,
+                    torch.ones_like(self.cap_wrist_target_quat[bad, 3]),
+                    self.cap_wrist_target_quat[bad, 3],
+                )
+            dpos = base_action[:, 0:3].clamp(-1, 1) * self.cap_wrist_delta_pos
+            drot = base_action[:, 3:6].clamp(-1, 1) * self.cap_wrist_delta_rot
+            if os.environ.get("CAP_ARM_CMD_TRACK", ""):
+                _wp = self._base_state[:, :3]; _wq = self._base_state[:, 3:7]
+                if not hasattr(self, "_ct_prev_wp"):
+                    self._ct_prev_wp = _wp.clone(); self._ct_prev_wq = _wq.clone()
+                    self._ct_prev_cmd = torch.zeros(self.num_envs, 6, device=self.device); self._ct_n = 0
+                _real_dp = _wp - self._ct_prev_wp
+                _qrel = torch_jit_utils.quat_mul(_wq, torch_jit_utils.quat_conjugate(self._ct_prev_wq))
+                _ra, _rx = torch_jit_utils.quat_to_angle_axis(_qrel)
+                _real_dr = _rx * _ra.unsqueeze(-1)
+                _c = self._ct_prev_cmd; _cp, _cr = _c[:, :3], _c[:, 3:]
+                _cpn = _cp.norm(dim=-1); _crn = _cr.norm(dim=-1)
+                _rpn = _real_dp.norm(dim=-1); _rrn = _real_dr.norm(dim=-1)
+                _mask_p = _cpn > 1e-4; _mask_r = _crn > 1e-3
+                def _cos(a, b, m):
+                    if int(m.sum()) == 0: return float("nan")
+                    return float(((a[m]*b[m]).sum(-1) / (a[m].norm(dim=-1)*b[m].norm(dim=-1)).clamp_min(1e-9)).mean())
+                if int(self.progress_buf[0].item()) % 60 == 0 and self._ct_n > 0:
+                    print(f"[cmd-track/hand] step {int(self.progress_buf[0].item())} "
+                          f"위치: 명령 {float(_cpn.mean())*1000:.2f}mm 실현 {float(_rpn.mean())*1000:.2f}mm "
+                          f"비율 {float((_rpn/_cpn.clamp_min(1e-9))[_mask_p].mean()) if int(_mask_p.sum())>0 else float('nan'):.2f} "
+                          f"방향cos {_cos(_real_dp,_cp,_mask_p):.2f} | "
+                          f"회전: 명령 {float(torch.rad2deg(_crn).mean()):.2f}도 실현 {float(torch.rad2deg(_rrn).mean()):.2f}도 "
+                          f"비율 {float((_rrn/_crn.clamp_min(1e-9))[_mask_r].mean()) if int(_mask_r.sum())>0 else float('nan'):.2f} "
+                          f"방향cos {_cos(_real_dr,_cr,_mask_r):.2f}", flush=True)
+                self._ct_prev_wp = _wp.clone(); self._ct_prev_wq = _wq.clone()
+                self._ct_prev_cmd = torch.cat([dpos, drot], dim=-1).clone(); self._ct_n += 1
+            self.cap_wrist_target_pos += dpos
+            ang = torch.linalg.norm(drot, dim=-1).clamp_min(1e-9)
+            dq = torch_jit_utils.quat_from_angle_axis(ang, drot / ang.unsqueeze(-1))
+            self.cap_wrist_target_quat = torch_jit_utils.quat_mul(dq, self.cap_wrist_target_quat)
+            self.cap_wrist_target_quat = self.cap_wrist_target_quat / torch.linalg.norm(
+                self.cap_wrist_target_quat, dim=-1, keepdim=True).clamp_min(1e-9)
+
+            # 목표가 현재에서 err_max 이상 벗어나지 못하게 끌어당긴다. 접촉에
+            # 막혀 손목이 못 따라가는 동안 목표만 멀리 가버리면(적분 폭주)
+            # 풀리는 순간 튄다.
+            perr = self.cap_wrist_target_pos - self._base_state[:, :3]
+            pn = torch.linalg.norm(perr, dim=-1, keepdim=True)
+            over = (pn > self.cap_wrist_err_max).squeeze(-1)
+            if bool(over.any()):
+                self.cap_wrist_target_pos[over] = (
+                    self._base_state[over, :3]
+                    + perr[over] / pn[over] * self.cap_wrist_err_max
+                )
+                perr = self.cap_wrist_target_pos - self._base_state[:, :3]
+
+            qerr = torch_jit_utils.quat_mul(
+                self.cap_wrist_target_quat,
+                torch_jit_utils.quat_conjugate(self._base_state[:, 3:7]),
+            )
+            rang, raxis = torch_jit_utils.quat_to_angle_axis(qerr)
+            rerr = raxis * rang.unsqueeze(-1)
+
+            force = (self.cap_wrist_kp_pos * perr
+                     - self.cap_wrist_kd_pos * self._base_state[:, 7:10])
+            torque = (self.cap_wrist_kp_rot * rerr
+                      - self.cap_wrist_kd_rot * self._base_state[:, 10:13])
+            fn = torch.linalg.norm(force, dim=-1, keepdim=True).clamp_min(1e-9)
+            force = force * (fn.clamp(max=self.cap_wrist_force_max) / fn)
+            tn = torch.linalg.norm(torque, dim=-1, keepdim=True).clamp_min(1e-9)
+            torque = torque * (tn.clamp(max=self.cap_wrist_torque_max) / tn)
+            # PD 는 자체가 매끄러우므로 EMA 없이 그대로 쓴다. else 분기의 기록
+            # 코드는 이 분기를 지나치므로 여기서 직접 쓴다.
+            wh_ = self.dexhand_handles[self.dexhand.to_dex("wrist")[0]]
+            self.apply_forces[:, wh_, :] = force
+            self.apply_torque[:, wh_, :] = torque
+        else:
+            _wctrl_pos = servo_pos_err if self.wrist_servo else base_action[:, 0:3]
+            _wctrl_rot = servo_rot_err if self.wrist_servo else base_action[:, 3:6]
+            force = 1.0 * (_wctrl_pos * self.dt * self.translation_scale * 500) + (
+                residual_action[:, 0:3] * self.dt * self.translation_scale * 500
+            )
+            torque = 1.0 * (_wctrl_rot * self.dt * self.orientation_scale * 200) + (
+                residual_action[:, 3:6] * self.dt * self.orientation_scale * 200
+            )
+
+            self.apply_forces[:, self.dexhand_handles[self.dexhand.to_dex("wrist")[0]], :] = (
+                curr_act_moving_average * force
+                + (1.0 - curr_act_moving_average)
+                * self.apply_forces[:, self.dexhand_handles[self.dexhand.to_dex("wrist")[0]], :]
+            )
+            self.apply_torque[:, self.dexhand_handles[self.dexhand.to_dex("wrist")[0]], :] = (
+                curr_act_moving_average * torque
+                + (1.0 - curr_act_moving_average)
+                * self.apply_torque[:, self.dexhand_handles[self.dexhand.to_dex("wrist")[0]], :]
+            )
+
+        if self.cap_grasp_mode and self.cap_grasp_lock_wrist:
+            wrist_handle = self.dexhand_handles[self.dexhand.to_dex("wrist")[0]]
+            self.apply_forces[:, wrist_handle, :] = 0.0
+            self.apply_torque[:, wrist_handle, :] = 0.0
+            self._lock_cap_grasp_wrist_state(push_to_sim=True)
+
+        # Not in tumbler mode: this schedules gravity on a free cap and then pins
+        # it, writing the manip_obj *root* state every step. The tumbler's root is
+        # its fixed body, so pushing that to the sim walked the whole tumbler
+        # upward -- visible in the viewer as the body slowly rising.
+        if self.cap_grasp_mode and not self.cap_grasp_pedestal and not self.cap_grasp_tumbler:
+            gravity_scale = self.cap_grasp_gravity_scale_fn(
+                self.running_progress_buf,
+                self.dt,
+                self.cap_grasp_cfg,
+            ).to(device=self.device, dtype=torch.float32)
+            self.apply_forces[:, self._manip_obj_rigid_body_handle, :] = 0.0
+            self.apply_torque[:, self._manip_obj_rigid_body_handle, :] = 0.0
+            self.apply_forces[:, self._manip_obj_rigid_body_handle, 2] = (
+                self.manip_obj_mass.to(self.device) * float(self.sim_params.gravity.z) * gravity_scale
+            )
+            self._lock_cap_grasp_cap_until_gravity(push_to_sim=True, apply_soft_force=True)
+
+        self.gym.apply_rigid_body_force_tensors(
+            self.sim,
+            gymtorch.unwrap_tensor(self.apply_forces),
+            gymtorch.unwrap_tensor(self.apply_torque),
+            gymapi.ENV_SPACE,
+        )
+
+        self.prev_targets[:] = self.curr_targets[:]
+        self._pos_control[:, : self.n_hand_dofs] = self.prev_targets[:]
+        if not self.cap_arm_mode:
+            self._clamp_unscrew_wrist()
+        if self.cap_grasp_screw is not None:
+            # Re-impose the thread: cap_lift tracks pitch/2pi * cumulative spin.
+            # Must run once per step -- it integrates the unwrapped angle.
+            self.cap_grasp_screw.apply(self._q, self._pos_control)
+            # Envs that just reached 200 deg get their drive zeroed, so the cap
+            # is loose on the free stroke and can actually be carried off.
+            self.cap_grasp_screw.release_bound(
+                self.gym, self.envs, self.cap_grasp_obj_actors, self._q
+            )
+
+        self.gym.set_dof_position_target_tensor(self.sim, gymtorch.unwrap_tensor(self._pos_control))
+
+        # 회전만 학습: 뚜껑 위치 고정 + 나사축 1-DOF 회전 구속을 시뮬레이션 직전 적용
+        self._apply_cap_constraint(push_to_sim=True)
+
+    def post_physics_step(self):
+
+        self._lock_cap_grasp_wrist_state(push_to_sim=True)
+        self._lock_cap_grasp_cap_until_gravity(push_to_sim=True, apply_soft_force=False)
+        self.compute_observations()
+        self.compute_reward(self.actions)
+
+        if self.cap_rot_only and self._cap_lock_pos is not None and int(os.environ.get("CAP_DEBUG", "0")):
+            dev = torch.norm(self._manip_obj_root_state[:, :3] - self._cap_lock_pos, dim=-1)
+            # 나사축 이탈각: 현재 원반 normal vs 나사축 n (0°이면 1-DOF 완벽 구속)
+            zc = torch_jit_utils.quat_rotate(self._manip_obj_root_state[:, 3:7], self._cap_local_z)
+            tilt = torch.acos(((zc * self._cap_screw_axis).sum(-1)).clamp(-1, 1)) * 180 / np.pi
+            # 풀림 방향 회전속도(rad/s): +면 풀림, -면 잠금 (damping 튜닝 참고)
+            _sa = self._cap_unscrew_axis if self._cap_unscrew_axis is not None else self._cap_screw_axis
+            spin = (self._manip_obj_root_state[:, 10:13] * _sa).sum(-1)
+            # 나사축(z) 방향 이동량(lift) + 이탈(released) env 수
+            lift = ((self._manip_obj_root_state[:, :3] - self._cap_lock_pos) * self._cap_screw_axis).sum(-1)
+            n_rel = int(self._cap_released.sum()) if self._cap_released is not None else 0
+            if int(self.progress_buf[0]) % 20 == 0:
+                print(f"[CAP_DEBUG] step={int(self.progress_buf[0])} z이동(lift) max={lift.max()*100:.2f}cm "
+                      f"| 이탈각(tilt)={tilt.max():.2f}°(0=완벽1DOF) | 풀림속도 mean={spin.mean():+.2f}rad/s "
+                      f"| 구속해제 env={n_rel}/{self.num_envs}", flush=True)
+
+        self.progress_buf += 1
+        self.running_progress_buf += 1
+        self.randomize_buf += 1
+
+    def create_camera(
+        self,
+        *,
+        env,
+        isaac_gym,
+    ):
+        """
+        Only create front camera for view purpose
+        """
+        if self._record:
+            camera_cfg = gymapi.CameraProperties()
+            camera_cfg.enable_tensors = True
+            camera_cfg.width = 1280
+            camera_cfg.height = 720
+            camera_cfg.horizontal_fov = 69.4
+
+            camera = isaac_gym.create_camera_sensor(env, camera_cfg)
+            cam_pos = gymapi.Vec3(0.80, -0.00, 0.7)
+            cam_target = gymapi.Vec3(-1, -0.00, 0.3)
+            isaac_gym.set_camera_location(camera, env, cam_pos, cam_target)
+        else:
+            camera_cfg = gymapi.CameraProperties()
+            camera_cfg.enable_tensors = True
+            camera_cfg.width = 320
+            camera_cfg.height = 180
+            camera_cfg.horizontal_fov = 69.4
+
+            camera = isaac_gym.create_camera_sensor(env, camera_cfg)
+            cam_pos = gymapi.Vec3(0.97, 0, 0.74)
+            cam_target = gymapi.Vec3(-1, 0, 0.5)
+            isaac_gym.set_camera_location(camera, env, cam_pos, cam_target)
+        return camera
+
+    def set_force_vis(self, env_ptr, part_k, has_force):
+        self.gym.set_rigid_body_color(
+            env_ptr,
+            0,
+            self.dexhand_handles[part_k],
+            gymapi.MESH_VISUAL,
+            (
+                gymapi.Vec3(
+                    1.0,
+                    0.6,
+                    0.6,
+                )
+                if has_force
+                else gymapi.Vec3(1.0, 1.0, 1.0)
+            ),
+        )
+
+
+@torch.jit.script
+def quat_to_angle_axis(q):
+    # type: (Tensor) -> Tuple[Tensor, Tensor]
+    # computes axis-angle representation from quaternion q
+    # q must be normalized
+    min_theta = 1e-5
+    qx, qy, qz, qw = 0, 1, 2, 3
+
+    sin_theta = torch.sqrt(1 - q[..., qw] * q[..., qw])
+    angle = 2 * torch.acos(q[..., qw])
+    angle = normalize_angle(angle)
+    sin_theta_expand = sin_theta.unsqueeze(-1)
+    axis = q[..., qx:qw] / sin_theta_expand
+
+    mask = torch.abs(sin_theta) > min_theta
+    default_axis = torch.zeros_like(axis)
+    default_axis[..., -1] = 1
+
+    angle = torch.where(mask, angle, torch.zeros_like(angle))
+    mask_expand = mask.unsqueeze(-1)
+    axis = torch.where(mask_expand, axis, default_axis)
+    return angle, axis
+
+
+@torch.jit.script
+def compute_imitation_reward(
+    reset_buf: Tensor,
+    progress_buf: Tensor,
+    running_progress_buf: Tensor,
+    actions: Tensor,
+    states: Dict[str, Tensor],
+    target_states: Dict[str, Tensor],
+    max_length: List[int],
+    scale_factor: float,
+    dexhand_weight_idx: Dict[str, List[int]],
+    obj_pos_weight: float,
+    obj_rot_weight: float,
+    unscrew_weight: float,
+    unscrew_rev_weight: float,
+    unscrew_ref: float,
+    contact_time_weight: float,
+    contact_time_ref: float,
+    disable_rot_term: bool,
+    disable_obj_pos_term: bool,
+    tracking_scale: float,
+) -> Tuple[Tensor, Tensor, Tensor, Tensor]:
+
+    # type: (Tensor, Tensor, Tensor, Tensor, Dict[str, Tensor], Dict[str, Tensor], Tensor, float, Dict[str, List[int]], float, float, float, float, float, float, float, bool, bool, float) -> Tuple[Tensor, Tensor, Tensor, Tensor, Dict[str, Tensor], Tensor]
+
+    # end effector pose reward
+    current_eef_pos = states["base_state"][:, :3]
+    current_eef_quat = states["base_state"][:, 3:7]
+
+    target_eef_pos = target_states["wrist_pos"]
+    target_eef_quat = target_states["wrist_quat"]
+    diff_eef_pos = target_eef_pos - current_eef_pos
+    diff_eef_pos_dist = torch.norm(diff_eef_pos, dim=-1)
+
+    current_eef_vel = states["base_state"][:, 7:10]
+    current_eef_ang_vel = states["base_state"][:, 10:13]
+    target_eef_vel = target_states["wrist_vel"]
+    target_eef_ang_vel = target_states["wrist_ang_vel"]
+
+    diff_eef_vel = target_eef_vel - current_eef_vel
+    diff_eef_ang_vel = target_eef_ang_vel - current_eef_ang_vel
+
+    joints_pos = states["joints_state"][:, 1:, :3]
+    target_joints_pos = target_states["joints_pos"]
+    diff_joints_pos = target_joints_pos - joints_pos
+    diff_joints_pos_dist = torch.norm(diff_joints_pos, dim=-1)
+
+    # ? assign different weights to different joints
+    # assert diff_joints_pos_dist.shape[1] == 17  # ignore the base joint
+    diff_thumb_tip_pos_dist = diff_joints_pos_dist[:, [k - 1 for k in dexhand_weight_idx["thumb_tip"]]].mean(dim=-1)
+    diff_index_tip_pos_dist = diff_joints_pos_dist[:, [k - 1 for k in dexhand_weight_idx["index_tip"]]].mean(dim=-1)
+    diff_middle_tip_pos_dist = diff_joints_pos_dist[:, [k - 1 for k in dexhand_weight_idx["middle_tip"]]].mean(dim=-1)
+    diff_ring_tip_pos_dist = diff_joints_pos_dist[:, [k - 1 for k in dexhand_weight_idx["ring_tip"]]].mean(dim=-1)
+    diff_pinky_tip_pos_dist = diff_joints_pos_dist[:, [k - 1 for k in dexhand_weight_idx["pinky_tip"]]].mean(dim=-1)
+    diff_level_1_pos_dist = diff_joints_pos_dist[:, [k - 1 for k in dexhand_weight_idx["level_1_joints"]]].mean(dim=-1)
+    diff_level_2_pos_dist = diff_joints_pos_dist[:, [k - 1 for k in dexhand_weight_idx["level_2_joints"]]].mean(dim=-1)
+
+    joints_vel = states["joints_state"][:, 1:, 7:10]
+    target_joints_vel = target_states["joints_vel"]
+    diff_joints_vel = target_joints_vel - joints_vel
+
+    reward_eef_pos = torch.exp(-40 * diff_eef_pos_dist)
+    reward_thumb_tip_pos = torch.exp(-100 * diff_thumb_tip_pos_dist)
+    reward_index_tip_pos = torch.exp(-90 * diff_index_tip_pos_dist)
+    reward_middle_tip_pos = torch.exp(-80 * diff_middle_tip_pos_dist)
+    reward_pinky_tip_pos = torch.exp(-60 * diff_pinky_tip_pos_dist)
+    reward_ring_tip_pos = torch.exp(-60 * diff_ring_tip_pos_dist)
+    reward_level_1_pos = torch.exp(-50 * diff_level_1_pos_dist)
+    reward_level_2_pos = torch.exp(-40 * diff_level_2_pos_dist)
+
+    reward_eef_vel = torch.exp(-1 * diff_eef_vel.abs().mean(dim=-1))
+    reward_eef_ang_vel = torch.exp(-1 * diff_eef_ang_vel.abs().mean(dim=-1))
+    reward_joints_vel = torch.exp(-1 * diff_joints_vel.abs().mean(dim=-1).mean(-1))
+    current_dof_vel = states["dq"]
+
+    diff_eef_rot = quat_mul(target_eef_quat, quat_conjugate(current_eef_quat))
+    diff_eef_rot_angle = quat_to_angle_axis(diff_eef_rot)[0]
+    reward_eef_rot = torch.exp(-1 * (diff_eef_rot_angle).abs())
+
+    # object pose reward
+    current_obj_pos = states["manip_obj_pos"]
+    current_obj_quat = states["manip_obj_quat"]
+
+    target_obj_pos = target_states["manip_obj_pos"]
+    target_obj_quat = target_states["manip_obj_quat"]
+    diff_obj_pos = target_obj_pos - current_obj_pos
+    diff_obj_pos_dist = torch.norm(diff_obj_pos, dim=-1)
+
+    reward_obj_pos = torch.exp(-80 * diff_obj_pos_dist)
+
+    diff_obj_rot = quat_mul(target_obj_quat, quat_conjugate(current_obj_quat))
+    diff_obj_rot_angle = quat_to_angle_axis(diff_obj_rot)[0]
+    reward_obj_rot = torch.exp(-3 * (diff_obj_rot_angle).abs())
+
+    current_obj_vel = states["manip_obj_vel"]
+    target_obj_vel = target_states["manip_obj_vel"]
+    diff_obj_vel = target_obj_vel - current_obj_vel
+    reward_obj_vel = torch.exp(-1 * diff_obj_vel.abs().mean(dim=-1))
+
+    current_obj_ang_vel = states["manip_obj_ang_vel"]
+    target_obj_ang_vel = target_states["manip_obj_ang_vel"]
+    diff_obj_ang_vel = target_obj_ang_vel - current_obj_ang_vel
+    reward_obj_ang_vel = torch.exp(-1 * diff_obj_ang_vel.abs().mean(dim=-1))
+
+    # 나사풀림 보상: 뚜껑 각속도를 풀림 방향축에 투영 → 그 방향으로 돌수록 +, 반대/정지=0.
+    # 데모 각도추종(obj_rot) 대신 "풀림 회전 자체"를 보상. unscrew_weight=0이면 무효(하위호환).
+    unscrew_axis = target_states["unscrew_axis"]
+    unscrew_rate = (current_obj_ang_vel * unscrew_axis).sum(-1)  # rad/s, +면 풀림/-면 잠금
+    _raw = unscrew_rate / unscrew_ref
+    reward_unscrew = torch.clamp(_raw, 0.0, 1.0)      # 풀림 진행 [0,1] → unscrew_weight로 보상
+    reward_lock = torch.clamp(-_raw, 0.0, 1.0)        # 역방향(잠금) [0,1] → unscrew_rev_weight로 페널티
+
+    # 지속 접촉 보상: 손끝별 연속 접촉 스텝수 / 기준 → [0,1] 포화, 손끝 평균 (접촉 길수록 큼)
+    # 게이팅: 풀림 방향으로 돌릴 때만 지급 (reward_unscrew로 스케일) → 정지/역회전으로 접촉만 챙기는 해킹 방지
+    reward_contact_time = torch.clamp(target_states["contact_duration"] / contact_time_ref, 0.0, 1.0).mean(-1)
+    reward_contact_time = reward_contact_time * reward_unscrew
+
+    reward_power = torch.exp(-10 * target_states["power"])
+    reward_wrist_power = torch.exp(-2 * target_states["wrist_power"])
+
+    finger_tip_force = target_states["tip_force"]
+    finger_tip_distance = target_states["tips_distance"]
+    contact_range = [0.02, 0.03]
+    finger_tip_weight = torch.clamp(
+        (contact_range[1] - finger_tip_distance) / (contact_range[1] - contact_range[0]), 0, 1
+    )
+    finger_tip_force_masked = finger_tip_force * finger_tip_weight[:, :, None]
+
+    reward_finger_tip_force = torch.exp(-1 * (1 / (torch.norm(finger_tip_force_masked, dim=-1).sum(-1) + 1e-5)))
+
+    error_buf = (
+        (torch.norm(current_eef_vel, dim=-1) > 100)
+        | (torch.norm(current_eef_ang_vel, dim=-1) > 200)
+        | (torch.norm(joints_vel, dim=-1).mean(-1) > 100)
+        | (torch.abs(current_dof_vel).mean(-1) > 200)
+        | (torch.norm(current_obj_vel, dim=-1) > 100)
+        | (torch.norm(current_obj_ang_vel, dim=-1) > 200)
+    )  # sanity check
+
+    failed_execute = (
+        (
+            (diff_obj_pos_dist > (1e9 if disable_obj_pos_term else 0.02 / 0.343 * scale_factor**3))  # 축이동(lift) 허용시 위치이탈 종료 비활성
+            # dg5fs: 손끝/관절 tracking 종료 제거 — 리타겟 포즈가 물체를 관통(도달불가)할 수 있어
+            # 억울한 종료 방지. 손 reward는 유지, 종료는 물체·속도·접촉만.
+            # | (diff_thumb_tip_pos_dist > 0.04 / 0.7 * scale_factor)
+            # | (diff_index_tip_pos_dist > 0.045 / 0.7 * scale_factor)
+            # | (diff_middle_tip_pos_dist > 0.05 / 0.7 * scale_factor)
+            # | (diff_pinky_tip_pos_dist > 0.06 / 0.7 * scale_factor)
+            # | (diff_ring_tip_pos_dist > 0.06 / 0.7 * scale_factor)
+            # | (diff_level_1_pos_dist > 0.07 / 0.7 * scale_factor)
+            # | (diff_level_2_pos_dist > 0.08 / 0.7 * scale_factor)
+            | (diff_obj_rot_angle.abs() / np.pi * 180 > (1e9 if disable_rot_term else 30 / 0.343 * scale_factor**3))  # 풀림-보상 모드는 회전추종 종료 비활성
+            | torch.any((finger_tip_distance < 0.005) & ~(target_states["tip_contact_state"].any(1)), dim=-1)
+        )
+        & (running_progress_buf >= 8)
+    ) | error_buf
+    # 궤적-추종 보상 (모두 현재↔데모 target 비교) — tracking_scale로 annealing (curriculum).
+    reward_tracking = (
+        0.1 * reward_eef_pos
+        + 0.6 * reward_eef_rot
+        + 0.9 * reward_thumb_tip_pos
+        + 0.8 * reward_index_tip_pos
+        + 0.75 * reward_middle_tip_pos
+        + 0.6 * reward_pinky_tip_pos
+        + 0.6 * reward_ring_tip_pos
+        + 0.5 * reward_level_1_pos
+        + 0.3 * reward_level_2_pos
+        + obj_pos_weight * reward_obj_pos
+        + obj_rot_weight * reward_obj_rot
+        + 0.1 * reward_eef_vel
+        + 0.05 * reward_eef_ang_vel
+        + 0.1 * reward_joints_vel
+        + 0.1 * reward_obj_vel
+        + 0.1 * reward_obj_ang_vel
+    )
+    # 궤적-무관 보상 (unscrew 방향, 접촉, 에너지) — annealing 안 함.
+    reward_traj_free = (
+        unscrew_weight * reward_unscrew
+        - unscrew_rev_weight * reward_lock
+        + contact_time_weight * reward_contact_time
+        + 1.0 * reward_finger_tip_force
+        + 0.5 * reward_power
+        + 0.5 * reward_wrist_power
+    )
+    reward_execute = tracking_scale * reward_tracking + reward_traj_free
+
+    succeeded = (
+        progress_buf + 1 + 3 >= max_length
+    ) & ~failed_execute  # reached the end of the trajectory, +3 for max future 3 steps
+    reset_buf = torch.where(
+        succeeded | failed_execute,
+        torch.ones_like(reset_buf),
+        reset_buf,
+    )
+    reward_dict = {
+        "reward_eef_pos": reward_eef_pos,
+        "reward_eef_rot": reward_eef_rot,
+        "reward_eef_vel": reward_eef_vel,
+        "reward_eef_ang_vel": reward_eef_ang_vel,
+        "reward_joints_vel": reward_joints_vel,
+        "reward_obj_pos": reward_obj_pos,
+        "reward_obj_rot": reward_obj_rot,
+        "reward_tracking_raw": reward_tracking,
+        "reward_tracking_scaled": tracking_scale * reward_tracking,
+        "reward_unscrew": reward_unscrew,
+        "reward_lock": reward_lock,
+        "reward_contact_time": reward_contact_time,
+        "reward_obj_vel": reward_obj_vel,
+        "reward_obj_ang_vel": reward_obj_ang_vel,
+        "reward_joints_pos": (
+            reward_thumb_tip_pos
+            + reward_index_tip_pos
+            + reward_middle_tip_pos
+            + reward_pinky_tip_pos
+            + reward_ring_tip_pos
+            + reward_level_1_pos
+            + reward_level_2_pos
+        ),
+        "reward_power": reward_power,
+        "reward_wrist_power": reward_wrist_power,
+        "reward_finger_tip_force": reward_finger_tip_force,
+    }
+
+    return reward_execute, reset_buf, succeeded, failed_execute, reward_dict, error_buf
+
+
+class DexHandManipLHEnv(DexHandManipRHEnv):
+    side = "left"
+
+    def __init__(
+        self,
+        cfg,
+        *,
+        rl_device=0,
+        sim_device=0,
+        graphics_device_id=0,
+        display=False,
+        record=False,
+        headless=True,
+    ):
+        self.dexhand = DexHandFactory.create_hand(cfg["env"]["dexhand"], "left")
+        super().__init__(
+            cfg,
+            rl_device=rl_device,
+            sim_device=sim_device,
+            graphics_device_id=graphics_device_id,
+            display=display,
+            record=record,
+            headless=headless,
+        )
