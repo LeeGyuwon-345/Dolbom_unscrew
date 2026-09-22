@@ -1,5 +1,4 @@
 import math
-import os
 import torch
 import torch.nn as nn
 from hydra.utils import instantiate
@@ -126,22 +125,7 @@ class DictObsNetwork(A2CBuilder.Network):
         dones = obs_dict.get("dones", None)
         bptt_len = obs_dict.get("bptt_len", 0)
 
-        # --- 비대칭 AC (CAP_ACTOR_PRIV_KEEP, 기본 0=off) ---------------------
-        # privileged 앞 K 차원만 actor 에 남기고 나머지는 0 으로 가린다.
-        # critic 은 실측 그대로 본다 (교과서적 asymmetric actor-critic).
-        # 근거: 이 네트워크는 separate:False 라 actor·critic 이 같은 dict 입력을
-        # 공유한다 -> env 에서 지우면 critic 까지 눈이 먼다(A86 실증: 성공률 0).
-        # K=22 면 actor 는 관절속도(dq)만 보고 캡 위치/자세/속도/접촉력벡터/COM/무게는 0.
-        _K = int(os.environ.get("CAP_ACTOR_PRIV_KEEP", "0"))
-        _obs_actor = obs
-        if _K > 0 and isinstance(obs, dict) and "privileged" in obs:
-            _pv = obs["privileged"]
-            _masked = torch.zeros_like(_pv)
-            _masked[..., :_K] = _pv[..., :_K]
-            _obs_actor = {k: (v if k != "privileged" else _masked) for k, v in obs.items()}
-
-        obs_critic = self.dict_feature_encoder(obs)
-        obs = self.dict_feature_encoder(_obs_actor) if _K > 0 else obs_critic
+        obs = self.dict_feature_encoder(obs)
 
         if self.separate:
             a_out = c_out = obs
@@ -265,13 +249,7 @@ class DictObsNetwork(A2CBuilder.Network):
                     states = (states,)
             else:
                 out = self.actor_mlp(out)
-            if _K > 0:
-                _c = self.actor_cnn(obs_critic)
-                _c = _c.flatten(1)
-                _c = self.actor_mlp(_c)
-                value = self.value_act(self.value(_c))   # critic 은 캡 실측 포함
-            else:
-                value = self.value_act(self.value(out))
+            value = self.value_act(self.value(out))
 
             if self.central_value:
                 return value, states

@@ -449,11 +449,6 @@ class DexHandManipRHEnv(VecTask):
         # Read here, not inside the curriculum branch: compute_observations uses
         # it on every tumbler path, curriculum or not.
         self.cap_hide_angle = bool(int(os.environ.get("CAP_HIDE_ANGLE", "0")))
-        # J6 전진 누적각 관측 (기본 0=off). 값은 도 단위 누적을 이 값으로 나눠
-        # 대략 0~2 범위로 정규화한다 (180 이면 180도 전진 = 1.0).
-        self._j6_int_scale = float(os.environ.get("CAP_OBS_J6_INT", "0"))
-        self._j6_fwd_accum = None
-        self._j6_prev = None
         # 캡의 z(상승) 속도를 privileged 에서 가린다. 위치·수평속도는 유지.
         self.cap_hide_rise = bool(int(os.environ.get("CAP_HIDE_RISE", "0")))
         # 성공해도 에피소드를 끝내지 않는다 (tools2). 수준 기반 보상에서 성공
@@ -544,32 +539,9 @@ class DexHandManipRHEnv(VecTask):
         # 11 = 10 + 해제 여부. released 는 HIDE_ANGLE 과 무관하게 원값이 들어간다
         # -- 각도(어디까지 왔나)는 숨기되 "나사가 풀렸다" 는 이벤트는 정책이
         # 알아야 잡고 들어올리는 전환을 배울 수 있다.
-        # 12 = 11 + J6 전진누적(CAP_OBS_J6_INT>0 일 때). 캡 상태가 아니라 로봇
-        # 엔코더 적분이라 실기 재현 가능. 재파지로 손목이 되감기므로 현재 J6
-        # 값만으로는 진행률을 알 수 없다는 실측(J6 +12°에 캡 166°, +16°에 121°)
-        # 에 대한 처방. 캡 회전과 상관 r=+0.75.
-        if self.CAP_PHASE_DIM not in (0, 6, 10, 11, 12, 13, 14, 15):
-            raise ValueError(f"CAP_GRASP_PHASE_DIM must be 0, 6, 10, 11, 12, 13, 14 or 15, got {self.CAP_PHASE_DIM}")
-        if self.CAP_PHASE_DIM == 12 and (
-            float(os.environ.get("CAP_OBS_J6_INT", "0")) <= 0
-            and int(os.environ.get("CAP_OBS_ANGLE", "0")) == 0
-        ):
-            raise ValueError(
-                "CAP_GRASP_PHASE_DIM=12 은 CAP_OBS_J6_INT>0 또는 CAP_OBS_ANGLE=1 과 함께 써야 한다"
-            )
+        if self.CAP_PHASE_DIM not in (0, 6, 10, 11, 13, 14, 15):
+            raise ValueError(f"CAP_GRASP_PHASE_DIM must be 0, 6, 10, 11, 13, 14 or 15, got {self.CAP_PHASE_DIM}")
         TARGET_OBS_DIM += self.CAP_PHASE_DIM
-        # CAP_OBS_COMPACT (기본 0=off): 배포 빌드용 -- 값이 상수인 관측 채널을
-        # 차원에서 아예 제거한다. 정규화 후 상수는 항상 0 이라 정보 기여가 없고,
-        # 실기에서 165 개 상수를 정확히 재현해야 하는 부담(정규화 배율 ~316배)이
-        # 사라진다. 제거 대상(총 165):
-        #   wrist_vel3, wrist_ang_vel3, wrist_quat4        (손목 블록 10)
-        #   물체 목표 블록 23 전부 (delta_obj_pos/vel/quat/angvel 계열)
-        #   bps 128, cap_phase 내 rel_quat 4
-        # 남기는 것: delta_wrist_pos3/vel3/quat4/angvel3(13), obj_to_joints 21,
-        #   cap_phase 8(frac,sin,cos,released,j6int,rel_pos3), FSR 24
-        self.cap_obs_compact = bool(int(os.environ.get("CAP_OBS_COMPACT", "0")))
-        if self.cap_obs_compact:
-            TARGET_OBS_DIM -= (10 + 23 + 128 + 4)
         # CAP_OBS_TIP_FORCE6: fingertip_v2 실리콘 팁의 팜쪽 3면×상하 2분할
         # = 손가락당 6개 FSR 패드를 존별 채널로 관측 (4지 × 6 = 24dim).
         # 차원은 ObjDexUnscrewPPO.yaml target extractor 가 같은 변수를 읽어
@@ -823,12 +795,6 @@ class DexHandManipRHEnv(VecTask):
             # 고마찰 수렴본에서 하강해야 해제-hold 습관이 유지된 채 적응한다.
             self.cap_fric_curriculum = bool(int(os.environ.get("CAP_FRICTION_CURRICULUM", "0")))
             self.cap_fric_now = float(os.environ.get("CAP_FRICTION_CURR_START", "5.0"))
-            # CAP_FRIC_STAMP_INIT (기본 0=off): 생성 직후 유효마찰을 cap_fric_now 로
-            # 즉시 스탬프한다. 기본 동작은 "커리큘럼이 전진할 때만" 스탬프라
-            # 프로세스 시작 시 실제 마찰 = HAND/OBJ_FRICTION 이고 비팁 shape 도
-            # 아직 0 이 아니다 -> PLAY·동결평가가 학습 후기 조건을 재현하지 못했다
-            # (2026-08-31 감사 훅으로 발견). 평가용으로 켜서 조건을 맞춘다.
-            self._fric_stamp_init = bool(int(os.environ.get("CAP_FRIC_STAMP_INIT", "0")))
             self.cap_fric_curr_end = float(os.environ.get("CAP_FRICTION_CURR_END", "1.5"))
             self.cap_fric_curr_step = float(os.environ.get("CAP_FRICTION_CURR_STEP", "0.5"))
             if self.cap_fric_curriculum:
@@ -868,8 +834,6 @@ class DexHandManipRHEnv(VecTask):
                     float(v) for v in os.environ.get("CAP_GRIP_FLOOR", "").split(",") if v.strip()
                 ),
                 grip_floor_ramp=float(os.environ.get("CAP_GRIP_FLOOR_RAMP", "4.0")),
-                # CAP_GRIP_MEAN4=1: grip 평균을 실제 4지로만 (5번째 약지 중복 슬롯 제외).
-                grip_mean4=bool(int(os.environ.get("CAP_GRIP_MEAN4", "0"))),
                 closure_err_max=float(os.environ.get("CAP_CLOSURE_ERR_MAX", "0.75")),
                 unscrew_weight=float(os.environ.get("CAP_UNSCREW_W", "10.0")),
                 hold_weight=float(os.environ.get("CAP_HOLD_W", "4.0")),
@@ -2424,14 +2388,6 @@ class DexHandManipRHEnv(VecTask):
         self.demo_data["wrist_rot"] = wrist_aa[:, None, :].repeat(1, T, 1)
         self.demo_data["wrist_velocity"] = zeros_3.clone()
         self.demo_data["wrist_angular_velocity"] = zeros_3.clone()
-        if os.environ.get("CAP_DEMO_WRIST_PRINT", "0") == "1":
-            # 배포 상수(wrist_pos_ref / wrist_quat_ref) 추출용. 기본 off.
-            _wp = self.demo_data["wrist_pos"][0, 0]
-            _wq = aa_to_quat(self.demo_data["wrist_rot"][0, 0:1])[:, [1, 2, 3, 0]][0]
-            print("[demo-wrist] wrist_pos_ref_world = ("
-                  + ", ".join(f"{float(v):.5f}" for v in _wp) + ")")
-            print("[demo-wrist] wrist_quat_ref_xyzw = ("
-                  + ", ".join(f"{float(v):.6f}" for v in _wq) + ")")
         self.demo_data["opt_wrist_pos"] = self.demo_data["wrist_pos"].clone()  # lift included
         self.demo_data["opt_wrist_rot"] = self.demo_data["wrist_rot"].clone()
         self.demo_data["opt_wrist_velocity"] = zeros_3.clone()
@@ -3452,15 +3408,6 @@ class DexHandManipRHEnv(VecTask):
         ).to(_ftot.dtype)
         _w = torch.exp(-(_d / 0.003).pow(2)) * _gate
         _w = _w / _w.sum(-1, keepdim=True).clamp_min(1e-6)
-        if os.environ.get("CAP_FSR_GEO_DEBUG", "0") == "1":
-            # 현재 캡 기준 손가락별 최소 반경갭[mm]/존높이[mm]/게이트열림수. 기본 off.
-            _dm = _d[0].min(dim=-1).values * 1000.0
-            _zm = _zrel[0].mean(dim=-1) * 1000.0
-            _gs = _gate[0].sum(dim=-1)
-            print("[fsr-geo] " + " ".join(
-                f"{n}:갭{float(_dm[i]):+.1f}/z{float(_zm[i]):+.0f}/g{int(_gs[i])}"
-                for i, n in enumerate(("엄지", "검지", "중지", "약지"))
-            ) + f"  캡z={float(self._cap_src[0, 2]) * 1000:.0f}mm", flush=True)
         return _ftot[..., None] * _w
 
     def _compute_cap_grasp_reward(self, actions):
@@ -3542,20 +3489,6 @@ class DexHandManipRHEnv(VecTask):
                 _prev_for_pay = torch.minimum(self.cap_unscrew_hwm, angle)
             else:
                 _prev_for_pay = self.cap_unscrew_prev_angle
-            # 팜다운 벌점 sr 램프 (CAP_PALM_DOWN_SR_RAMP, 기본 0=off):
-            # 에너지 항과 같은 구조 — 성공률 EMA 가 기준에 이르기 전에는 벌점을
-            # 줄여 형성(부트스트랩)을 보호한다. A83 실증: 램프 없이 팜 벌점을
-            # 켜면 실질 ep500 에 rew +300/sr 0 (계보 +1571/sr 0.008 대비 지연).
-            if getattr(self, "_palm_sr_ref", None) is None:
-                self._palm_sr_ref = float(os.environ.get("CAP_PALM_DOWN_SR_RAMP", "0"))
-                self._palm_w_base = float(getattr(self.cap_unscrew_cfg, "palm_down_penalty_weight", 0.0))
-            if self._palm_sr_ref > 0 and self._palm_w_base > 0:
-                _sr_ema = float(getattr(self, "_energy_sr_ema", 0.0))
-                object.__setattr__(
-                    self.cap_unscrew_cfg,
-                    "palm_down_penalty_weight",
-                    self._palm_w_base * min(1.0, _sr_ema / self._palm_sr_ref),
-                )  # cfg 는 frozen dataclass -- 직접 대입 불가
             reward, success, self.cap_grasp_hold_timer, terms = self.cap_unscrew_reward_fn(
                 **extra,
                 unscrew_angle=angle,
@@ -3748,108 +3681,15 @@ class DexHandManipRHEnv(VecTask):
                 _dphi2 = torch.atan2(torch.sin(_dphi2), torch.cos(_dphi2))  # 감김 처리
                 _s2 = torch.sqrt((_dphi2 * 0.044).pow(2) + (_rz2 - self.cap_slip2_anchor[..., 1]).pow(2))
                 _pf2 = ((_s2 - self.cap_slip2_dead) / max(self.cap_slip2_ref, 1e-6)).clamp(0.0, 1.0)
-                # CAP_SLIP2_BACK_DEAD_MM (기본 -1 = off): 역방향(캡 회전 반대쪽으로
-                # 손끝이 밀리는) 슬립에만 좁은 불감대를 따로 적용한다. 기존 대칭
-                # 불감대(8mm≈10.4°)는 역슬립을 사실상 봐줘서, 엄지가 캡에 붙은 채
-                # -6~-16° 뒤로 밀려도 무과금이었다 (A98 ep300 실측).
-                # 순방향(재파지용 재배치)은 기존 불감대를 그대로 두고 역방향만 조인다.
-                # 부호: 풀림이 +각도이므로 캡프레임 방위 편차 _dphi2 < 0 이 역슬립.
-                if not hasattr(self, "_slip2_back_dead"):
-                    _v = float(os.environ.get("CAP_SLIP2_BACK_DEAD_MM", "-1"))
-                    self._slip2_back_dead = (_v / 1000.0) if _v >= 0 else None
-                    if self._slip2_back_dead is not None:
-                        print(f"[slip2-back] 역방향 전용 불감대 {_v:.1f}mm "
-                              f"(순방향 {self.cap_slip2_dead*1000:.0f}mm 유지)", flush=True)
-                if self._slip2_back_dead is not None:
-                    _back = (-_dphi2 * 0.044).clamp_min(0.0)   # 역방향 호길이 [m]
-                    _pfb = ((_back - self._slip2_back_dead) / max(self.cap_slip2_ref, 1e-6)).clamp(0.0, 1.0)
-                    # CAP_SLIP2_BACK_SR_RAMP (기본 0=off): 성공률 EMA 가 기준에
-                    # 이르기 전에는 역슬립 과금을 비례 축소한다. A67 교훈 —
-                    # "접촉 중에만 발생하는 과금"은 형성기에 손가락을 떼는 회피를
-                    # 부른다(z-dead 8mm 에서 검지 이탈로 기각). 에너지·팜다운과
-                    # 동일한 램프 구조로 형성기를 보호한다.
-                    if not hasattr(self, "_slip2_back_sr_ref"):
-                        self._slip2_back_sr_ref = float(
-                            os.environ.get("CAP_SLIP2_BACK_SR_RAMP", "0")
-                        )
-                        if self._slip2_back_sr_ref > 0:
-                            print(f"[slip2-back] sr 램프 {self._slip2_back_sr_ref:.2f} "
-                                  f"(성공률 EMA 도달 전 과금 축소)", flush=True)
-                    if self._slip2_back_sr_ref > 0:
-                        _sre = float(getattr(self, "_energy_sr_ema", 0.0))
-                        _pfb = _pfb * min(1.0, _sre / self._slip2_back_sr_ref)
-                    _pf2 = torch.maximum(_pf2, _pfb)
                 if self.cap_slip2_z_dead > 0:
                     # z축 별도 dead: 총량 dead 아래의 수직 편차도 과금 (max 결합
                     # — 켜기 전 대비 벌점은 단조 증가만, ref·w·kc 공유)
                     _zdev2 = (_rz2 - self.cap_slip2_anchor[..., 1]).abs()
                     _pfz2 = ((_zdev2 - self.cap_slip2_z_dead) / max(self.cap_slip2_ref, 1e-6)).clamp(0.0, 1.0)
-                    # CAP_SLIP2_Z_SR_RAMP (기본 0=off): 성공률 EMA 가 기준에 이르기 전에는
-                    # z 과금을 비례 축소한다. 역방향(BACK_SR_RAMP)과 같은 구조.
-                    # 근거: B09 는 이 램프 없이 z_dead=3mm 를 걸었다가 **형성 39연속 실패**했다
-                    # (ep400 판정 rew 평균 -678, 합격 0회). 파지를 만들려면 손끝이 캡 위를
-                    # 더듬어야 하는데 수직 편차 3mm 는 곧바로 넘으므로 "닿는 순간 벌점"이 되고,
-                    # 정책은 손을 떼는 쪽으로 굳는다(A67 교훈). kc(0.4->1)는 시간 기반이라
-                    # 형성이 안 되고 있어도 계속 올라가 보호가 안 된다.
-                    if not hasattr(self, "_slip2_z_sr_ref"):
-                        self._slip2_z_sr_ref = float(os.environ.get("CAP_SLIP2_Z_SR_RAMP", "0"))
-                        if self._slip2_z_sr_ref > 0:
-                            print(f"[slip2] z 과금 sr 램프 {self._slip2_z_sr_ref:.2f} "
-                                  f"(성공률 EMA 도달 전 축소)", flush=True)
-                    if self._slip2_z_sr_ref > 0:
-                        _pfz2 = _pfz2 * min(1.0, float(getattr(self, "_energy_sr_ema", 0.0))
-                                            / self._slip2_z_sr_ref)
                     _pf2 = torch.maximum(_pf2, _pfz2)
-                # CAP_SLIP2_DIR_W="순방향W,역방향W" (기본 빈값 = off, 기존 경로 그대로):
-                # 방향별로 가중치를 따로 준다. 역슬립(팁이 캡보다 뒤처짐)을 줄이는 길은
-                # 손목을 굴려 손 전체가 캡과 함께 도는 것뿐이다(손가락 가동범위로는
-                # 캡을 못 따라간다). 그래서 역방향을 무겁게 하면 J롤 쪽으로 기울고,
-                # 순방향(팁이 캡보다 앞서 미끄러짐 = 재배치)은 가볍게 둬 탐색을 막지 않는다.
-                # 켜면 벌점 = kc·(Wf·mean(순방향+z 성분) + Wb·mean(역방향 성분)).
-                if not hasattr(self, "_slip2_dir_w"):
-                    _dw = os.environ.get("CAP_SLIP2_DIR_W", "").strip()
-                    if _dw:
-                        _v = [float(x) for x in _dw.split(",")]
-                        assert len(_v) == 2, "CAP_SLIP2_DIR_W 는 '순방향W,역방향W' 두 값"
-                        self._slip2_dir_w = tuple(_v)
-                        print(f"[slip2] 방향별 가중치 순방향 {_v[0]:.1f} / 역방향 {_v[1]:.1f} "
-                              f"(공통 W={self.cap_slip2_w:.1f} 대신 사용)", flush=True)
-                    else:
-                        self._slip2_dir_w = None
-                if self._slip2_dir_w is not None:
-                    _fwd = (_dphi2 * 0.044).clamp_min(0.0)
-                    _zdv = (_rz2 - self.cap_slip2_anchor[..., 1]).abs()
-                    _pf_f = ((torch.sqrt(_fwd.pow(2) + _zdv.pow(2)) - self.cap_slip2_dead)
-                             / max(self.cap_slip2_ref, 1e-6)).clamp(0.0, 1.0)
-                    _bdead = self._slip2_back_dead if self._slip2_back_dead is not None else self.cap_slip2_dead
-                    _pf_b = (((-_dphi2 * 0.044).clamp_min(0.0) - _bdead)
-                             / max(self.cap_slip2_ref, 1e-6)).clamp(0.0, 1.0)
-                    if self._slip2_back_sr_ref > 0:
-                        _pf_b = _pf_b * min(1.0, float(getattr(self, "_energy_sr_ema", 0.0)) / self._slip2_back_sr_ref)
-                    self._slip2_pf_fb = (_pf_f, _pf_b)      # 아래에서 _sp2 를 덮어쓴다
                 _pf2 = _pf2 * _con2.to(reward.dtype)
-                # CAP_SLIP2_FORCE_REF (기본 0 = off): 손가락별 슬립 과금을 그 손가락의
-                # 접촉력에 비례시킨다. 탐지 문턱(CAP_SLIP2_CONTACT_N)은 그대로 두므로
-                # 가벼운 접촉의 역슬립도 계속 잡히되, 만점 과금은 REF N 이상에서만 난다.
-                # 이유: 과금은 0.3N 부터 시작하는데 grip 크레딧은 floor(4N) 위에서만
-                # 나와서, 그 사이가 "보상 0 · 벌점만" 구간이 된다. 정책은 검지·약지를
-                # 6~7mm 띄우는 쪽을 택했다 (B02 ep5400 실측 압착률 3%/7%).
-                if not hasattr(self, "_slip2_force_ref"):
-                    self._slip2_force_ref = float(os.environ.get("CAP_SLIP2_FORCE_REF", "0"))
-                    if self._slip2_force_ref > 0:
-                        print(f"[slip2] 접촉력 비례 과금 ref={self._slip2_force_ref:.1f}N "
-                              f"(탐지 문턱 {self.cap_slip2_contact_n:.2f}N 유지)", flush=True)
-                if self._slip2_force_ref > 0:
-                    _fw2 = (torch.linalg.norm(_tf2, dim=-1) / self._slip2_force_ref).clamp(0.0, 1.0)
-                    _pf2 = _pf2 * _fw2
                 _n2 = _con2.sum(dim=1).clamp_min(1).to(reward.dtype)
                 _sp2 = self.cap_slip2_w * self.cap_kc * (_pf2.sum(dim=1) / _n2)
-                if self._slip2_dir_w is not None:
-                    # 방향별 가중치: 기본 벌점을 대체한다(공통 W 미사용).
-                    _pf_f, _pf_b = self._slip2_pf_fb
-                    _m = _con2.to(reward.dtype)
-                    _sp2 = self.cap_kc * (self._slip2_dir_w[0] * (_pf_f * _m).sum(dim=1) / _n2
-                                          + self._slip2_dir_w[1] * (_pf_b * _m).sum(dim=1) / _n2)
                 reward = reward - _sp2
                 self.cap_slip2_active = _con2                              # 끊기면 앵커 해제
                 terms["slip2_penalty"] = _sp2
@@ -3857,23 +3697,16 @@ class DexHandManipRHEnv(VecTask):
                 _s2dbg = int(os.environ.get("CAP_SLIP2_DEBUG", "0"))
                 if _s2dbg > 0:
                     if not hasattr(self, "_slip2_dbg"):
-                        self._slip2_dbg = {"n": 0, "s": 0.0, "p": 0.0, "c": 0.0, "f": 0.0, "b": 0.0, "z": 0.0}
+                        self._slip2_dbg = {"n": 0, "s": 0.0, "p": 0.0, "c": 0.0}
                     _a2 = self._slip2_dbg
                     _a2["n"] += 1; _a2["s"] += float(terms["slip2_mm"].mean())
                     _a2["p"] += float(_sp2.mean())
                     _a2["c"] += float(_con2.sum(dim=1).to(reward.dtype).mean())
-                    # 방향 분해: 순방향(_dphi2>0 = 팁이 캡보다 앞서 감 = 비비기) / 역방향(뒤처짐)
-                    _m2 = _con2.to(reward.dtype); _nn = _m2.sum().clamp_min(1.0)
-                    _a2["f"] = _a2.get("f", 0.0) + float(((_dphi2 * 0.044).clamp_min(0.0) * _m2).sum() / _nn) * 1000.0
-                    _a2["b"] = _a2.get("b", 0.0) + float(((-_dphi2 * 0.044).clamp_min(0.0) * _m2).sum() / _nn) * 1000.0
-                    _a2["z"] = _a2.get("z", 0.0) + float(((_rz2 - self.cap_slip2_anchor[..., 1]).abs() * _m2).sum() / _nn) * 1000.0
                     if _a2["n"] >= _s2dbg:
-                        print(f"[slip2] {_a2['n']}스텝 평균  순방향 {_a2.get('f',0)/_a2['n']:.1f}mm  "
-                              f"역방향 {_a2.get('b',0)/_a2['n']:.1f}mm  z {_a2.get('z',0)/_a2['n']:.1f}mm  "
-                              f"편차 {_a2['s']/_a2['n']:.1f}mm  "
+                        print(f"[slip2] {_a2['n']}스텝 평균  편차 {_a2['s']/_a2['n']:.1f}mm  "
                               f"벌점 {_a2['p']/_a2['n']:.3f}/step  접촉팁 {_a2['c']/_a2['n']:.2f}개  "
                               f"kc={self.cap_kc:.3f}", flush=True)
-                        self._slip2_dbg = {"n": 0, "s": 0.0, "p": 0.0, "c": 0.0, "f": 0.0, "b": 0.0, "z": 0.0}
+                        self._slip2_dbg = {"n": 0, "s": 0.0, "p": 0.0, "c": 0.0}
             self.cap_unscrew_prev_angle = angle.clone()
             self.cap_unscrew_hwm = torch.maximum(self.cap_unscrew_hwm, angle)
             self.cap_grasp_stable_timer = terms["grasp_timer"]
@@ -4399,14 +4232,6 @@ class DexHandManipRHEnv(VecTask):
 
     def compute_observations(self):
         self._refresh()
-        if self._j6_int_scale > 0:
-            _j6 = torch.rad2deg(self._q[:, 5])          # DOF 5 = wrist3 (J6)
-            if self._j6_fwd_accum is None or self._j6_fwd_accum.shape[0] != _j6.shape[0]:
-                self._j6_fwd_accum = torch.zeros_like(_j6)
-                self._j6_prev = _j6.clone()
-            _d = _j6 - self._j6_prev
-            self._j6_fwd_accum += _d.clamp_min(0.0)      # 전진분만 누적(되감기 무시)
-            self._j6_prev = _j6.clone()
         # obs_keys: q, cos_q, sin_q, base_state
         obs_values = []
         _hand_obs = self.cap_arm_hand_obs
@@ -4414,9 +4239,8 @@ class DexHandManipRHEnv(VecTask):
             if ob == "base_state":
                 _bs = self._wrist_state_arm() if (_hand_obs or self.cap_arm_mode) else self.states[ob]
                 obs_values.append(
-                    _bs[:, 3:] if self.cap_obs_compact
-                    else torch.cat([torch.zeros_like(_bs[:, :3]), _bs[:, 3:]], dim=-1)
-                )  # ! ignore base position (compact: 0 인 3채널 제거)
+                    torch.cat([torch.zeros_like(_bs[:, :3]), _bs[:, 3:]], dim=-1)
+                )  # ! ignore base position
             elif _hand_obs and ob in ("q", "cos_q", "sin_q"):
                 obs_values.append(self.states[ob][:, 6:])
             else:
@@ -4443,26 +4267,13 @@ class DexHandManipRHEnv(VecTask):
         if _odump and int(self.progress_buf[0].item()) == 0 and not getattr(self, "_obs_dumped", False):
             self._obs_dump_pending = _odump  # target 조립 후 저장
         # privileged_obs_keys: dq, manip_obj_pos, manip_obj_quat, manip_obj_vel, manip_obj_ang_vel
-        # CAP_PRIV_ZERO (기본 0=off): privileged 블록을 캡 상태 없이 조립한다.
-        # 네트워크가 separate:False 라 actor 도 privileged 를 입력으로 받으므로,
-        # 실기(비전 없음) 배포 가능성 검증용. 1=캡 관련 채널만 상수/0,
-        # 2=privileged 전체 0.
-        _priv_zero = int(os.environ.get("CAP_PRIV_ZERO", "0"))
         if len(self._privileged_obs_keys) > 0:
             pri_obs_values = []
             _pbase = (self._wrist_state_arm()[:, :3] if (_hand_obs or self.cap_arm_mode)
                       else self.states["base_state"][:, :3])
             for ob in self._privileged_obs_keys:
                 if ob == "manip_obj_pos":
-                    _v = self.states[ob] - _pbase
-                    if _priv_zero == 1 and hasattr(self, "cap_grasp_cap_home_pos"):
-                        _v = self.cap_grasp_cap_home_pos - _pbase  # 홈(지그) 상수
-                    pri_obs_values.append(_v)
-                elif ob == "manip_obj_com" and _priv_zero == 1 and hasattr(self, "cap_grasp_cap_home_pos"):
-                    # 홈 위치 + 단위자세 기준 COM (캡 실측 불요)
-                    pri_obs_values.append(
-                        self.manip_obj_com + self.cap_grasp_cap_home_pos - _pbase
-                    )
+                    pri_obs_values.append(self.states[ob] - _pbase)
                 elif ob == "manip_obj_com":
                     cur_com_pos = (
                         quat_to_rotmat(self.states["manip_obj_quat"][:, [1, 2, 3, 0]])
@@ -4495,16 +4306,6 @@ class DexHandManipRHEnv(VecTask):
                     pri_obs_values.append(tip_force.reshape(self.num_envs, -1))
                 elif _hand_obs and ob == "dq":
                     pri_obs_values.append(self.states[ob][:, 6:])
-                elif _priv_zero == 3 and ob == "manip_obj_quat":
-                    _v = torch.zeros_like(self.states[ob]); _v[:, 3] = 1.0
-                    pri_obs_values.append(_v)   # 캡 자세만 상수화 (나머지 실측)
-                elif _priv_zero == 4 and ob in ("manip_obj_vel", "manip_obj_ang_vel"):
-                    pri_obs_values.append(torch.zeros_like(self.states[ob]))  # 속도만 은닉
-                elif _priv_zero == 1 and ob in ("manip_obj_quat", "manip_obj_vel", "manip_obj_ang_vel"):
-                    _v = torch.zeros_like(self.states[ob])
-                    if ob == "manip_obj_quat":
-                        _v[:, 3] = 1.0  # 단위 쿼터니언 (x,y,z,w 순서 가정)
-                    pri_obs_values.append(_v)
                 else:
                     pri_obs_values.append(self.states[ob])
             if getattr(self, "cap_priv_resist", False):
@@ -4521,10 +4322,7 @@ class DexHandManipRHEnv(VecTask):
                         device=self.device,
                     )
                 pri_obs_values.append((_rv / 1.2).unsqueeze(-1))
-            _priv = torch.cat(pri_obs_values, dim=-1)
-            if _priv_zero >= 2:
-                _priv = torch.zeros_like(_priv)
-            self.obs_dict["privileged"][:] = _priv
+            self.obs_dict["privileged"][:] = torch.cat(pri_obs_values, dim=-1)
 
         next_target_state = {}
 
@@ -4785,20 +4583,6 @@ class DexHandManipRHEnv(VecTask):
                 torch.tensor([1.0, 0.0, 0.0], device=self.device).expand(_E * 4, 3),
             ).view(_E, 4, 3)
             _ftot6 = (-(self.net_cf[:, _th6, :] * _pad6).sum(-1)).clamp(min=0.0)  # (E,4) 디버그용
-            # CAP_TIP_FORCE6_TIPSUM=1 (기본 0=off): 존 분해를 버리고 팁당 총힘(존합)을
-            # 6존 전부에 복제한다. 정보량 = 손가락당 1값. 실물 fingertip FSR 의 공간
-            # 해상도가 sim 의 6존 기하(존 간격 ~11mm)에 못 미쳐 존 귀속이 안 되는 문제 대응 —
-            # 실물 조립기는 팁당 읽은 1값을 6칸에 복사하면 sim 학습 분포와 등가가 된다.
-            # 합 -> EMA -> 양자화 순서라 "팁 1값에 EMA" 를 거는 실물 파이프라인과 일치한다.
-            # 관측 차원(24ch)·양자화(10단계)·배포 규약은 그대로다. 보상 쪽 존 귀속
-            # (_fsr_zone_forces 를 쓰는 CAP_REWARD_ZONE_FORCE)은 sim 내부용이라 건드리지 않는다.
-            if not hasattr(self, "_tip_force6_tipsum"):
-                self._tip_force6_tipsum = bool(int(os.environ.get("CAP_TIP_FORCE6_TIPSUM", "0")))
-                if self._tip_force6_tipsum:
-                    print("[obs-tip-force6] 팁합 복제 모드: 존 6개에 팁 총힘 동일 기록 "
-                          "(공간해상도 포기, 힘 10단계 유지)", flush=True)
-            if self._tip_force6_tipsum:
-                _f6 = _f6.sum(-1, keepdim=True).expand(-1, -1, 6).contiguous()
             _fa6 = float(os.environ.get("CAP_TIP_FORCE_FILTER", "0.3"))
             _f6_raw = _f6
             if _fa6 > 0.0:
@@ -4828,39 +4612,6 @@ class DexHandManipRHEnv(VecTask):
                 .reshape(_E, 24)
                 .to(next_target_state["delta_manip_obj_pos"].dtype)
             )
-            # CAP_FSR_CSV=<path> (기본 off): 실기 FSR 보정용 전 단계 기록.
-            # env0 매 스텝 — 존별 원시힘(24) -> EMA 필터(24) -> 양자화 레벨(24) -> obs(레벨/9).
-            # 팁 몸체 패드법선 총힘(4)도 함께 남긴다(tot >> zone 이면 존 밖 접촉).
-            _fcsv = os.environ.get("CAP_FSR_CSV", "").strip()
-            if _fcsv:
-                if not hasattr(self, "_fsr_csv_fh"):
-                    self._fsr_csv_fh = open(_fcsv, "w", buffering=1)
-                    _zn = [f"{f}{z}" for f in ("th", "ix", "mi", "ri")
-                           for z in ("_c_d", "_c_p", "_ny_d", "_ny_p", "_py_d", "_py_p")]
-                    self._fsr_csv_fh.write(
-                        "step,cap_deg,"
-                        + ",".join(f"raw_{n}" for n in _zn) + ","
-                        + ",".join(f"filt_{n}" for n in _zn) + ","
-                        + ",".join(f"lvl_{n}" for n in _zn) + ","
-                        + ",".join(f"tot_{f}" for f in ("th", "ix", "mi", "ri")) + "\n")
-                    print(f"[fsr-csv] 보정용 기록 시작 -> {_fcsv} "
-                          f"(원시24/필터24/레벨24/팁총힘4, env0, α={_fa6})", flush=True)
-                _ang = 0.0
-                if self.cap_grasp_screw is not None:
-                    try:
-                        _ang = float(self.cap_grasp_screw.angle().to(self.device)[0]) * 57.29578
-                    except Exception:
-                        _ang = 0.0
-                _r = _f6_raw[0].reshape(-1).tolist()
-                _fl = _f6[0].reshape(-1).tolist()
-                _lv = (_lvl6[0].reshape(-1)).tolist()
-                _tt = _ftot6[0].tolist()
-                self._fsr_csv_fh.write(
-                    f"{int(self.progress_buf[0])},{_ang:.3f},"
-                    + ",".join(f"{v:.5f}" for v in _r) + ","
-                    + ",".join(f"{v:.5f}" for v in _fl) + ","
-                    + ",".join(f"{int(v)}" for v in _lv) + ","
-                    + ",".join(f"{v:.5f}" for v in _tt) + "\n")
             if bool(int(os.environ.get("CAP_TIP_FORCE_DEBUG", "0"))):
                 _lv6 = (self._tip_force6_obs[0].view(4, 6) * 9).round().int().tolist()
                 # tot = 팁 몸체의 패드법선 총힘, zone = 존 귀속 합. tot >> zone
@@ -4991,57 +4742,18 @@ class DexHandManipRHEnv(VecTask):
                     turn = torch.zeros_like(turn)
                     released = torch.zeros_like(released)
                     hold_frac = torch.zeros_like(hold_frac)
-                _av_new = bool(int(os.environ.get("CAP_OBS_ANGLE_VEL", "0"))) and bool(
-                    int(os.environ.get("CAP_OBS_ANGLE", "0"))
-                )
-                if self.CAP_PHASE_DIM in (10, 11, 12) or (self.CAP_PHASE_DIM == 13 and _av_new):
+                if self.CAP_PHASE_DIM in (10, 11):
                     # 각도류 없음 -- 시간 3개만. 회전 정보는 privileged 의 캡
                     # 쿼터니언(원시 자세)으로만 들어간다. 11 은 해제 여부를
                     # 원값으로 추가한다 (HIDE_ANGLE 의 영향을 받지 않음).
                     phase = [frac, torch.sin(2 * np.pi * frac), torch.cos(2 * np.pi * frac)]
-                    if self.CAP_PHASE_DIM >= 11:
+                    if self.CAP_PHASE_DIM == 11:
                         phase.append(released_raw)
-                    # CAP_OBS_J6_INT (기본 0=off): J6(손목 롤) **전진 누적각**을
-                    # 관측에 넣는다. 캡 상태가 아니라 로봇 자기 엔코더의 적분이라
-                    # 실기에서 그대로 재현 가능. 근거: 재파지로 손목이 되감기므로
-                    # 현재 J6 값은 진행률을 못 담는다(실측: J6 +12°에 캡 166°,
-                    # +16°에 캡 121°). 전진 누적은 캡 회전과 r=+0.75.
-                    # PHASE_DIM 은 그대로 두고 released 자리를 대체하지 않는다 --
-                    # 채널을 늘리므로 PHASE_DIM 을 12 로 주어야 한다.
-                    # CAP_OBS_ANGLE (기본 0=off): 캡 풀림각을 actor 관측에 1채널 추가.
-                    # 실기에서 비전으로 풀림각을 얻을 수 있게 된 경우에만 켠다(2026-08-29).
-                    # 값 = 누적 풀림각 / 목표각(180°), [0,2] 클램프. HIDE_ANGLE 과 무관하게 원값.
-                    if int(os.environ.get("CAP_OBS_ANGLE", "0")) and self.CAP_PHASE_DIM >= 12:
-                        # 정규화는 **고정 상수**(기본 180°)로 한다 — 목표각으로 나누면
-                        # 로봇 PC 가 텀블러별 목표각을 알아야 하므로 배포 부담이 생긴다.
-                        # 실기: 비전이 준 누적 풀림각(deg) / 180, [0,2] 클램프. 그게 전부.
-                        _asc = math.radians(float(os.environ.get("CAP_OBS_ANGLE_SCALE_DEG", "180")))
-                        _ang_raw = self.cap_grasp_screw.angle()
-                        _ang_n = (_ang_raw / max(_asc, 1e-6)).clamp(0.0, 2.0)
-                        phase.append(_ang_n.to(device=self.device, dtype=frac.dtype))
-                        # CAP_OBS_ANGLE_VEL: 풀림 각속도 1채널 (PHASE_DIM=13 과 세트).
-                        # 실기 = 비전 각도의 유한차분. 정규화는 각도 채널과 동일 상수
-                        # (rate[deg/s] / 180). 각도만으로는 무기억 MLP 가 "캡이 지금
-                        # 따라오는 중인지"를 한 스텝에서 알 수 없어 큰 손목 롤을 못 쓴다
-                        # (A91 실측: 엄지 접촉 35%·롤 +32°, 정본은 94%·+118°).
-                        if _av_new and self.CAP_PHASE_DIM >= 13:
-                            if (not hasattr(self, "_angv_prev")
-                                    or self._angv_prev.shape != _ang_raw.shape):
-                                self._angv_prev = torch.zeros_like(_ang_raw)
-                            _rate = (_ang_raw - self._angv_prev) / float(self.dt)
-                            self._angv_prev = _ang_raw.clone()
-                            phase.append(
-                                (_rate / max(_asc, 1e-6)).clamp(-2.0, 2.0).to(dtype=frac.dtype)
-                            )
-                    elif self._j6_int_scale > 0 and self.CAP_PHASE_DIM >= 12:
-                        phase.append(
-                            (self._j6_fwd_accum / self._j6_int_scale).clamp(0.0, 2.0)
-                        )
                 else:
                     phase = [frac, torch.sin(2 * np.pi * frac), torch.cos(2 * np.pi * frac),
                              turn, released, hold_frac]
                 cap_phase = torch.stack(phase, dim=-1)
-                if self.CAP_PHASE_DIM in (10, 11, 12) or self.CAP_PHASE_DIM >= 13:
+                if self.CAP_PHASE_DIM in (10, 11) or self.CAP_PHASE_DIM >= 13:
                     cap_pos = self.states["manip_obj_pos"]
                     cap_quat = self.states["manip_obj_quat"]      # xyzw
                     wrist_pos = self._wrist_state_arm()[:, :3]
@@ -5058,12 +4770,6 @@ class DexHandManipRHEnv(VecTask):
                         _capref_rel = cap_pos.clone()
                         if hasattr(self, "cap_grasp_cap_home_pos"):
                             _capref_rel[:, 2] = self.cap_grasp_cap_home_pos[:, 2]
-                            # CAP_REL_HOME_XY (기본 0=off): xy 도 홈(지그) 상수로.
-                            # 실기 배포용 — 캡 실측을 관측에서 완전히 제거한다.
-                            # 고정 배치에선 값이 사실상 같으나, 캡의 미세 흔들림·
-                            # 이동이 채널에 실리는 경로를 구조적으로 막는다.
-                            if int(os.environ.get("CAP_REL_HOME_XY", "0")):
-                                _capref_rel[:, :2] = self.cap_grasp_cap_home_pos[:, :2]
                         rel_pos = wrist_pos - _capref_rel
                         rel_quat = torch.zeros_like(wrist_quat)
                     else:
@@ -5071,10 +4777,7 @@ class DexHandManipRHEnv(VecTask):
                         rel_quat = torch_jit_utils.quat_mul(
                             torch_jit_utils.quat_conjugate(cap_quat), wrist_quat
                         )
-                    cap_phase = torch.cat(
-                        [cap_phase, rel_pos] + ([] if self.cap_obs_compact else [rel_quat]),
-                        dim=-1,
-                    )  # compact: rel_quat(상수 0) 제거
+                    cap_phase = torch.cat([cap_phase, rel_pos, rel_quat], dim=-1)
                 if self.CAP_PHASE_DIM >= 14:
                     lift_frac = (
                         self.cap_grasp_screw.lift(self._q).to(self.device)
@@ -5102,7 +4805,7 @@ class DexHandManipRHEnv(VecTask):
                     cap_phase = torch.cat([cap_phase, remain[:, None]], dim=-1)
                 next_target_state["cap_phase"] = cap_phase
             else:
-                if self.CAP_PHASE_DIM in (10, 11, 12):
+                if self.CAP_PHASE_DIM in (10, 11):
                     raise ValueError(f"CAP_GRASP_PHASE_DIM={self.CAP_PHASE_DIM} 은 tumbler 모드 전용")
                 next_target_state["cap_phase"] = torch.stack(
                     [
@@ -5125,15 +4828,7 @@ class DexHandManipRHEnv(VecTask):
                 torch.zeros(self.num_envs, 24, device=self.device),
             )
             TARGET_ORDER = TARGET_ORDER + [("cap_tip_force6", False)]
-        _CONST_SEGS = (
-            "wrist_vel", "wrist_ang_vel", "wrist_quat",
-            "delta_manip_obj_pos", "manip_obj_vel", "delta_manip_obj_vel",
-            "manip_obj_quat", "delta_manip_obj_quat",
-            "manip_obj_ang_vel", "delta_manip_obj_ang_vel", "bps",
-        )  # compact 모드에서 차원째 제거하는 상수 세그먼트 (합 161 + rel_quat 4)
-        _order = [(ob, t) for ob, t in TARGET_ORDER
-                  if not (self.cap_obs_compact and ob in _CONST_SEGS)]
-        self.obs_dict["target"][:] = torch.cat([next_target_state[ob] for ob, _ in _order], dim=-1)
+        self.obs_dict["target"][:] = torch.cat([next_target_state[ob] for ob, _ in TARGET_ORDER], dim=-1)
         if getattr(self, "_obs_dump_pending", None):
             _parts = {ob: next_target_state[ob][0].detach().cpu() for ob, _ in TARGET_ORDER}
             torch.save({
@@ -5150,7 +4845,7 @@ class DexHandManipRHEnv(VecTask):
         # trajectory 컬럼 마스크(bool, target dim 길이) 1회 생성해 캐시
         if getattr(self, "_traj_col_mask", None) is None:
             segs = []
-            for ob, is_traj in _order:      # compact 시 제거된 세그먼트 제외
+            for ob, is_traj in TARGET_ORDER:
                 d = next_target_state[ob].shape[-1]
                 segs.append(torch.full((d,), bool(is_traj), dtype=torch.bool, device=self.device))
             self._traj_col_mask = torch.cat(segs)  # (target_dim,), True=trajectory
@@ -5164,30 +4859,6 @@ class DexHandManipRHEnv(VecTask):
                 self.obs_dict["target"][:, self._traj_col_mask] * self.trajectory_available
             )
         # Mode A(stage2_only_dropout)는 base action에 궤적이 남으므로 trajectory-free가 아님 → 모델 레벨 마스킹 필요.
-
-        # CAP_OBS_CSV (기본 off): 매 스텝 actor 관측 전체(privileged+proprio+target)와
-        # 캡 실측각을 env0 기준으로 CSV 기록. 실기 배포 검증(캡 상태 누설 감사)용.
-        _ocsv = os.environ.get("CAP_OBS_CSV", "")
-        if _ocsv:
-            if not hasattr(self, "_obs_csv_f"):
-                self._obs_csv_f = open(_ocsv, "w")
-                _dims = {k: int(self.obs_dict[k].shape[-1]) for k in ("privileged", "proprioception", "target")
-                         if k in self.obs_dict}
-                hdr = ["step", "cap_deg"]
-                for k, n in _dims.items():
-                    hdr += [f"{k[:4]}_{i}" for i in range(n)]
-                self._obs_csv_f.write(",".join(hdr) + "\n")
-            _ang = 0.0
-            if getattr(self, "cap_grasp_screw", None) is not None:
-                try:
-                    _ang = float(torch.rad2deg(self.cap_grasp_screw.angle())[0].item())
-                except Exception:
-                    _ang = 0.0
-            _row = [str(int(self.progress_buf[0].item())), f"{_ang:.4f}"]
-            for k in ("privileged", "proprioception", "target"):
-                if k in self.obs_dict:
-                    _row += [f"{v:.6f}" for v in self.obs_dict[k][0].tolist()]
-            self._obs_csv_f.write(",".join(_row) + "\n")
 
         if self.cap_grasp_mode:
             for key in self.obs_dict:
@@ -5382,29 +5053,6 @@ class DexHandManipRHEnv(VecTask):
             self._manip_obj_root_state[env_ids, 5] = _tcp_[5]
             self._manip_obj_root_state[env_ids, 6] = _tcp_[6]
             self._manip_obj_root_state[env_ids, 7:13] = 0.0
-            # CAP_TUMBLER_POS_NOISE_MM (기본 0 = off): 실기 지그 설치 오차 모사.
-            # 리셋마다 env 별로 ±N mm 균일 노이즈를 xyz 에 준다("N" 또는 "nx,ny,nz").
-            # **실제 텀블러만 움직이고 관측/데모 기준은 공칭 위치에 그대로 둔다** —
-            # demo_data(손목 기준자세·cap_home·obj_to_joints)는 액터 생성 전에
-            # 환경변수 CAP_GRASP_TUMBLER_POS 로 한 번 만들어지므로 노이즈를 모른다.
-            # 로봇 PC 가 지그 좌표를 상수로 쓰는 실제 배포 상황과 같다(오차를 모른 채 잡는다).
-            # 보상·FSR 기하는 _cap_src(실제 강체)를 읽으므로 진짜 위치를 본다.
-            if not hasattr(self, "_tumbler_noise_amp"):
-                _nz = os.environ.get("CAP_TUMBLER_POS_NOISE_MM", "0").strip()
-                _v = [float(x) for x in _nz.split(",") if x.strip()] or [0.0]
-                if len(_v) == 1:
-                    _v = _v * 3
-                self._tumbler_noise_amp = torch.tensor(
-                    [x / 1000.0 for x in _v[:3]], device=self.device, dtype=torch.float32
-                )
-                if float(self._tumbler_noise_amp.abs().max()) > 0:
-                    print("[tumbler-noise] 지그 오차 모사 ±"
-                          + "/".join(f"{float(x)*1000:.1f}" for x in self._tumbler_noise_amp)
-                          + "mm (xyz, 리셋마다 재추첨) — 관측 기준은 공칭 고정", flush=True)
-            if float(self._tumbler_noise_amp.abs().max()) > 0:
-                _off = (torch.rand((len(env_ids), 3), device=self.device) * 2.0 - 1.0)
-                _off = _off * self._tumbler_noise_amp[None, :]
-                self._manip_obj_root_state[env_ids, 0:3] += _off
         else:
             self._manip_obj_root_state[env_ids, :3] = obj_pos_init
             self._manip_obj_root_state[env_ids, 3:7] = obj_rot_init
@@ -5417,64 +5065,6 @@ class DexHandManipRHEnv(VecTask):
                       f"wrist {self._base_state[_e,:3].cpu().numpy().round(3)}", flush=True)
         if self.cap_grasp_screw is not None:
             self.cap_grasp_screw.rebind_engaged(self.gym, self.envs, self.cap_grasp_obj_actors, env_ids)
-            # CAP_RESIST_AUDIT (기본 0=off): 리셋 직후 나사 소스 조인트의 실제
-            # effort(=저항 토크)를 읽어 기대값과 대조한다. 과거 이력 결함
-            # (release 후 props 되쓰기로 저항이 조용히 되돌아가 sr 오염)의 재발
-            # 여부를 학습 중 상시 확인하기 위한 훅.
-            # CAP_FRIC_AUDIT (기본 0=off): 리셋 직후 실제 shape 마찰계수를 읽어
-            # cap_fric_now 와 대조. 커리큘럼 로그는 "전진 결정" 시점만 찍으므로,
-            # 실제로 모든 env·shape 에 반영·유지되는지는 별도 확인이 필요하다
-            # (학습 sr 과 신선 env sr 이 어긋난 원인 후보 — 2026-08-31).
-            if int(os.environ.get("CAP_FRIC_AUDIT", "0")) and len(env_ids) > 0:
-                try:
-                    _want = float(getattr(self, "cap_fric_now", -1.0))
-                    _nt = getattr(self, "_nontip_mu", None)
-                    _bad = []
-                    for _i in [int(x) for x in env_ids[:4]]:
-                        _ep = self.envs[_i]
-                        for _nm in ("dexhand", "manip_obj"):
-                            _ac = self.gym.find_actor_handle(_ep, _nm)
-                            _pr = self.gym.get_actor_rigid_shape_properties(_ep, _ac)
-                            _msk = getattr(self, "_tip_shape_mask", None)
-                            for _si, _p in enumerate(_pr):
-                                if _nm == "dexhand" and _nt is not None and _msk is not None:
-                                    _exp = _want if _msk[_si] else float(_nt)
-                                else:
-                                    _exp = _want
-                                if abs(float(_p.friction) - _exp) > 0.02:
-                                    _bad.append((_i, _nm, _si, round(float(_p.friction), 3), _exp))
-                    self._fric_audit_n = getattr(self, "_fric_audit_n", 0) + 1
-                    if _bad:
-                        print(f"[fric-audit] 불일치 {len(_bad)}건 (env,actor,shape,실제,기대): "
-                              f"{_bad[:5]}", flush=True)
-                    elif self._fric_audit_n % 50 == 1:
-                        print(f"[fric-audit] OK n={self._fric_audit_n} 유효μ {_want:.2f} "
-                              f"(비팁 {_nt}) 리셋 {len(env_ids)}env", flush=True)
-                except Exception as _e:
-                    print(f"[fric-audit] 실패: {_e}", flush=True)
-            if int(os.environ.get("CAP_RESIST_AUDIT", "0")) and len(env_ids) > 0:
-                try:
-                    _sl = getattr(self.cap_grasp_screw, "_source_local", [])
-                    _exp = float(getattr(self.cap_grasp_screw, "_resistance_nm", 0.0))
-                    _bad = []
-                    for _i in [int(x) for x in env_ids[:8]]:
-                        _pr = self.gym.get_actor_dof_properties(
-                            self.envs[_i], self.cap_grasp_obj_actors[_i]
-                        )
-                        for _si in _sl:
-                            _eff = float(_pr["effort"][_si])
-                            _re = getattr(self.cap_grasp_screw, "resist_env", None)
-                            _want = float(_re[_i]) if _re is not None else _exp
-                            if abs(_eff - _want) > 0.02:
-                                _bad.append((_i, round(_eff, 3), round(_want, 3)))
-                    self._resist_audit_n = getattr(self, "_resist_audit_n", 0) + 1
-                    if _bad:
-                        print(f"[resist-audit] 불일치 {len(_bad)}건 (env,실제,기대): {_bad[:4]}", flush=True)
-                    elif self._resist_audit_n % 50 == 1:
-                        print(f"[resist-audit] OK n={self._resist_audit_n} 기대 {_exp:.2f}Nm "
-                              f"(리셋 {len(env_ids)}env 검사)", flush=True)
-                except Exception as _e:
-                    print(f"[resist-audit] 실패: {_e}", flush=True)
             if getattr(self, "cap_resist_profile", False) and (
                 getattr(self, "cap_resist_knots_random", False)
                 or getattr(self, "cap_resist_curriculum", False)
@@ -5582,11 +5172,6 @@ class DexHandManipRHEnv(VecTask):
 
         self.progress_buf[env_ids] = seq_idx
         self.running_progress_buf[env_ids] = 0
-        if getattr(self, "_angv_prev", None) is not None:
-            self._angv_prev[env_ids] = 0.0
-        if self._j6_int_scale > 0 and self._j6_fwd_accum is not None:
-            self._j6_fwd_accum[env_ids] = 0.0
-            self._j6_prev[env_ids] = torch.rad2deg(self._q[env_ids, 5])
         self.reset_buf[env_ids] = 0
         self.success_buf[env_ids] = 0
         self.failure_buf[env_ids] = 0

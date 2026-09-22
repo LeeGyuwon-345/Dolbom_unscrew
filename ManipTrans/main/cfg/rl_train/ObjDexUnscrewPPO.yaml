@@ -36,9 +36,10 @@ params:
         # (t/T, sin, cos, gravity_scale, 중력까지 남은시간, hold 진척도) = 6.
         # env(dexhandmanip_sh)도 같은 환경변수를 읽으므로 양쪽이 항상 일치한다.
         # 설정하지 않으면 0 → 기존 동작 그대로.
+        # CAP_OBS_TIP_FORCE6: 손가락당 6존 FSR 관측 24dim (env 와 동일 계약).
         target:
           _target_: lib.nn.features.Identity
-          input_dim: ${is_united_model:${.......bimanual_mode},${.......side},${eval:'3+3+3+4+4+3+3+3+3+3+4+4+3+3+${nbody:${.....dexhand}}+128+${oc.env:CAP_GRASP_PHASE_DIM,0}'}}
+          input_dim: ${is_united_model:${.......bimanual_mode},${.......side},${eval:'3+3+3+4+4+3+3+3+3+3+4+4+3+3+${nbody:${.....dexhand}}+128+${oc.env:CAP_GRASP_PHASE_DIM,0}+24*${oc.env:CAP_OBS_TIP_FORCE6,0}'}}
       hidden_depth: 3
       hidden_dim: 512
       output_dim: 256

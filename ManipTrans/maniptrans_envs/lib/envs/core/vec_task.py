@@ -315,8 +315,10 @@ class VecTask(Env):
         for env_id in range(self.num_envs):
             self.extern_actor_params[env_id] = None
 
-        self.camera_handlers = [] if (display or record) else None
-        self.camera_obs = [] if (display or record) else None
+        # CAP_VIDEO_MP4: wandb 래퍼 없이 로컬 mp4 녹화용 카메라 활성화
+        _want_video = bool(os.environ.get("CAP_VIDEO_MP4", ""))
+        self.camera_handlers = [] if (display or record or _want_video) else None
+        self.camera_obs = [] if (display or record or _want_video) else None
 
         # create envs, sim and viewer
         self.sim_initialized = False
@@ -359,6 +361,11 @@ class VecTask(Env):
         camera = isaac_gym.create_camera_sensor(env, camera_cfg)
         cam_pos = gymapi.Vec3(0.75, 0.75, 2)
         cam_target = gymapi.Vec3(-0.1, -0.1, 0.75)
+        _cam = os.environ.get("CAP_VIDEO_CAM", "").strip()
+        if _cam:  # "px,py,pz,tx,ty,tz"
+            v = [float(x) for x in _cam.split(",")]
+            cam_pos = gymapi.Vec3(v[0], v[1], v[2])
+            cam_target = gymapi.Vec3(v[3], v[4], v[5])
         isaac_gym.set_camera_location(camera, env, cam_pos, cam_target)
         return camera
 
@@ -495,6 +502,21 @@ class VecTask(Env):
         if self.camera_obs is not None:
             self.gym.render_all_camera_sensors(self.sim)
             self.gym.start_access_image_tensors(self.sim)
+            _mp4 = os.environ.get("CAP_VIDEO_MP4", "")
+            if _mp4 and self.camera_obs:
+                if not hasattr(self, "_vid_writer"):
+                    import imageio
+                    self._vid_writer = imageio.get_writer(_mp4, fps=60, quality=8)
+                    self._vid_frames = 0
+                    self._vid_max = int(os.environ.get("CAP_VIDEO_MAX_FRAMES", "1800"))
+                if self._vid_frames < self._vid_max:
+                    _fr = self.camera_obs[0]
+                    _fr = _fr.detach().cpu().numpy() if hasattr(_fr, "detach") else _fr
+                    self._vid_writer.append_data(_fr[..., :3].astype("uint8"))
+                    self._vid_frames += 1
+                    if self._vid_frames == self._vid_max:
+                        self._vid_writer.close()
+                        print(f"[video] {_mp4} 저장 완료 ({self._vid_max} frames)", flush=True)
         # compute observations, rewards, resets, ...
         self.post_physics_step()
 
