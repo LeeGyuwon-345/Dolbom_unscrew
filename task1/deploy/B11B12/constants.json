@@ -1,0 +1,45 @@
+{
+ "wrist_pos_ref_world": [
+  0.38492,
+  -0.01295,
+  0.38807
+ ],
+ "wrist_quat_ref_xyzw": [
+  -0.511626,
+  -0.472978,
+  0.549937,
+  -0.460543
+ ],
+ "cap_home_pos_world": [
+  0.4,
+  0.0,
+  0.25
+ ],
+ "tumbler_pos_world": [
+  0.4,
+  0.0,
+  0.022
+ ],
+ "tumbler_body_height_m": 0.228,
+ "cap_radius_m": 0.044,
+ "cap_height_m": 0.016,
+ "robot_urdf": "rb5_allegro_vmount_siltip2.urdf (hand_mount y=-0.0615, 마운트면-손등 32.0mm)",
+ "episode_steps_T": 360,
+ "dt": 0.016666666666666666,
+ "obs_dims": {
+  "privileged": 60,
+  "proprioception": 76,
+  "target": 65,
+  "note": "actor 는 privileged 앞 22(dq)만 사용, 나머지는 0"
+ },
+ "vision_required": false,
+ "jig_noise_trained_mm": 2.0,
+ "action_dither": {
+  "required_below_mu": 2.5,
+  "sigma_scale": 0.1,
+  "note": "두 run 모두 마찰 커리큘럼 종점 2.5. μ2.5 미만 미학습 — 저마찰 의심 시 디더링 필수"
+ },
+ "wrist_pos_ref_status": "MEASURED (CAP_DEMO_WRIST_PRINT=1)",
+ "wrist_ref_note": "캡 0.250 + 마운트 32mm 조합 전용. 캡 높이나 hand_mount 가 바뀌면 재측정 필수",
+ "note": "B11/B12 배포 상수 — B08 과 동일 기구·배치(캡 0.250, 마운트 32mm). FSR 관측 규약만 다름(README 참조)"
+}

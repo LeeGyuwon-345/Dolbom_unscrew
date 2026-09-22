@@ -1,0 +1,39 @@
+{
+ "wrist_pos_ref_world": [
+  0.38492,
+  -0.01295,
+  0.39307
+ ],
+ "wrist_quat_ref_xyzw": [
+  -0.511626,
+  -0.472978,
+  0.549937,
+  -0.460543
+ ],
+ "cap_home_pos_world": [
+  0.4,
+  0.0,
+  0.246
+ ],
+ "tumbler_pos_world": [
+  0.4,
+  0.0,
+  0.031
+ ],
+ "episode_steps_T": 360,
+ "dt": 0.016666666666666666,
+ "obs_dims": {
+  "privileged": 60,
+  "proprioception": 76,
+  "target": 65,
+  "note": "actor 는 privileged 앞 22(dq)만 사용, 나머지는 0"
+ },
+ "vision_required": false,
+ "action_dither": {
+  "required_below_mu": 2.5,
+  "sigma_scale": 0.1,
+  "note": "체크포인트 sigma x0.1 가우시안 디더링. B02 는 마찰 2.0 까지 학습했으나 실물 마찰 불확실 구간에서 권장"
+ },
+ "note": "B02 배포 상수 — 텀블러 31mm 상승 배치 + MLP 시작자세(z193). 관측/액션 규약은 A95 와 동일",
+ "wrist_ref_note": "demo 파지 샘플러가 캡 위치에서 산출하는 고정 기준값. 초기자세 FK 가 아니다. A95 와 동일한 값이며 sim 에서 CAP_DEMO_WRIST_PRINT=1 로 실측함"
+}

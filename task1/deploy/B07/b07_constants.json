@@ -1,0 +1,50 @@
+{
+ "wrist_pos_ref_world": [
+  0.38492,
+  -0.01295,
+  0.38807
+ ],
+ "wrist_quat_ref_xyzw": [
+  -0.511626,
+  -0.472978,
+  0.549937,
+  -0.460543
+ ],
+ "cap_home_pos_world": [
+  0.4,
+  0.0,
+  0.25
+ ],
+ "tumbler_pos_world": [
+  0.4,
+  0.0,
+  0.022
+ ],
+ "tumbler_body_height_m": 0.228,
+ "cap_radius_m": 0.044,
+ "cap_height_m": 0.016,
+ "robot_urdf": "rb5_allegro_vmount_siltip2.urdf (hand_mount y=-0.0615, 마운트면-손등 32.0mm)",
+ "episode_steps_T": 360,
+ "dt": 0.016666666666666666,
+ "obs_dims": {
+  "privileged": 60,
+  "proprioception": 76,
+  "target": 65,
+  "note": "actor 는 privileged 앞 22(dq)만 사용, 나머지는 0"
+ },
+ "vision_required": false,
+ "jig_noise_trained_mm": 2.0,
+ "action_dither": {
+  "required_below_mu": 2.0,
+  "sigma_scale": 0.1,
+  "note": "B07 은 마찰 커리큘럼 미시작(μ5.0 만 학습). 저마찰에서는 디더링 필수"
+ },
+ "wrist_pos_ref_status": "MEASURED",
+ "wrist_ref_note": "2026-09-03 정정: 이전의 유도값 (…, 0.40107) 은 틀렸다(13mm 오차). demo 손목 기준자세는 cap_z 만의 함수가 아니라 로봇 URDF(hand_mount) 에도 의존한다 — 샘플러가 손 기구를 포함해 도달 가능한 손목 자세를 뽑기 때문. 실측(CAP_DEMO_WRIST_PRINT=1, 캡 0.250 + 마운트 32mm): z=0.38807. 참고 실측점: 캡0.246+마운트30.5mm→0.39307 / 캡0.237+마운트30.5mm→0.37507",
+ "note": "B07 배포 상수 — 텀블러 몸체 228mm(캡 0.250), 지그 오차 ±2mm 학습, 마운트 32mm 기구",
+ "wrist_pos_ref_world_DERIVED_WRONG": [
+  0.38492,
+  -0.01295,
+  0.40107
+ ]
+}
