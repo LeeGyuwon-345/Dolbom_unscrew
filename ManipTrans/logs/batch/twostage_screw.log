@@ -1,0 +1,110 @@
+Importing module 'gym_38' (/home/leegyuwon/Documents/isaacgym/python/isaacgym/_bindings/linux-x86_64/gym_38.so)
+Setting GYM_USD_PLUG_INFO_PATH to /home/leegyuwon/Documents/isaacgym/python/isaacgym/_bindings/linux-x86_64/usd/plugInfo.json
+PyTorch version 1.13.1+cu117
+Device count 1
+/home/leegyuwon/Documents/isaacgym/python/isaacgym/_bindings/src/gymtorch
+Using /home/leegyuwon/.cache/torch_extensions/py38_cu117 as PyTorch extensions root...
+Emitting ninja build file /home/leegyuwon/.cache/torch_extensions/py38_cu117/gymtorch/build.ninja...
+Building extension module gymtorch...
+Allowing ninja to set a default number of workers... (overridable by setting the environment variable MAX_JOBS=N)
+ninja: no work to do.
+Not connected to PVD
++++ Using GPU PhysX
+Physics Engine: PhysX
+Physics Device: cuda:0
+GPU Pipeline: enabled
+Loading extension module gymtorch...
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+/home/leegyuwon/Documents/isaacgym/python/isaacgym/torch_utils.py:135: DeprecationWarning: `np.float` is a deprecated alias for the builtin `float`. To silence this warning, use `float` by itself. Doing this will not modify any behavior and is safe. If you specifically wanted the numpy scalar type, use `np.float64` here.
+Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
+  def get_axis_params(value, axis_idx, x_value=0., dtype=np.float, n_dims=3):
+main/dataset/mano2dexhand.py:107: DeprecationWarning: an integer is required (got type isaacgym._bindings.linux-x86_64.gym_38.DofDriveMode).  Implicit conversion to integers using __int__ is deprecated, and may be removed in a future version of Python.
+  asset_options.default_dof_drive_mode = gymapi.DOF_MODE_POS
+main/dataset/mano2dexhand.py:420: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  opt_wrist_pos = torch.tensor(
+main/dataset/mano2dexhand.py:426: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  opt_wrist_rot = torch.tensor(
+[two_stage] Stage 1/2: wrist + 비엄지 손가락 최적화
+100 0.13950394093990326
+200 0.0452522337436676
+300 0.024027397856116295
+400 0.020856067538261414
+500 0.019331088289618492
+600 0.018646640703082085
+700 0.01818503625690937
+800 0.017787545919418335
+900 0.017427027225494385
+1000 0.017101146280765533
+1100 0.016801925376057625
+1200 0.01652957685291767
+1300 0.01626712642610073
+1400 0.016015028581023216
+1500 0.015765953809022903
+1600 0.015520410612225533
+1700 0.015275934711098671
+1800 0.015037714503705502
+1900 0.014797313138842583
+2000 0.014561273157596588
+2100 0.014333795756101608
+2200 0.014118616469204426
+2300 0.013910623267292976
+2400 0.013702507130801678
+2500 0.013495483435690403
+2600 0.01329321600496769
+2700 0.013087678700685501
+2800 0.012882445007562637
+2900 0.01267745066434145
+3000 0.01248045451939106
+3100 0.01228363811969757
+3200 0.012114257551729679
+3300 0.011949234642088413
+3400 0.011802767403423786
+3500 0.011666088365018368
+3600 0.011540061794221401
+3700 0.011411115527153015
+3800 0.011288776993751526
+3900 0.011170724406838417
+4000 0.011059683747589588
+[two_stage] Stage 2/2: thumb DOF만 최적화 (wrist 고정)
+100 0.12877105176448822
+200 0.1241922378540039
+300 0.11947713792324066
+400 0.11468029022216797
+500 0.10986252874135971
+600 0.10508899390697479
+700 0.1004268154501915
+800 0.0959421843290329
+900 0.0916970819234848
+1000 0.08774586021900177
+1100 0.08413207530975342
+1200 0.08088603615760803
+1300 0.07802346348762512
+1400 0.07554556429386139
+1500 0.07344023138284683
+1600 0.071684330701828
+1700 0.07024645060300827
+1800 0.0690898671746254
+1900 0.06817544251680374
+2000 0.06746406853199005
+2100 0.06691873073577881
+2200 0.06650594621896744
+2300 0.06619655340909958
+2400 0.06596610695123672
+2500 0.0657946988940239
+2600 0.06566660851240158
+2700 0.06556973606348038
+2800 0.06549498438835144
+2900 0.06543567031621933
+3000 0.06538702547550201
+3100 0.06534568965435028
+3200 0.06530937552452087
+3300 0.06527656316757202
+3400 0.06524626165628433
+3500 0.06521786749362946
+3600 0.06519097834825516
+3700 0.06516540050506592
+3800 0.0651409924030304
+3900 0.06511769443750381
+4000 0.065095454454422

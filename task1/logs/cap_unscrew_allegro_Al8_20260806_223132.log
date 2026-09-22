@@ -1,0 +1,521 @@
+Importing module 'gym_38' (/home/leegyuwon/Documents/isaacgym/python/isaacgym/_bindings/linux-x86_64/gym_38.so)
+Setting GYM_USD_PLUG_INFO_PATH to /home/leegyuwon/Documents/isaacgym/python/isaacgym/_bindings/linux-x86_64/usd/plugInfo.json
+PyTorch version 1.13.1+cu117
+Device count 1
+/home/leegyuwon/Documents/isaacgym/python/isaacgym/_bindings/src/gymtorch
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/hydra/_internal/hydra.py:119: UserWarning: Future Hydra versions will no longer change working directory at job runtime by default.
+See https://hydra.cc/docs/1.2/upgrades/1.1_to_1.2/changes_to_job_working_dir/ for more information.
+  ret = run_job(
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/torch/utils/cpp_extension.py:25: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+  from pkg_resources import packaging  # type: ignore[attr-defined]
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/pkg_resources/__init__.py:3154: DeprecationWarning: Deprecated call to `pkg_resources.declare_namespace('mpl_toolkits')`.
+Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages
+  declare_namespace(pkg)
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/pkg_resources/__init__.py:3154: DeprecationWarning: Deprecated call to `pkg_resources.declare_namespace('google')`.
+Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages
+  declare_namespace(pkg)
+Using /home/leegyuwon/.cache/torch_extensions/py38_cu117 as PyTorch extensions root...
+Emitting ninja build file /home/leegyuwon/.cache/torch_extensions/py38_cu117/gymtorch/build.ninja...
+Building extension module gymtorch...
+Allowing ninja to set a default number of workers... (overridable by setting the environment variable MAX_JOBS=N)
+ninja: no work to do.
+task: 
+    name: ResDexHandRH
+    physics_engine: physx
+    seed: 42
+    env: 
+        numEnvs: 512
+        dexhand: allegro
+        episodeLength: 1200
+        training: True
+        usePIDControl: False
+        rolloutStateInit: False
+        randomStateInit: True
+        dataIndices: [7]
+        obsFutureLength: 1
+        rolloutLen: None
+        rolloutBegin: None
+        clipObservations: 5.0
+        clipActions: 1.0
+        furniture: just_one_leg
+        frankaDofNoise: 0.25
+        targetLiftHeight: 0.05
+        distanceReward: 0.1
+        liftReward: 1.0
+        successReward: 1.0
+        aggregateMode: 3
+        tightenMethod: exp_decay
+        tightenFactor: 0.7
+        tightenSteps: 3200
+        actionScale: 1.0
+        useQuatRot: False
+        propDumpInfo: 
+            q_rh: 16
+            q_lh: 16
+            dq_rh: 16
+            dq_lh: 16
+            state_rh: 13
+            state_lh: 13
+            state_manip_obj_rh: 13
+            state_manip_obj_lh: 13
+            joint_state_rh: 273
+            joint_state_lh: 273
+            tip_force_rh: 15
+            tip_force_lh: 15
+            reward: 1
+        actionsMovingAverage: 1.0
+        translationScale: 1.0
+        orientationScale: 0.1
+        bimanual_mode: united
+        trajectory_dropout: 
+            enabled: False
+            mode: full_trajectory_free
+            schedule: linear
+            start_progress: 0.2
+            end_progress: 0.6
+            final_probability: 1.0
+            mask_scope: episode
+            append_availability_flag: False
+            curriculum_total_frames: 0
+            force_probability: -1.0
+            performance_gate: 
+                enabled: False
+                success_threshold: 0.7
+        trajectory_tracking_annealing: 
+            enabled: False
+            schedule: linear
+            start_progress: 0.3
+            end_progress: 0.7
+            final_scale: 0.0
+        observation: 
+            use_normalized_phase: False
+        propObsDim: 61
+        obsKeys: ['q', 'cos_q', 'sin_q', 'base_state']
+        privilegedObsDim: 53
+        privilegedObsKeys: ['dq', 'manip_obj_pos', 'manip_obj_quat', 'manip_obj_vel', 'manip_obj_ang_vel', 'tip_force', 'manip_obj_com', 'manip_obj_weight']
+        enableCameraSensors: False
+    sim: 
+        dt: 0.0166667
+        substeps: 2
+        up_axis: z
+        use_gpu_pipeline: True
+        gravity: [0.0, 0.0, -9.81]
+        physx: 
+            num_threads: 4
+            solver_type: 1
+            use_gpu: True
+            num_position_iterations: 8
+            num_velocity_iterations: 1
+            contact_offset: 0.005
+            rest_offset: 0.0
+            bounce_threshold_velocity: 0.2
+            max_depenetration_velocity: 1.0
+            default_buffer_size_multiplier: 5.0
+            max_gpu_contact_pairs: 1048576
+            num_subscenes: 4
+            contact_collection: 1
+    task: 
+        randomize: True
+        randomization_params: 
+            frequency: 32
+            sim_params: 
+                gravity: 
+                    operation: scaling
+                    schedule: linear_decay
+                    schedule_steps: 1920
+                    external_sample: 
+                        type: const_scale
+                        init_value: 0
+            actor_params: 
+                manip_obj: 
+                    color: True
+                    rigid_shape_properties: 
+                        friction: 
+                            num_buckets: 250
+                            operation: scaling
+                            schedule: linear_decay
+                            schedule_steps: 1920
+                            external_sample: 
+                                type: const_scale
+                                init_value: 3
+                                upper_bound: 6.0
+                                lower_bound: 1.0
+                manip_obj_rh: 
+                    color: True
+                    rigid_shape_properties: 
+                        friction: 
+                            num_buckets: 250
+                            operation: scaling
+                            schedule: linear_decay
+                            schedule_steps: 1920
+                            external_sample: 
+                                type: const_scale
+                                init_value: 3
+                                upper_bound: 6.0
+                                lower_bound: 1.0
+                manip_obj_lh: 
+                    color: True
+                    rigid_shape_properties: 
+                        friction: 
+                            num_buckets: 250
+                            operation: scaling
+                            schedule: linear_decay
+                            schedule_steps: 1920
+                            external_sample: 
+                                type: const_scale
+                                init_value: 3
+                                upper_bound: 6.0
+                                lower_bound: 1.0
+rl_train: 
+    params: 
+        seed: 42
+        algo: 
+            name: ppo
+        model: 
+            name: my_continuous_a2c_logstd
+        network: 
+            name: dict_obs_actor_critic
+            separate: False
+            space: 
+                continuous: 
+                    mu_activation: None
+                    sigma_activation: None
+                    mu_init: 
+                        name: default
+                    sigma_init: 
+                        name: const_initializer
+                        val: 0
+                    fixed_sigma: True
+            dict_feature_encoder: 
+                _target_: lib.nn.features.SimpleFeatureFusion
+                extractors: 
+                    privileged: 
+                        _target_: lib.nn.features.Identity
+                        input_dim: 53
+                    proprioception: 
+                        _target_: lib.nn.features.Identity
+                        input_dim: 61
+                    target: 
+                        _target_: lib.nn.features.Identity
+                        input_dim: 206
+                hidden_depth: 3
+                hidden_dim: 512
+                output_dim: 256
+                activation: swish
+                add_input_activation: False
+                add_output_activation: False
+            mlp: 
+                units: [256, 512, 128, 64]
+                activation: elu
+                d2rl: False
+                initializer: 
+                    name: default
+                regularizer: 
+                    name: None
+        load_checkpoint: False
+        load_path: 
+        dexhand: allegro
+        config: 
+            name: CapUnscrewAllegro_Al8_20260806_223132
+            full_experiment_name: CapUnscrewAllegro_Al8_20260806_223132
+            env_name: rlgpu
+            multi_gpu: False
+            ppo: True
+            mixed_precision: False
+            normalize_input: True
+            normalize_input_excluded_keys: []
+            normalize_value: True
+            use_pid_control: False
+            value_bootstrap: True
+            num_actors: 512
+            reward_shaper: 
+                scale_value: 1.0
+            normalize_advantage: True
+            gamma: 0.99
+            tau: 0.95
+            learning_rate: 0.0005
+            lr_schedule: adaptive
+            schedule_type: standard
+            kl_threshold: 0.008
+            score_to_win: 10000
+            max_epochs: 10000
+            early_stop_epochs: 9999999999999
+            save_best_after: 10
+            save_frequency: 100
+            print_stats: True
+            grad_norm: 1.0
+            entropy_coef: 0.0
+            truncate_grads: True
+            e_clip: 0.2
+            horizon_length: 32
+            minibatch_size: 1024
+            mini_epochs: 5
+            critic_coef: 4
+            clip_value: True
+            seq_len: 4
+            bounds_loss_coef: 0.0001
+            use_soft_clamp: True
+task_name: ResDexHandRH
+experiment: CapUnscrewAllegro_Al8_20260806_223132
+side: RH
+bimanual_mode: united
+dexhand: allegro
+rh_base_model_checkpoint: assets/imitator_rh_inspire.pth
+lh_base_model_checkpoint: assets/imitator_lh_inspire.pth
+num_envs: 512
+rolloutStateInit: False
+randomStateInit: True
+rolloutLen: None
+rolloutBegin: None
+learning_rate: 0.0005
+actionsMovingAverage: 1.0
+usePIDControl: False
+dataIndices: [7]
+seed: 42
+torch_deterministic: False
+max_iterations: 10000
+early_stop_epochs: 9999999999999
+physics_engine: physx
+pipeline: gpu
+sim_device: cuda:0
+rl_device: cuda:0
+graphics_device_id: 0
+num_threads: 4
+solver_type: 1
+num_subscenes: 4
+test: False
+save_rollouts: False
+save_successful_rollouts_only: True
+num_rollouts_to_save: 20000
+num_rollouts_to_run: 9999999999999
+min_episode_length: 20
+checkpoint: 
+from_ckpt_epoch: False
+sigma: 
+multi_gpu: False
+wandb_activate: False
+wandb_group: 
+wandb_name: CapUnscrewAllegro_Al8_20260806_223132
+wandb_entity: None
+wandb_project: None
+wandb_tags: []
+wandb_logcode_dir: 
+capture_video: False
+n_parallel_recorders: 8
+n_successful_videos_to_record: 50
+display: False
+headless: True
+Setting seed: 42
+Using rl_device: cuda:0
+Using sim_device: cuda:0
+{'name': 'CapUnscrewAllegro_Al8_20260806_223132', 'full_experiment_name': None, 'env_name': 'rlgpu', 'multi_gpu': False, 'ppo': True, 'mixed_precision': False, 'normalize_input': True, 'normalize_input_excluded_keys': [], 'normalize_value': True, 'use_pid_control': False, 'value_bootstrap': True, 'num_actors': 512, 'reward_shaper': {'scale_value': 1.0}, 'normalize_advantage': True, 'gamma': 0.99, 'tau': 0.95, 'learning_rate': 0.0005, 'lr_schedule': 'adaptive', 'schedule_type': 'standard', 'kl_threshold': 0.008, 'score_to_win': 10000, 'max_epochs': 10000, 'early_stop_epochs': 9999999999999, 'save_best_after': 10, 'save_frequency': 100, 'print_stats': True, 'grad_norm': 1.0, 'entropy_coef': 0.0, 'truncate_grads': True, 'e_clip': 0.2, 'horizon_length': 32, 'minibatch_size': 1024, 'mini_epochs': 5, 'critic_coef': 4, 'clip_value': True, 'seq_len': 4, 'bounds_loss_coef': 0.0001, 'use_soft_clamp': True, 'device': 'cuda:0', 'population_based_training': False, 'pbt_idx': None}
+self.seed = 42
+Started to train
+Exact experiment name requested from command line: CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35
+[cap_grasp] mode=on | wrist=servo + finger policy | grasp=1.00s settle=0.50s hold=0.30s | wrist_sampler=topdown reach_min_fingers=2 reach_margin=0.020m thumb_required=True thumb_margin=0.025m opposition_min=Nonedeg | zero_triangle_xy=True thumb_mcp_outside_margin=off reject_palm_collision=True:0.002m r=0.045~0.075m z=0.040~0.095m palm_down_max=20.0deg side_contact_margin=0.010m finger_radius=0.012m probe_steps=4 thumb_contact_w=0.50 grip_w=1.00 closure_w=3.00 closure_err_max=0.75 near_w=2.00 require_gravity_for_hold=True hold_decay=3.00 penetration_penalty_w=3.00 penetration_tol=0.002m cap_pre_gravity_lock=True:teleport | pedestal=False lift=0.060m@1.50s/1.00s lift_success=0.016m level_w=1.00 level_cos_min=0.87 | resample_wrist_on_reset=False |
+[Warning] [carb.gym.plugin] useGpu is set, forcing single scene (0 subscenes)
+Not connected to PVD
++++ Using GPU PhysX
+Physics Engine: PhysX
+Physics Device: cuda:0
+GPU Pipeline: enabled
+[friction] hand=4.00 obj=2.00 유효(평균)=3.00  rolling 0.01/0.05 torsion 0.01/0.05
+Num dexhand Bodies: 21
+Num dexhand DOFs: 16
+[cap_grasp] cap-only demo override | envs=512 steps=360 cap_z=0.640m urdf=/home/leegyuwon/Documents/task1/assets/cap_only/cap_only.urdf
+[cap_unscrew] cap_lift<-cap_spin x3.183099e-03 (pitch 20.0mm/rev)  target=180deg  band=14.3~30.0mm (고정)  lift>=16.0mm
+[cap_unscrew] actions=22 (wrist ON + fingers 16)
+[cap_unscrew] curriculum reward | kc 0.4->1 (kd=0.997, /32 steps)  objective: unscrew=10.0 hold=4.0 near=2.0 pinch=2.0@8mm quality=2.0(대향 x 접촉/4, stable>=0.125) grip=1.0  constraints(xkc): pen=3.0 reverse=2.0 revang=2.0(ref=0.25) leash=0.3 palm=0.0 tpair=0.0 action=0.01
+[cap_grasp] contact bodies per finger: [('link_15.0', 'link_15.0_tip'), ('link_3.0', 'link_3.0_tip'), ('link_7.0', 'link_7.0_tip'), ('link_11.0', 'link_11.0_tip'), ('link_11.0', 'link_11.0_tip')]
+[grasp-init] grasp_al_r50.json 로드  비율 1.00  노이즈 0.0도  손목노이즈 0.0mm/0.0도  (사용자 제공 grasps.csv r50/h17 행. CSV joint_0..15 순차 -> ManipTrans 순서 재배열. RPY 고정축 XYZ 가정)
+WARNING: seq_len is deprecated, use seq_length instead
+seq_length: 4
+current training device: cuda:0
+build mlp: 256
+RunningMeanStd:  (1,)
+RunningMeanStd:  (53,)
+RunningMeanStd:  (61,)
+RunningMeanStd:  (206,)
+[traj_dropout] target dim=206, trajectory cols=46, keep(obj/bps)=160, mode=full_trajectory_free
+fps step: 9705 fps step and policy inference: 6670 fps total: 4827 epoch: 1/10000 frames: 0
+fps step: 14938 fps step and policy inference: 13726 fps total: 7784 epoch: 2/10000 frames: 16384
+fps step: 14419 fps step and policy inference: 13252 fps total: 7444 epoch: 3/10000 frames: 32768
+fps step: 14590 fps step and policy inference: 13388 fps total: 7440 epoch: 4/10000 frames: 49152
+fps step: 14644 fps step and policy inference: 13367 fps total: 7509 epoch: 5/10000 frames: 65536
+fps step: 14585 fps step and policy inference: 11962 fps total: 7079 epoch: 6/10000 frames: 81920
+fps step: 16008 fps step and policy inference: 14563 fps total: 7719 epoch: 7/10000 frames: 98304
+fps step: 15525 fps step and policy inference: 13975 fps total: 7825 epoch: 8/10000 frames: 114688
+fps step: 16285 fps step and policy inference: 14477 fps total: 8050 epoch: 9/10000 frames: 131072
+fps step: 15989 fps step and policy inference: 14049 fps total: 7886 epoch: 10/10000 frames: 147456
+saving next best rewards:  [-382.65]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 15979 fps step and policy inference: 13926 fps total: 7866 epoch: 11/10000 frames: 163840
+fps step: 15710 fps step and policy inference: 13907 fps total: 7641 epoch: 12/10000 frames: 180224
+fps step: 14472 fps step and policy inference: 13038 fps total: 7347 epoch: 13/10000 frames: 196608
+fps step: 15113 fps step and policy inference: 13714 fps total: 7496 epoch: 14/10000 frames: 212992
+fps step: 15079 fps step and policy inference: 13545 fps total: 7370 epoch: 15/10000 frames: 229376
+fps step: 14763 fps step and policy inference: 12825 fps total: 7209 epoch: 16/10000 frames: 245760
+fps step: 14909 fps step and policy inference: 12889 fps total: 7391 epoch: 17/10000 frames: 262144
+fps step: 15224 fps step and policy inference: 13193 fps total: 7489 epoch: 18/10000 frames: 278528
+fps step: 14173 fps step and policy inference: 12065 fps total: 7118 epoch: 19/10000 frames: 294912
+fps step: 14278 fps step and policy inference: 12083 fps total: 7131 epoch: 20/10000 frames: 311296
+fps step: 14085 fps step and policy inference: 12200 fps total: 7142 epoch: 21/10000 frames: 327680
+fps step: 13577 fps step and policy inference: 11387 fps total: 6539 epoch: 22/10000 frames: 344064
+fps step: 14989 fps step and policy inference: 13134 fps total: 7561 epoch: 23/10000 frames: 360448
+fps step: 15410 fps step and policy inference: 13837 fps total: 7417 epoch: 24/10000 frames: 376832
+fps step: 14569 fps step and policy inference: 13292 fps total: 7523 epoch: 25/10000 frames: 393216
+fps step: 14290 fps step and policy inference: 12869 fps total: 7361 epoch: 26/10000 frames: 409600
+fps step: 13768 fps step and policy inference: 12020 fps total: 6966 epoch: 27/10000 frames: 425984
+fps step: 14207 fps step and policy inference: 12033 fps total: 7033 epoch: 28/10000 frames: 442368
+fps step: 14163 fps step and policy inference: 12299 fps total: 7281 epoch: 29/10000 frames: 458752
+fps step: 14150 fps step and policy inference: 11792 fps total: 7003 epoch: 30/10000 frames: 475136
+fps step: 15083 fps step and policy inference: 12310 fps total: 7318 epoch: 31/10000 frames: 491520
+fps step: 14208 fps step and policy inference: 11442 fps total: 6936 epoch: 32/10000 frames: 507904
+fps step: 14215 fps step and policy inference: 11287 fps total: 6865 epoch: 33/10000 frames: 524288
+fps step: 14012 fps step and policy inference: 11758 fps total: 6905 epoch: 34/10000 frames: 540672
+fps step: 13899 fps step and policy inference: 12536 fps total: 7224 epoch: 35/10000 frames: 557056
+fps step: 13329 fps step and policy inference: 12148 fps total: 7218 epoch: 36/10000 frames: 573440
+fps step: 13815 fps step and policy inference: 12492 fps total: 7303 epoch: 37/10000 frames: 589824
+fps step: 13574 fps step and policy inference: 11975 fps total: 7062 epoch: 38/10000 frames: 606208
+fps step: 13183 fps step and policy inference: 11322 fps total: 6860 epoch: 39/10000 frames: 622592
+fps step: 13642 fps step and policy inference: 11329 fps total: 6954 epoch: 40/10000 frames: 638976
+fps step: 13792 fps step and policy inference: 10929 fps total: 6806 epoch: 41/10000 frames: 655360
+fps step: 13834 fps step and policy inference: 10725 fps total: 6708 epoch: 42/10000 frames: 671744
+fps step: 13671 fps step and policy inference: 10289 fps total: 6530 epoch: 43/10000 frames: 688128
+saving next best rewards:  [-365.26]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 13409 fps step and policy inference: 10601 fps total: 6599 epoch: 44/10000 frames: 704512
+saving next best rewards:  [-355.14]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 13560 fps step and policy inference: 10409 fps total: 6542 epoch: 45/10000 frames: 720896
+saving next best rewards:  [-312.75]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 14083 fps step and policy inference: 12605 fps total: 7405 epoch: 46/10000 frames: 737280
+saving next best rewards:  [-305.95]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 14165 fps step and policy inference: 12885 fps total: 7367 epoch: 47/10000 frames: 753664
+saving next best rewards:  [-303.38]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 14096 fps step and policy inference: 12574 fps total: 7297 epoch: 48/10000 frames: 770048
+saving next best rewards:  [-294.48]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 13656 fps step and policy inference: 12291 fps total: 7176 epoch: 49/10000 frames: 786432
+saving next best rewards:  [-287.12]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 13603 fps step and policy inference: 10669 fps total: 6597 epoch: 50/10000 frames: 802816
+saving next best rewards:  [-219.37]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 13622 fps step and policy inference: 10112 fps total: 6405 epoch: 51/10000 frames: 819200
+saving next best rewards:  [-117.62]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 13863 fps step and policy inference: 10096 fps total: 6438 epoch: 52/10000 frames: 835584
+saving next best rewards:  [-73.91]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 13897 fps step and policy inference: 10029 fps total: 6288 epoch: 53/10000 frames: 851968
+saving next best rewards:  [-44.5]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 14291 fps step and policy inference: 10483 fps total: 6603 epoch: 54/10000 frames: 868352
+fps step: 14346 fps step and policy inference: 10131 fps total: 6404 epoch: 55/10000 frames: 884736
+saving next best rewards:  [-43.67]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 13637 fps step and policy inference: 10124 fps total: 6355 epoch: 56/10000 frames: 901120
+saving next best rewards:  [-39.1]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 13847 fps step and policy inference: 10747 fps total: 6595 epoch: 57/10000 frames: 917504
+fps step: 14164 fps step and policy inference: 11268 fps total: 6882 epoch: 58/10000 frames: 933888
+saving next best rewards:  [-17.84]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 14099 fps step and policy inference: 11112 fps total: 6652 epoch: 59/10000 frames: 950272
+saving next best rewards:  [15.7]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 13883 fps step and policy inference: 10026 fps total: 6254 epoch: 60/10000 frames: 966656
+saving next best rewards:  [77.12]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 13863 fps step and policy inference: 9385 fps total: 6069 epoch: 61/10000 frames: 983040
+saving next best rewards:  [140.17]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 14119 fps step and policy inference: 9741 fps total: 6267 epoch: 62/10000 frames: 999424
+saving next best rewards:  [194.08]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 13590 fps step and policy inference: 9498 fps total: 6231 epoch: 63/10000 frames: 1015808
+saving next best rewards:  [212.85]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 14301 fps step and policy inference: 10071 fps total: 6448 epoch: 64/10000 frames: 1032192
+saving next best rewards:  [220.81]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 13878 fps step and policy inference: 10075 fps total: 6294 epoch: 65/10000 frames: 1048576
+saving next best rewards:  [272.85]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 13833 fps step and policy inference: 9751 fps total: 6256 epoch: 66/10000 frames: 1064960
+saving next best rewards:  [276.95]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 13745 fps step and policy inference: 9796 fps total: 6211 epoch: 67/10000 frames: 1081344
+saving next best rewards:  [282.26]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 14491 fps step and policy inference: 10030 fps total: 6434 epoch: 68/10000 frames: 1097728
+saving next best rewards:  [310.25]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 14342 fps step and policy inference: 10053 fps total: 6390 epoch: 69/10000 frames: 1114112
+saving next best rewards:  [390.38]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 13858 fps step and policy inference: 9812 fps total: 6303 epoch: 70/10000 frames: 1130496
+saving next best rewards:  [478.66]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 13981 fps step and policy inference: 9815 fps total: 6306 epoch: 71/10000 frames: 1146880
+saving next best rewards:  [540.56]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 12876 fps step and policy inference: 8990 fps total: 5877 epoch: 72/10000 frames: 1163264
+fps step: 12261 fps step and policy inference: 8150 fps total: 5166 epoch: 73/10000 frames: 1179648
+saving next best rewards:  [558.26]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 13273 fps step and policy inference: 8992 fps total: 5849 epoch: 74/10000 frames: 1196032
+saving next best rewards:  [691.76]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 13428 fps step and policy inference: 9569 fps total: 5996 epoch: 75/10000 frames: 1212416
+saving next best rewards:  [725.49]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 13701 fps step and policy inference: 9655 fps total: 6173 epoch: 76/10000 frames: 1228800
+saving next best rewards:  [788.7]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 13800 fps step and policy inference: 9710 fps total: 6238 epoch: 77/10000 frames: 1245184
+fps step: 13798 fps step and policy inference: 10033 fps total: 6418 epoch: 78/10000 frames: 1261568
+saving next best rewards:  [864.21]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 14262 fps step and policy inference: 10310 fps total: 6486 epoch: 79/10000 frames: 1277952
+fps step: 14090 fps step and policy inference: 9798 fps total: 6351 epoch: 80/10000 frames: 1294336
+saving next best rewards:  [879.08]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 14174 fps step and policy inference: 10077 fps total: 6464 epoch: 81/10000 frames: 1310720
+saving next best rewards:  [963.83]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 14429 fps step and policy inference: 10319 fps total: 6526 epoch: 82/10000 frames: 1327104
+saving next best rewards:  [1066.85]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 14043 fps step and policy inference: 9874 fps total: 6290 epoch: 83/10000 frames: 1343488
+saving next best rewards:  [1124.88]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 13874 fps step and policy inference: 10007 fps total: 6383 epoch: 84/10000 frames: 1359872
+saving next best rewards:  [1181.67]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 14278 fps step and policy inference: 10382 fps total: 6476 epoch: 85/10000 frames: 1376256
+saving next best rewards:  [1213.32]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 13994 fps step and policy inference: 9855 fps total: 6267 epoch: 86/10000 frames: 1392640
+saving next best rewards:  [1256.31]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 14086 fps step and policy inference: 9898 fps total: 6273 epoch: 87/10000 frames: 1409024
+saving next best rewards:  [1389.48]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 13889 fps step and policy inference: 9823 fps total: 6238 epoch: 88/10000 frames: 1425408
+saving next best rewards:  [1473.31]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 13884 fps step and policy inference: 10008 fps total: 6354 epoch: 89/10000 frames: 1441792
+saving next best rewards:  [1548.48]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 14217 fps step and policy inference: 9940 fps total: 6353 epoch: 90/10000 frames: 1458176
+saving next best rewards:  [1668.5]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al8_20260806_223132__08-06-22-31-35/nn/CapUnscrewAllegro_Al8_20260806_223132.pth'
+fps step: 14357 fps step and policy inference: 10521 fps total: 6500 epoch: 91/10000 frames: 1474560

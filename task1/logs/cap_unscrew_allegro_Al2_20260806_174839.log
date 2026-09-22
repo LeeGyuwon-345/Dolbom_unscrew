@@ -1,0 +1,503 @@
+Importing module 'gym_38' (/home/leegyuwon/Documents/isaacgym/python/isaacgym/_bindings/linux-x86_64/gym_38.so)
+Setting GYM_USD_PLUG_INFO_PATH to /home/leegyuwon/Documents/isaacgym/python/isaacgym/_bindings/linux-x86_64/usd/plugInfo.json
+PyTorch version 1.13.1+cu117
+Device count 1
+/home/leegyuwon/Documents/isaacgym/python/isaacgym/_bindings/src/gymtorch
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/hydra/_internal/hydra.py:119: UserWarning: Future Hydra versions will no longer change working directory at job runtime by default.
+See https://hydra.cc/docs/1.2/upgrades/1.1_to_1.2/changes_to_job_working_dir/ for more information.
+  ret = run_job(
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/torch/utils/cpp_extension.py:25: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+  from pkg_resources import packaging  # type: ignore[attr-defined]
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/pkg_resources/__init__.py:3154: DeprecationWarning: Deprecated call to `pkg_resources.declare_namespace('mpl_toolkits')`.
+Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages
+  declare_namespace(pkg)
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/pkg_resources/__init__.py:3154: DeprecationWarning: Deprecated call to `pkg_resources.declare_namespace('google')`.
+Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages
+  declare_namespace(pkg)
+Using /home/leegyuwon/.cache/torch_extensions/py38_cu117 as PyTorch extensions root...
+Emitting ninja build file /home/leegyuwon/.cache/torch_extensions/py38_cu117/gymtorch/build.ninja...
+Building extension module gymtorch...
+Allowing ninja to set a default number of workers... (overridable by setting the environment variable MAX_JOBS=N)
+ninja: no work to do.
+task: 
+    name: ResDexHandRH
+    physics_engine: physx
+    seed: 42
+    env: 
+        numEnvs: 512
+        dexhand: allegro
+        episodeLength: 1200
+        training: True
+        usePIDControl: False
+        rolloutStateInit: False
+        randomStateInit: True
+        dataIndices: [7]
+        obsFutureLength: 1
+        rolloutLen: None
+        rolloutBegin: None
+        clipObservations: 5.0
+        clipActions: 1.0
+        furniture: just_one_leg
+        frankaDofNoise: 0.25
+        targetLiftHeight: 0.05
+        distanceReward: 0.1
+        liftReward: 1.0
+        successReward: 1.0
+        aggregateMode: 3
+        tightenMethod: exp_decay
+        tightenFactor: 0.7
+        tightenSteps: 3200
+        actionScale: 1.0
+        useQuatRot: False
+        propDumpInfo: 
+            q_rh: 16
+            q_lh: 16
+            dq_rh: 16
+            dq_lh: 16
+            state_rh: 13
+            state_lh: 13
+            state_manip_obj_rh: 13
+            state_manip_obj_lh: 13
+            joint_state_rh: 273
+            joint_state_lh: 273
+            tip_force_rh: 15
+            tip_force_lh: 15
+            reward: 1
+        actionsMovingAverage: 1.0
+        translationScale: 1.0
+        orientationScale: 0.1
+        bimanual_mode: united
+        trajectory_dropout: 
+            enabled: False
+            mode: full_trajectory_free
+            schedule: linear
+            start_progress: 0.2
+            end_progress: 0.6
+            final_probability: 1.0
+            mask_scope: episode
+            append_availability_flag: False
+            curriculum_total_frames: 0
+            force_probability: -1.0
+            performance_gate: 
+                enabled: False
+                success_threshold: 0.7
+        trajectory_tracking_annealing: 
+            enabled: False
+            schedule: linear
+            start_progress: 0.3
+            end_progress: 0.7
+            final_scale: 0.0
+        observation: 
+            use_normalized_phase: False
+        propObsDim: 61
+        obsKeys: ['q', 'cos_q', 'sin_q', 'base_state']
+        privilegedObsDim: 53
+        privilegedObsKeys: ['dq', 'manip_obj_pos', 'manip_obj_quat', 'manip_obj_vel', 'manip_obj_ang_vel', 'tip_force', 'manip_obj_com', 'manip_obj_weight']
+        enableCameraSensors: False
+    sim: 
+        dt: 0.0166667
+        substeps: 2
+        up_axis: z
+        use_gpu_pipeline: True
+        gravity: [0.0, 0.0, -9.81]
+        physx: 
+            num_threads: 4
+            solver_type: 1
+            use_gpu: True
+            num_position_iterations: 8
+            num_velocity_iterations: 1
+            contact_offset: 0.005
+            rest_offset: 0.0
+            bounce_threshold_velocity: 0.2
+            max_depenetration_velocity: 1.0
+            default_buffer_size_multiplier: 5.0
+            max_gpu_contact_pairs: 1048576
+            num_subscenes: 4
+            contact_collection: 1
+    task: 
+        randomize: True
+        randomization_params: 
+            frequency: 32
+            sim_params: 
+                gravity: 
+                    operation: scaling
+                    schedule: linear_decay
+                    schedule_steps: 1920
+                    external_sample: 
+                        type: const_scale
+                        init_value: 0
+            actor_params: 
+                manip_obj: 
+                    color: True
+                    rigid_shape_properties: 
+                        friction: 
+                            num_buckets: 250
+                            operation: scaling
+                            schedule: linear_decay
+                            schedule_steps: 1920
+                            external_sample: 
+                                type: const_scale
+                                init_value: 3
+                                upper_bound: 6.0
+                                lower_bound: 1.0
+                manip_obj_rh: 
+                    color: True
+                    rigid_shape_properties: 
+                        friction: 
+                            num_buckets: 250
+                            operation: scaling
+                            schedule: linear_decay
+                            schedule_steps: 1920
+                            external_sample: 
+                                type: const_scale
+                                init_value: 3
+                                upper_bound: 6.0
+                                lower_bound: 1.0
+                manip_obj_lh: 
+                    color: True
+                    rigid_shape_properties: 
+                        friction: 
+                            num_buckets: 250
+                            operation: scaling
+                            schedule: linear_decay
+                            schedule_steps: 1920
+                            external_sample: 
+                                type: const_scale
+                                init_value: 3
+                                upper_bound: 6.0
+                                lower_bound: 1.0
+rl_train: 
+    params: 
+        seed: 42
+        algo: 
+            name: ppo
+        model: 
+            name: my_continuous_a2c_logstd
+        network: 
+            name: dict_obs_actor_critic
+            separate: False
+            space: 
+                continuous: 
+                    mu_activation: None
+                    sigma_activation: None
+                    mu_init: 
+                        name: default
+                    sigma_init: 
+                        name: const_initializer
+                        val: 0
+                    fixed_sigma: True
+            dict_feature_encoder: 
+                _target_: lib.nn.features.SimpleFeatureFusion
+                extractors: 
+                    privileged: 
+                        _target_: lib.nn.features.Identity
+                        input_dim: 53
+                    proprioception: 
+                        _target_: lib.nn.features.Identity
+                        input_dim: 61
+                    target: 
+                        _target_: lib.nn.features.Identity
+                        input_dim: 206
+                hidden_depth: 3
+                hidden_dim: 512
+                output_dim: 256
+                activation: swish
+                add_input_activation: False
+                add_output_activation: False
+            mlp: 
+                units: [256, 512, 128, 64]
+                activation: elu
+                d2rl: False
+                initializer: 
+                    name: default
+                regularizer: 
+                    name: None
+        load_checkpoint: False
+        load_path: 
+        dexhand: allegro
+        config: 
+            name: CapUnscrewAllegro_Al2_20260806_174839
+            full_experiment_name: CapUnscrewAllegro_Al2_20260806_174839
+            env_name: rlgpu
+            multi_gpu: False
+            ppo: True
+            mixed_precision: False
+            normalize_input: True
+            normalize_input_excluded_keys: []
+            normalize_value: True
+            use_pid_control: False
+            value_bootstrap: True
+            num_actors: 512
+            reward_shaper: 
+                scale_value: 1.0
+            normalize_advantage: True
+            gamma: 0.99
+            tau: 0.95
+            learning_rate: 0.0005
+            lr_schedule: adaptive
+            schedule_type: standard
+            kl_threshold: 0.008
+            score_to_win: 10000
+            max_epochs: 10000
+            early_stop_epochs: 9999999999999
+            save_best_after: 10
+            save_frequency: 100
+            print_stats: True
+            grad_norm: 1.0
+            entropy_coef: 0.0
+            truncate_grads: True
+            e_clip: 0.2
+            horizon_length: 32
+            minibatch_size: 1024
+            mini_epochs: 5
+            critic_coef: 4
+            clip_value: True
+            seq_len: 4
+            bounds_loss_coef: 0.0001
+            use_soft_clamp: True
+task_name: ResDexHandRH
+experiment: CapUnscrewAllegro_Al2_20260806_174839
+side: RH
+bimanual_mode: united
+dexhand: allegro
+rh_base_model_checkpoint: assets/imitator_rh_inspire.pth
+lh_base_model_checkpoint: assets/imitator_lh_inspire.pth
+num_envs: 512
+rolloutStateInit: False
+randomStateInit: True
+rolloutLen: None
+rolloutBegin: None
+learning_rate: 0.0005
+actionsMovingAverage: 1.0
+usePIDControl: False
+dataIndices: [7]
+seed: 42
+torch_deterministic: False
+max_iterations: 10000
+early_stop_epochs: 9999999999999
+physics_engine: physx
+pipeline: gpu
+sim_device: cuda:0
+rl_device: cuda:0
+graphics_device_id: 0
+num_threads: 4
+solver_type: 1
+num_subscenes: 4
+test: False
+save_rollouts: False
+save_successful_rollouts_only: True
+num_rollouts_to_save: 20000
+num_rollouts_to_run: 9999999999999
+min_episode_length: 20
+checkpoint: 
+from_ckpt_epoch: False
+sigma: 
+multi_gpu: False
+wandb_activate: False
+wandb_group: 
+wandb_name: CapUnscrewAllegro_Al2_20260806_174839
+wandb_entity: None
+wandb_project: None
+wandb_tags: []
+wandb_logcode_dir: 
+capture_video: False
+n_parallel_recorders: 8
+n_successful_videos_to_record: 50
+display: False
+headless: True
+Setting seed: 42
+Using rl_device: cuda:0
+Using sim_device: cuda:0
+{'name': 'CapUnscrewAllegro_Al2_20260806_174839', 'full_experiment_name': None, 'env_name': 'rlgpu', 'multi_gpu': False, 'ppo': True, 'mixed_precision': False, 'normalize_input': True, 'normalize_input_excluded_keys': [], 'normalize_value': True, 'use_pid_control': False, 'value_bootstrap': True, 'num_actors': 512, 'reward_shaper': {'scale_value': 1.0}, 'normalize_advantage': True, 'gamma': 0.99, 'tau': 0.95, 'learning_rate': 0.0005, 'lr_schedule': 'adaptive', 'schedule_type': 'standard', 'kl_threshold': 0.008, 'score_to_win': 10000, 'max_epochs': 10000, 'early_stop_epochs': 9999999999999, 'save_best_after': 10, 'save_frequency': 100, 'print_stats': True, 'grad_norm': 1.0, 'entropy_coef': 0.0, 'truncate_grads': True, 'e_clip': 0.2, 'horizon_length': 32, 'minibatch_size': 1024, 'mini_epochs': 5, 'critic_coef': 4, 'clip_value': True, 'seq_len': 4, 'bounds_loss_coef': 0.0001, 'use_soft_clamp': True, 'device': 'cuda:0', 'population_based_training': False, 'pbt_idx': None}
+self.seed = 42
+Started to train
+Exact experiment name requested from command line: CapUnscrewAllegro_Al2_20260806_174839__08-06-17-48-42
+[cap_grasp] mode=on | wrist=servo + finger policy | grasp=1.00s settle=0.50s hold=0.30s | wrist_sampler=topdown reach_min_fingers=2 reach_margin=0.020m thumb_required=True thumb_margin=0.025m opposition_min=Nonedeg | zero_triangle_xy=True thumb_mcp_outside_margin=off reject_palm_collision=True:0.002m r=0.045~0.075m z=0.040~0.095m palm_down_max=20.0deg side_contact_margin=0.010m finger_radius=0.012m probe_steps=4 thumb_contact_w=0.50 grip_w=1.00 closure_w=3.00 closure_err_max=0.75 near_w=2.00 require_gravity_for_hold=True hold_decay=3.00 penetration_penalty_w=3.00 penetration_tol=0.002m cap_pre_gravity_lock=True:teleport | pedestal=False lift=0.060m@1.50s/1.00s lift_success=0.016m level_w=1.00 level_cos_min=0.87 | resample_wrist_on_reset=False |
+[Warning] [carb.gym.plugin] useGpu is set, forcing single scene (0 subscenes)
+Not connected to PVD
++++ Using GPU PhysX
+Physics Engine: PhysX
+Physics Device: cuda:0
+GPU Pipeline: enabled
+[friction] hand=1.50 obj=1.50 유효(평균)=1.50  rolling 0.01/0.05 torsion 0.01/0.05
+Num dexhand Bodies: 21
+Num dexhand DOFs: 16
+[cap_grasp] cap-only demo override | envs=512 steps=360 cap_z=0.640m urdf=/home/leegyuwon/Documents/task1/assets/cap_only/cap_only.urdf
+[cap_unscrew] cap_lift<-cap_spin x3.183099e-03 (pitch 20.0mm/rev)  target=180deg  band=14.3~30.0mm (고정)  lift>=16.0mm
+[cap_unscrew] actions=22 (wrist ON + fingers 16)
+[cap_unscrew] curriculum reward | kc 0.4->1 (kd=0.997, /32 steps)  objective: unscrew=10.0 hold=4.0 near=2.0 pinch=2.0@8mm quality=2.0(대향 x 접촉/4, stable>=0.125) grip=1.0  constraints(xkc): pen=3.0 reverse=2.0 revang=2.0(ref=0.25) leash=0.3 palm=0.0 tpair=0.0 action=0.01
+[cap_grasp] contact bodies per finger: [('link_15.0', 'link_15.0_tip'), ('link_3.0', 'link_3.0_tip'), ('link_7.0', 'link_7.0_tip'), ('link_11.0', 'link_11.0_tip'), ('link_11.0', 'link_11.0_tip')]
+[grasp-init] grasp_al_r50.json 로드  비율 1.00  노이즈 0.0도  손목노이즈 0.0mm/0.0도  (사용자 제공 grasps.csv r50/h17 행. CSV joint_0..15 순차 -> ManipTrans 순서 재배열. RPY 고정축 XYZ 가정)
+WARNING: seq_len is deprecated, use seq_length instead
+seq_length: 4
+current training device: cuda:0
+build mlp: 256
+RunningMeanStd:  (1,)
+RunningMeanStd:  (53,)
+RunningMeanStd:  (61,)
+RunningMeanStd:  (206,)
+[traj_dropout] target dim=206, trajectory cols=46, keep(obj/bps)=160, mode=full_trajectory_free
+fps step: 12822 fps step and policy inference: 8067 fps total: 5622 epoch: 1/10000 frames: 0
+fps step: 25190 fps step and policy inference: 21932 fps total: 9747 epoch: 2/10000 frames: 16384
+fps step: 24595 fps step and policy inference: 21448 fps total: 9604 epoch: 3/10000 frames: 32768
+fps step: 22771 fps step and policy inference: 19742 fps total: 8741 epoch: 4/10000 frames: 49152
+fps step: 22429 fps step and policy inference: 19531 fps total: 8356 epoch: 5/10000 frames: 65536
+fps step: 24088 fps step and policy inference: 20970 fps total: 9505 epoch: 6/10000 frames: 81920
+fps step: 24584 fps step and policy inference: 21465 fps total: 9885 epoch: 7/10000 frames: 98304
+fps step: 23097 fps step and policy inference: 20255 fps total: 9550 epoch: 8/10000 frames: 114688
+fps step: 22949 fps step and policy inference: 20146 fps total: 9494 epoch: 9/10000 frames: 131072
+fps step: 21206 fps step and policy inference: 18664 fps total: 9093 epoch: 10/10000 frames: 147456
+fps step: 22063 fps step and policy inference: 19485 fps total: 9482 epoch: 11/10000 frames: 163840
+fps step: 24952 fps step and policy inference: 20499 fps total: 9663 epoch: 12/10000 frames: 180224
+saving next best rewards:  [-588.27]
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al2_20260806_174839__08-06-17-48-42/nn/CapUnscrewAllegro_Al2_20260806_174839.pth'
+fps step: 23615 fps step and policy inference: 20603 fps total: 9717 epoch: 13/10000 frames: 196608
+fps step: 24778 fps step and policy inference: 21383 fps total: 9736 epoch: 14/10000 frames: 212992
+fps step: 24576 fps step and policy inference: 21155 fps total: 9726 epoch: 15/10000 frames: 229376
+fps step: 24378 fps step and policy inference: 20909 fps total: 9584 epoch: 16/10000 frames: 245760
+fps step: 24571 fps step and policy inference: 21030 fps total: 9650 epoch: 17/10000 frames: 262144
+fps step: 24271 fps step and policy inference: 20880 fps total: 9761 epoch: 18/10000 frames: 278528
+fps step: 23788 fps step and policy inference: 20528 fps total: 9612 epoch: 19/10000 frames: 294912
+fps step: 23415 fps step and policy inference: 20348 fps total: 9455 epoch: 20/10000 frames: 311296
+fps step: 22983 fps step and policy inference: 19955 fps total: 9606 epoch: 21/10000 frames: 327680
+fps step: 22970 fps step and policy inference: 20021 fps total: 9543 epoch: 22/10000 frames: 344064
+fps step: 24095 fps step and policy inference: 19526 fps total: 9422 epoch: 23/10000 frames: 360448
+fps step: 25132 fps step and policy inference: 21657 fps total: 9490 epoch: 24/10000 frames: 376832
+fps step: 24916 fps step and policy inference: 21383 fps total: 9885 epoch: 25/10000 frames: 393216
+fps step: 23794 fps step and policy inference: 20520 fps total: 9635 epoch: 26/10000 frames: 409600
+fps step: 25013 fps step and policy inference: 21450 fps total: 9928 epoch: 27/10000 frames: 425984
+fps step: 24149 fps step and policy inference: 20863 fps total: 9717 epoch: 28/10000 frames: 442368
+fps step: 23152 fps step and policy inference: 20062 fps total: 9548 epoch: 29/10000 frames: 458752
+fps step: 23065 fps step and policy inference: 20102 fps total: 9500 epoch: 30/10000 frames: 475136
+fps step: 22868 fps step and policy inference: 19951 fps total: 9396 epoch: 31/10000 frames: 491520
+fps step: 22333 fps step and policy inference: 19558 fps total: 9242 epoch: 32/10000 frames: 507904
+fps step: 22622 fps step and policy inference: 19736 fps total: 9408 epoch: 33/10000 frames: 524288
+fps step: 22406 fps step and policy inference: 18226 fps total: 9002 epoch: 34/10000 frames: 540672
+fps step: 24722 fps step and policy inference: 21264 fps total: 9505 epoch: 35/10000 frames: 557056
+fps step: 24384 fps step and policy inference: 20965 fps total: 9563 epoch: 36/10000 frames: 573440
+fps step: 25662 fps step and policy inference: 22164 fps total: 9941 epoch: 37/10000 frames: 589824
+fps step: 24731 fps step and policy inference: 21409 fps total: 9694 epoch: 38/10000 frames: 606208
+fps step: 25182 fps step and policy inference: 21509 fps total: 9603 epoch: 39/10000 frames: 622592
+fps step: 24285 fps step and policy inference: 20508 fps total: 9206 epoch: 40/10000 frames: 638976
+fps step: 23816 fps step and policy inference: 20615 fps total: 9708 epoch: 41/10000 frames: 655360
+fps step: 22134 fps step and policy inference: 19112 fps total: 9044 epoch: 42/10000 frames: 671744
+fps step: 22074 fps step and policy inference: 19145 fps total: 8751 epoch: 43/10000 frames: 688128
+fps step: 21288 fps step and policy inference: 18424 fps total: 8553 epoch: 44/10000 frames: 704512
+fps step: 21180 fps step and policy inference: 17183 fps total: 8435 epoch: 45/10000 frames: 720896
+fps step: 23044 fps step and policy inference: 19714 fps total: 9301 epoch: 46/10000 frames: 737280
+fps step: 25090 fps step and policy inference: 21509 fps total: 9934 epoch: 47/10000 frames: 753664
+fps step: 25032 fps step and policy inference: 21642 fps total: 9246 epoch: 48/10000 frames: 770048
+fps step: 24561 fps step and policy inference: 20968 fps total: 9638 epoch: 49/10000 frames: 786432
+fps step: 25057 fps step and policy inference: 21620 fps total: 9796 epoch: 50/10000 frames: 802816
+fps step: 24838 fps step and policy inference: 21487 fps total: 9841 epoch: 51/10000 frames: 819200
+fps step: 24404 fps step and policy inference: 21246 fps total: 9707 epoch: 52/10000 frames: 835584
+fps step: 24037 fps step and policy inference: 20792 fps total: 9416 epoch: 53/10000 frames: 851968
+fps step: 21074 fps step and policy inference: 18189 fps total: 9056 epoch: 54/10000 frames: 868352
+fps step: 23330 fps step and policy inference: 20246 fps total: 9641 epoch: 55/10000 frames: 884736
+fps step: 23574 fps step and policy inference: 20630 fps total: 9801 epoch: 56/10000 frames: 901120
+fps step: 24565 fps step and policy inference: 19891 fps total: 9556 epoch: 57/10000 frames: 917504
+fps step: 24941 fps step and policy inference: 21345 fps total: 9770 epoch: 58/10000 frames: 933888
+fps step: 26024 fps step and policy inference: 22317 fps total: 10081 epoch: 59/10000 frames: 950272
+fps step: 25035 fps step and policy inference: 21314 fps total: 9747 epoch: 60/10000 frames: 966656
+fps step: 24625 fps step and policy inference: 21104 fps total: 9669 epoch: 61/10000 frames: 983040
+fps step: 24407 fps step and policy inference: 20978 fps total: 9716 epoch: 62/10000 frames: 999424
+fps step: 22438 fps step and policy inference: 19421 fps total: 9262 epoch: 63/10000 frames: 1015808
+fps step: 23055 fps step and policy inference: 19916 fps total: 9424 epoch: 64/10000 frames: 1032192
+fps step: 23126 fps step and policy inference: 20137 fps total: 9580 epoch: 65/10000 frames: 1048576
+fps step: 21271 fps step and policy inference: 18596 fps total: 9124 epoch: 66/10000 frames: 1064960
+fps step: 22222 fps step and policy inference: 19548 fps total: 8840 epoch: 67/10000 frames: 1081344
+fps step: 22551 fps step and policy inference: 18396 fps total: 9076 epoch: 68/10000 frames: 1097728
+fps step: 24467 fps step and policy inference: 21061 fps total: 9709 epoch: 69/10000 frames: 1114112
+fps step: 24874 fps step and policy inference: 21503 fps total: 9870 epoch: 70/10000 frames: 1130496
+fps step: 25477 fps step and policy inference: 21952 fps total: 9789 epoch: 71/10000 frames: 1146880
+fps step: 24199 fps step and policy inference: 20808 fps total: 9461 epoch: 72/10000 frames: 1163264
+fps step: 23491 fps step and policy inference: 20364 fps total: 9091 epoch: 73/10000 frames: 1179648
+fps step: 22913 fps step and policy inference: 19665 fps total: 9138 epoch: 74/10000 frames: 1196032
+fps step: 22812 fps step and policy inference: 19596 fps total: 9092 epoch: 75/10000 frames: 1212416
+fps step: 23873 fps step and policy inference: 20809 fps total: 9660 epoch: 76/10000 frames: 1228800
+fps step: 23245 fps step and policy inference: 20193 fps total: 9519 epoch: 77/10000 frames: 1245184
+fps step: 22998 fps step and policy inference: 19963 fps total: 9239 epoch: 78/10000 frames: 1261568
+fps step: 24809 fps step and policy inference: 20226 fps total: 9712 epoch: 79/10000 frames: 1277952
+fps step: 25141 fps step and policy inference: 21560 fps total: 9841 epoch: 80/10000 frames: 1294336
+fps step: 25579 fps step and policy inference: 22060 fps total: 9913 epoch: 81/10000 frames: 1310720
+fps step: 25418 fps step and policy inference: 21830 fps total: 9818 epoch: 82/10000 frames: 1327104
+fps step: 24830 fps step and policy inference: 21413 fps total: 9723 epoch: 83/10000 frames: 1343488
+fps step: 24086 fps step and policy inference: 20748 fps total: 9433 epoch: 84/10000 frames: 1359872
+fps step: 23040 fps step and policy inference: 19873 fps total: 9347 epoch: 85/10000 frames: 1376256
+fps step: 22290 fps step and policy inference: 19276 fps total: 9146 epoch: 86/10000 frames: 1392640
+fps step: 21987 fps step and policy inference: 19090 fps total: 9130 epoch: 87/10000 frames: 1409024
+fps step: 21814 fps step and policy inference: 19092 fps total: 9281 epoch: 88/10000 frames: 1425408
+fps step: 22795 fps step and policy inference: 19831 fps total: 9556 epoch: 89/10000 frames: 1441792
+fps step: 23943 fps step and policy inference: 19570 fps total: 9467 epoch: 90/10000 frames: 1458176
+fps step: 26136 fps step and policy inference: 22721 fps total: 10142 epoch: 91/10000 frames: 1474560
+fps step: 24690 fps step and policy inference: 21166 fps total: 9712 epoch: 92/10000 frames: 1490944
+fps step: 25680 fps step and policy inference: 22120 fps total: 10078 epoch: 93/10000 frames: 1507328
+fps step: 26082 fps step and policy inference: 22442 fps total: 10082 epoch: 94/10000 frames: 1523712
+fps step: 26141 fps step and policy inference: 22367 fps total: 10012 epoch: 95/10000 frames: 1540096
+fps step: 26381 fps step and policy inference: 22742 fps total: 9927 epoch: 96/10000 frames: 1556480
+fps step: 25198 fps step and policy inference: 21679 fps total: 9856 epoch: 97/10000 frames: 1572864
+fps step: 25775 fps step and policy inference: 22198 fps total: 9736 epoch: 98/10000 frames: 1589248
+fps step: 25213 fps step and policy inference: 21740 fps total: 9810 epoch: 99/10000 frames: 1605632
+fps step: 25607 fps step and policy inference: 22259 fps total: 9994 epoch: 100/10000 frames: 1622016
+=> saving checkpoint 'runs/CapUnscrewAllegro_Al2_20260806_174839__08-06-17-48-42/nn/last_CapUnscrewAllegro_Al2_20260806_174839_ep_100_rew_-761.1658_sr_0.0_fr_1.0.pth'
+fps step: 22819 fps step and policy inference: 18850 fps total: 8908 epoch: 101/10000 frames: 1638400
+fps step: 26207 fps step and policy inference: 22477 fps total: 9984 epoch: 102/10000 frames: 1654784
+fps step: 25033 fps step and policy inference: 21482 fps total: 9710 epoch: 103/10000 frames: 1671168
+fps step: 24321 fps step and policy inference: 20858 fps total: 8798 epoch: 104/10000 frames: 1687552
+fps step: 22133 fps step and policy inference: 18924 fps total: 8460 epoch: 105/10000 frames: 1703936
+fps step: 21961 fps step and policy inference: 18787 fps total: 8523 epoch: 106/10000 frames: 1720320
+fps step: 23637 fps step and policy inference: 20133 fps total: 9182 epoch: 107/10000 frames: 1736704
+fps step: 22321 fps step and policy inference: 19150 fps total: 8873 epoch: 108/10000 frames: 1753088
+fps step: 22896 fps step and policy inference: 19851 fps total: 8792 epoch: 109/10000 frames: 1769472
+fps step: 23271 fps step and policy inference: 20267 fps total: 9507 epoch: 110/10000 frames: 1785856
+fps step: 22511 fps step and policy inference: 19267 fps total: 8879 epoch: 111/10000 frames: 1802240
+fps step: 22108 fps step and policy inference: 18936 fps total: 8853 epoch: 112/10000 frames: 1818624
+fps step: 23296 fps step and policy inference: 18790 fps total: 9066 epoch: 113/10000 frames: 1835008
+fps step: 24753 fps step and policy inference: 21256 fps total: 9688 epoch: 114/10000 frames: 1851392
+fps step: 25592 fps step and policy inference: 21894 fps total: 9962 epoch: 115/10000 frames: 1867776
+fps step: 24411 fps step and policy inference: 20933 fps total: 9277 epoch: 116/10000 frames: 1884160
+fps step: 24604 fps step and policy inference: 21266 fps total: 9563 epoch: 117/10000 frames: 1900544
+fps step: 25402 fps step and policy inference: 21943 fps total: 9011 epoch: 118/10000 frames: 1916928
+fps step: 23561 fps step and policy inference: 20308 fps total: 9303 epoch: 119/10000 frames: 1933312
+fps step: 24855 fps step and policy inference: 21301 fps total: 9789 epoch: 120/10000 frames: 1949696
+fps step: 24446 fps step and policy inference: 21068 fps total: 9624 epoch: 121/10000 frames: 1966080
+fps step: 23852 fps step and policy inference: 20635 fps total: 9261 epoch: 122/10000 frames: 1982464
+fps step: 22764 fps step and policy inference: 19469 fps total: 9149 epoch: 123/10000 frames: 1998848
+fps step: 23197 fps step and policy inference: 18997 fps total: 9182 epoch: 124/10000 frames: 2015232
+fps step: 23130 fps step and policy inference: 19734 fps total: 9046 epoch: 125/10000 frames: 2031616
+fps step: 23010 fps step and policy inference: 19923 fps total: 9299 epoch: 126/10000 frames: 2048000
+fps step: 23514 fps step and policy inference: 20147 fps total: 9531 epoch: 127/10000 frames: 2064384
+fps step: 23416 fps step and policy inference: 20217 fps total: 9343 epoch: 128/10000 frames: 2080768
+fps step: 23647 fps step and policy inference: 20477 fps total: 9580 epoch: 129/10000 frames: 2097152
+fps step: 23874 fps step and policy inference: 20451 fps total: 9568 epoch: 130/10000 frames: 2113536
+fps step: 23018 fps step and policy inference: 19990 fps total: 8909 epoch: 131/10000 frames: 2129920
+fps step: 24008 fps step and policy inference: 20689 fps total: 9801 epoch: 132/10000 frames: 2146304
+fps step: 24517 fps step and policy inference: 21272 fps total: 9835 epoch: 133/10000 frames: 2162688
+fps step: 22072 fps step and policy inference: 19207 fps total: 9286 epoch: 134/10000 frames: 2179072
+fps step: 24064 fps step and policy inference: 19450 fps total: 9297 epoch: 135/10000 frames: 2195456
+fps step: 26162 fps step and policy inference: 22364 fps total: 9985 epoch: 136/10000 frames: 2211840
+fps step: 25234 fps step and policy inference: 21828 fps total: 9978 epoch: 137/10000 frames: 2228224
+fps step: 25725 fps step and policy inference: 22247 fps total: 9975 epoch: 138/10000 frames: 2244608
+fps step: 25529 fps step and policy inference: 21972 fps total: 9641 epoch: 139/10000 frames: 2260992
+fps step: 25991 fps step and policy inference: 22434 fps total: 10031 epoch: 140/10000 frames: 2277376
+fps step: 24729 fps step and policy inference: 21242 fps total: 9390 epoch: 141/10000 frames: 2293760
+fps step: 23594 fps step and policy inference: 20270 fps total: 9307 epoch: 142/10000 frames: 2310144
+fps step: 23751 fps step and policy inference: 20426 fps total: 9662 epoch: 143/10000 frames: 2326528
+fps step: 23492 fps step and policy inference: 20339 fps total: 9292 epoch: 144/10000 frames: 2342912
+fps step: 24803 fps step and policy inference: 21480 fps total: 9777 epoch: 145/10000 frames: 2359296
+fps step: 24112 fps step and policy inference: 19419 fps total: 9374 epoch: 146/10000 frames: 2375680
+fps step: 24410 fps step and policy inference: 20780 fps total: 9420 epoch: 147/10000 frames: 2392064
+fps step: 24327 fps step and policy inference: 20796 fps total: 9429 epoch: 148/10000 frames: 2408448
+fps step: 23995 fps step and policy inference: 20571 fps total: 9406 epoch: 149/10000 frames: 2424832
+fps step: 24635 fps step and policy inference: 21211 fps total: 9700 epoch: 150/10000 frames: 2441216
+fps step: 22807 fps step and policy inference: 19412 fps total: 8702 epoch: 151/10000 frames: 2457600
+fps step: 23587 fps step and policy inference: 20074 fps total: 9243 epoch: 152/10000 frames: 2473984
+fps step: 26310 fps step and policy inference: 22530 fps total: 10110 epoch: 153/10000 frames: 2490368
+fps step: 26132 fps step and policy inference: 22477 fps total: 9903 epoch: 154/10000 frames: 2506752
+fps step: 25092 fps step and policy inference: 21615 fps total: 9947 epoch: 155/10000 frames: 2523136
+fps step: 24996 fps step and policy inference: 21282 fps total: 9569 epoch: 156/10000 frames: 2539520
+fps step: 23234 fps step and policy inference: 19983 fps total: 8973 epoch: 157/10000 frames: 2555904
+fps step: 24812 fps step and policy inference: 19777 fps total: 9095 epoch: 158/10000 frames: 2572288

@@ -1,0 +1,27 @@
+Importing module 'gym_38' (/home/leegyuwon/Documents/isaacgym/python/isaacgym/_bindings/linux-x86_64/gym_38.so)
+Setting GYM_USD_PLUG_INFO_PATH to /home/leegyuwon/Documents/isaacgym/python/isaacgym/_bindings/linux-x86_64/usd/plugInfo.json
+PyTorch version 1.13.1+cu117
+Device count 1
+/home/leegyuwon/Documents/isaacgym/python/isaacgym/_bindings/src/gymtorch
+Using /home/leegyuwon/.cache/torch_extensions/py38_cu117 as PyTorch extensions root...
+Emitting ninja build file /home/leegyuwon/.cache/torch_extensions/py38_cu117/gymtorch/build.ninja...
+Building extension module gymtorch...
+Allowing ninja to set a default number of workers... (overridable by setting the environment variable MAX_JOBS=N)
+ninja: no work to do.
+Loading extension module gymtorch...
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+/home/leegyuwon/Documents/isaacgym/python/isaacgym/torch_utils.py:135: DeprecationWarning: `np.float` is a deprecated alias for the builtin `float`. To silence this warning, use `float` by itself. Doing this will not modify any behavior and is safe. If you specifically wanted the numpy scalar type, use `np.float64` here.
+Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
+  def get_axis_params(value, axis_idx, x_value=0., dtype=np.float, n_dims=3):
+Traceback (most recent call last):
+  File "main/dataset/mano2dexhand.py", line 612, in <module>
+    run(_parser, _parser.data_idx)
+  File "main/dataset/mano2dexhand.py", line 578, in run
+    demo_data = pack_data([demo_d[idx]], dexhand)
+  File "/home/leegyuwon/Documents/ManipTrans/main/dataset/oakink2_dataset_dexhand_rh.py", line 123, in __getitem__
+    right_hand_range = intersection(left_hand_range, right_hand_range)
+  File "/home/leegyuwon/Documents/ManipTrans/main/dataset/oakink2_dataset_dexhand_rh.py", line 116, in intersection
+    assert False, f"no intersection between {lst1} and {lst2}"
+AssertionError: no intersection between (2580, 2725) and (2757, 3101)

@@ -1,0 +1,2166 @@
+Importing module 'gym_38' (/home/leegyuwon/Documents/isaacgym/python/isaacgym/_bindings/linux-x86_64/gym_38.so)
+Setting GYM_USD_PLUG_INFO_PATH to /home/leegyuwon/Documents/isaacgym/python/isaacgym/_bindings/linux-x86_64/usd/plugInfo.json
+PyTorch version 1.13.1+cu117
+Device count 1
+/home/leegyuwon/Documents/isaacgym/python/isaacgym/_bindings/src/gymtorch
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/hydra/_internal/hydra.py:119: UserWarning: Future Hydra versions will no longer change working directory at job runtime by default.
+See https://hydra.cc/docs/1.2/upgrades/1.1_to_1.2/changes_to_job_working_dir/ for more information.
+  ret = run_job(
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/torch/utils/cpp_extension.py:25: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+  from pkg_resources import packaging  # type: ignore[attr-defined]
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/pkg_resources/__init__.py:3154: DeprecationWarning: Deprecated call to `pkg_resources.declare_namespace('mpl_toolkits')`.
+Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages
+  declare_namespace(pkg)
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/pkg_resources/__init__.py:3154: DeprecationWarning: Deprecated call to `pkg_resources.declare_namespace('google')`.
+Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages
+  declare_namespace(pkg)
+Using /home/leegyuwon/.cache/torch_extensions/py38_cu117 as PyTorch extensions root...
+Emitting ninja build file /home/leegyuwon/.cache/torch_extensions/py38_cu117/gymtorch/build.ninja...
+Building extension module gymtorch...
+Allowing ninja to set a default number of workers... (overridable by setting the environment variable MAX_JOBS=N)
+ninja: no work to do.
+task: 
+    name: ResDexHandRH
+    physics_engine: physx
+    seed: 42
+    env: 
+        numEnvs: 256
+        dexhand: dg5fs
+        episodeLength: 1200
+        training: True
+        usePIDControl: False
+        rolloutStateInit: False
+        randomStateInit: True
+        dataIndices: [7]
+        obsFutureLength: 1
+        rolloutLen: None
+        rolloutBegin: None
+        clipObservations: 5.0
+        clipActions: 1.0
+        furniture: just_one_leg
+        frankaDofNoise: 0.25
+        targetLiftHeight: 0.05
+        distanceReward: 0.1
+        liftReward: 1.0
+        successReward: 1.0
+        aggregateMode: 3
+        tightenMethod: exp_decay
+        tightenFactor: 0.7
+        tightenSteps: 3200
+        actionScale: 1.0
+        useQuatRot: False
+        propDumpInfo: 
+            q_rh: 20
+            q_lh: 20
+            dq_rh: 20
+            dq_lh: 20
+            state_rh: 13
+            state_lh: 13
+            state_manip_obj_rh: 13
+            state_manip_obj_lh: 13
+            joint_state_rh: 338
+            joint_state_lh: 338
+            tip_force_rh: 15
+            tip_force_lh: 15
+            reward: 1
+        actionsMovingAverage: 1.0
+        translationScale: 1.0
+        orientationScale: 0.1
+        bimanual_mode: united
+        trajectory_dropout: 
+            enabled: False
+            mode: full_trajectory_free
+            schedule: linear
+            start_progress: 0.2
+            end_progress: 0.6
+            final_probability: 1.0
+            mask_scope: episode
+            append_availability_flag: False
+            curriculum_total_frames: 0
+            force_probability: -1.0
+            performance_gate: 
+                enabled: False
+                success_threshold: 0.7
+        trajectory_tracking_annealing: 
+            enabled: False
+            schedule: linear
+            start_progress: 0.3
+            end_progress: 0.7
+            final_scale: 0.0
+        observation: 
+            use_normalized_phase: False
+        propObsDim: 73
+        obsKeys: ['q', 'cos_q', 'sin_q', 'base_state']
+        privilegedObsDim: 57
+        privilegedObsKeys: ['dq', 'manip_obj_pos', 'manip_obj_quat', 'manip_obj_vel', 'manip_obj_ang_vel', 'tip_force', 'manip_obj_com', 'manip_obj_weight']
+        enableCameraSensors: False
+    sim: 
+        dt: 0.0166667
+        substeps: 2
+        up_axis: z
+        use_gpu_pipeline: True
+        gravity: [0.0, 0.0, -9.81]
+        physx: 
+            num_threads: 4
+            solver_type: 1
+            use_gpu: True
+            num_position_iterations: 8
+            num_velocity_iterations: 1
+            contact_offset: 0.005
+            rest_offset: 0.0
+            bounce_threshold_velocity: 0.2
+            max_depenetration_velocity: 1.0
+            default_buffer_size_multiplier: 5.0
+            max_gpu_contact_pairs: 1048576
+            num_subscenes: 4
+            contact_collection: 1
+    task: 
+        randomize: True
+        randomization_params: 
+            frequency: 32
+            sim_params: 
+                gravity: 
+                    operation: scaling
+                    schedule: linear_decay
+                    schedule_steps: 1920
+                    external_sample: 
+                        type: const_scale
+                        init_value: 0
+            actor_params: 
+                manip_obj: 
+                    color: True
+                    rigid_shape_properties: 
+                        friction: 
+                            num_buckets: 250
+                            operation: scaling
+                            schedule: linear_decay
+                            schedule_steps: 1920
+                            external_sample: 
+                                type: const_scale
+                                init_value: 3
+                                upper_bound: 6.0
+                                lower_bound: 1.0
+                manip_obj_rh: 
+                    color: True
+                    rigid_shape_properties: 
+                        friction: 
+                            num_buckets: 250
+                            operation: scaling
+                            schedule: linear_decay
+                            schedule_steps: 1920
+                            external_sample: 
+                                type: const_scale
+                                init_value: 3
+                                upper_bound: 6.0
+                                lower_bound: 1.0
+                manip_obj_lh: 
+                    color: True
+                    rigid_shape_properties: 
+                        friction: 
+                            num_buckets: 250
+                            operation: scaling
+                            schedule: linear_decay
+                            schedule_steps: 1920
+                            external_sample: 
+                                type: const_scale
+                                init_value: 3
+                                upper_bound: 6.0
+                                lower_bound: 1.0
+rl_train: 
+    params: 
+        seed: 42
+        algo: 
+            name: ppo
+        model: 
+            name: my_continuous_a2c_logstd
+        network: 
+            name: dict_obs_actor_critic
+            separate: False
+            space: 
+                continuous: 
+                    mu_activation: None
+                    sigma_activation: None
+                    mu_init: 
+                        name: default
+                    sigma_init: 
+                        name: const_initializer
+                        val: 0
+                    fixed_sigma: True
+            dict_feature_encoder: 
+                _target_: lib.nn.features.SimpleFeatureFusion
+                extractors: 
+                    privileged: 
+                        _target_: lib.nn.features.Identity
+                        input_dim: 57
+                    proprioception: 
+                        _target_: lib.nn.features.Identity
+                        input_dim: 73
+                    target: 
+                        _target_: lib.nn.features.Identity
+                        input_dim: 215
+                hidden_depth: 3
+                hidden_dim: 512
+                output_dim: 256
+                activation: swish
+                add_input_activation: False
+                add_output_activation: False
+            mlp: 
+                units: [256, 512, 128, 64]
+                activation: elu
+                d2rl: False
+                initializer: 
+                    name: default
+                regularizer: 
+                    name: None
+        load_checkpoint: True
+        load_path: /home/leegyuwon/Documents/ManipTrans/runs/CapUnscrewCurrDG5FS_Geo1_20260804_111330__08-04-11-13-33/nn/last_CapUnscrewCurrDG5FS_Geo1_20260804_111330_ep_1200_rew_2064.0256_sr_0.0_fr_1.0.pth
+        dexhand: dg5fs
+        config: 
+            name: CapUnscrewCurrDG5FS_OrbitCheck_20260804_120722
+            full_experiment_name: CapUnscrewCurrDG5FS_OrbitCheck_20260804_120722
+            env_name: rlgpu
+            multi_gpu: False
+            ppo: True
+            mixed_precision: False
+            normalize_input: True
+            normalize_input_excluded_keys: []
+            normalize_value: True
+            use_pid_control: False
+            value_bootstrap: True
+            num_actors: 256
+            reward_shaper: 
+                scale_value: 1.0
+            normalize_advantage: True
+            gamma: 0.99
+            tau: 0.95
+            learning_rate: 0.0005
+            lr_schedule: adaptive
+            schedule_type: standard
+            kl_threshold: 0.008
+            score_to_win: 10000
+            max_epochs: 25
+            early_stop_epochs: 9999999999999
+            save_best_after: 10
+            save_frequency: 100
+            print_stats: True
+            grad_norm: 1.0
+            entropy_coef: 0.0
+            truncate_grads: True
+            e_clip: 0.2
+            horizon_length: 32
+            minibatch_size: 1024
+            mini_epochs: 5
+            critic_coef: 4
+            clip_value: True
+            seq_len: 4
+            bounds_loss_coef: 0.0001
+            use_soft_clamp: True
+task_name: ResDexHandRH
+experiment: CapUnscrewCurrDG5FS_OrbitCheck_20260804_120722
+side: RH
+bimanual_mode: united
+dexhand: dg5fs
+rh_base_model_checkpoint: assets/imitator_rh_inspire.pth
+lh_base_model_checkpoint: assets/imitator_lh_inspire.pth
+num_envs: 256
+rolloutStateInit: False
+randomStateInit: True
+rolloutLen: None
+rolloutBegin: None
+learning_rate: 0.0005
+actionsMovingAverage: 1.0
+usePIDControl: False
+dataIndices: [7]
+seed: 42
+torch_deterministic: False
+max_iterations: 25
+early_stop_epochs: 9999999999999
+physics_engine: physx
+pipeline: gpu
+sim_device: cuda:0
+rl_device: cuda:0
+graphics_device_id: 0
+num_threads: 4
+solver_type: 1
+num_subscenes: 4
+test: False
+save_rollouts: False
+save_successful_rollouts_only: True
+num_rollouts_to_save: 20000
+num_rollouts_to_run: 9999999999999
+min_episode_length: 20
+checkpoint: /home/leegyuwon/Documents/ManipTrans/runs/CapUnscrewCurrDG5FS_Geo1_20260804_111330__08-04-11-13-33/nn/last_CapUnscrewCurrDG5FS_Geo1_20260804_111330_ep_1200_rew_2064.0256_sr_0.0_fr_1.0.pth
+from_ckpt_epoch: False
+sigma: 
+multi_gpu: False
+wandb_activate: False
+wandb_group: 
+wandb_name: CapUnscrewCurrDG5FS_OrbitCheck_20260804_120722
+wandb_entity: None
+wandb_project: None
+wandb_tags: []
+wandb_logcode_dir: 
+capture_video: False
+n_parallel_recorders: 8
+n_successful_videos_to_record: 50
+display: False
+headless: True
+Setting seed: 42
+Using rl_device: cuda:0
+Using sim_device: cuda:0
+{'name': 'CapUnscrewCurrDG5FS_OrbitCheck_20260804_120722', 'full_experiment_name': None, 'env_name': 'rlgpu', 'multi_gpu': False, 'ppo': True, 'mixed_precision': False, 'normalize_input': True, 'normalize_input_excluded_keys': [], 'normalize_value': True, 'use_pid_control': False, 'value_bootstrap': True, 'num_actors': 256, 'reward_shaper': {'scale_value': 1.0}, 'normalize_advantage': True, 'gamma': 0.99, 'tau': 0.95, 'learning_rate': 0.0005, 'lr_schedule': 'adaptive', 'schedule_type': 'standard', 'kl_threshold': 0.008, 'score_to_win': 10000, 'max_epochs': 25, 'early_stop_epochs': 9999999999999, 'save_best_after': 10, 'save_frequency': 100, 'print_stats': True, 'grad_norm': 1.0, 'entropy_coef': 0.0, 'truncate_grads': True, 'e_clip': 0.2, 'horizon_length': 32, 'minibatch_size': 1024, 'mini_epochs': 5, 'critic_coef': 4, 'clip_value': True, 'seq_len': 4, 'bounds_loss_coef': 0.0001, 'use_soft_clamp': True, 'device': 'cuda:0', 'population_based_training': False, 'pbt_idx': None}
+self.seed = 42
+Started to train
+Exact experiment name requested from command line: CapUnscrewCurrDG5FS_OrbitCheck_20260804_120722__08-04-12-07-25
+[cap_grasp] mode=on | wrist=servo + finger policy | grasp=1.00s settle=0.50s hold=0.30s | wrist_sampler=topdown reach_min_fingers=2 reach_margin=0.020m thumb_required=True thumb_margin=0.025m opposition_min=Nonedeg | zero_triangle_xy=True thumb_mcp_outside_margin=off reject_palm_collision=True:0.002m r=0.045~0.075m z=0.040~0.095m palm_down_max=20.0deg side_contact_margin=0.010m finger_radius=0.008m probe_steps=4 thumb_contact_w=0.50 grip_w=1.00 closure_w=3.00 closure_err_max=0.75 near_w=2.00 require_gravity_for_hold=True hold_decay=3.00 penetration_penalty_w=3.00 penetration_tol=0.002m cap_pre_gravity_lock=True:teleport | pedestal=False lift=0.060m@1.50s/1.00s lift_success=0.016m level_w=1.00 level_cos_min=0.87 | resample_wrist_on_reset=True |
+[Warning] [carb.gym.plugin] useGpu is set, forcing single scene (0 subscenes)
+Not connected to PVD
++++ Using GPU PhysX
+Physics Engine: PhysX
+Physics Device: cuda:0
+GPU Pipeline: enabled
+Num dexhand Bodies: 26
+Num dexhand DOFs: 20
+[cap_grasp] cap-only demo override | envs=256 steps=360 cap_z=0.640m urdf=/home/leegyuwon/Documents/task1/assets/cap_only/cap_only.urdf
+[cap_unscrew] cap_lift<-cap_spin x3.183099e-03 (pitch 20.0mm/rev)  target=180deg  band=14.3~30.0mm (고정)  lift>=16.0mm
+[cap_unscrew] actions=26 (wrist ON + fingers 20)
+[cap_unscrew] curriculum reward | kc 0.4->1 (kd=0.997, /32 steps)  objective: unscrew=10.0 hold=4.0 near=2.0 pinch=2.0@8mm quality=2.0(대향 x 접촉/4, stable>=0.125) grip=1.0  constraints(xkc): pen=3.0 reverse=2.0 revang=2.0(ref=0.25) leash=0.3 palm=0.0 tpair=0.0 action=0.01
+[cap_grasp] contact bodies per finger: [('link_1_4', 'link_1_tip'), ('link_2_4', 'link_2_tip'), ('link_3_4', 'link_3_tip'), ('link_4_4', 'link_4_tip'), ('link_5_4', 'link_5_tip')]
+WARNING: seq_len is deprecated, use seq_length instead
+seq_length: 4
+current training device: cuda:0
+build mlp: 256
+RunningMeanStd:  (1,)
+RunningMeanStd:  (57,)
+RunningMeanStd:  (73,)
+RunningMeanStd:  (215,)
+=> loading checkpoint '/home/leegyuwon/Documents/ManipTrans/runs/CapUnscrewCurrDG5FS_Geo1_20260804_111330__08-04-11-13-33/nn/last_CapUnscrewCurrDG5FS_Geo1_20260804_111330_ep_1200_rew_2064.0256_sr_0.0_fr_1.0.pth'
+[traj_dropout] target dim=215, trajectory cols=46, keep(obj/bps)=169, mode=full_trajectory_free
+[unscrew-diag] 10 steps  TOTAL=-2.336/step  kc=0.400  |  unscrew=+0.000  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.800  near=+0.254  pinch=+0.001  press=+0.001  -oppose=-0.578  -quality=-0.800  -grip=-0.400  -pen=-0.001  -reverse=-0.012  -revang=-0.001  -leash=-0.000
+[unscrew-diag] raw접촉=0.41 밴드내=0.15 손바닥면=0.68(cos +0.40) 인정=0.00 대향=0%  풀림=1.7deg 상승=0.10mm 손목거리=56mm 손목높이=+162mm (초기 캡윗면기준 20~100 평균 60mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 3.47mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.000m/s  캡 표면 0.000m/s  차이 0.000m/s  전달률 0%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -4.243 rad/s  절대평균 5.227  비율 0.81   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.500Nm (yaw -0.104)  힘 12.6N   캡 각속도 +0.135rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 -9.3deg  캡 회전 25.4deg  공전비 -0.37   (1.0=캡과 함께 공전, 0=제자리 자전)   n=16
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 0.11mm 실제 0.10mm 오차 0.007mm  드라이브 +1.4N (한계 200N)  캡 z힘 -0.0N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 38%  검지 23%  중지 9%  약지 7%  새끼 34%  전체 22%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 0%/+0.23/37.4/55.2  검지 0%/+0.26/178.7/152.5  중지 0%/+0.45/152.1/116.9  약지 0%/+0.33/146.6/119.4  새끼 0%/+0.74/54.9/58.2
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 0.00mm  최대 3.47mm  10mm 도달 0%  현재 대비 +0.00mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=41 풀림중앙 0 | 60~120도 n=38 풀림중앙 0 | 120~180도 n=50 풀림중앙 0 | 180~240도 n=41 풀림중앙 0 | 240~300도 n=42 풀림중앙 0 | 300~360도 n=44 풀림중앙 0
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 0 / 중앙 0 / 75% 0 / 최대 63deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -53(-124~61)  검지 12(-63~98)  중지 10(-63~98)  약지 8(-63~93)  새끼 -27(-92~72)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 170  검지-중지 60  중지-약지 25  약지-새끼 104
+[unscrew-diag] 손끝거리=26.2mm (엄지 37.4mm 최근접 54.9mm) 손바닥각=37deg
+[unscrew-diag] tip최소간격=29.1mm 엄지-검지=180.6mm 엄지-중지=171.3mm 방위각 엄지-검지 34deg 엄지-중지 46deg (기준 90deg)  품질=0.000 파지유지=0.00
+[unscrew-diag]   손목 캡 안(116개): tip간격 29.2mm 밴드접촉 0.19  |  캡 밖(140개): tip간격 29.1mm 밴드접촉 0.12
+[unscrew-diag] 10 steps  TOTAL=-2.100/step  kc=0.400  |  unscrew=+0.000  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.800  near=+0.332  pinch=+0.007  press=+0.002  -oppose=-0.394  -quality=-0.800  -grip=-0.400  -pen=-0.014  -reverse=-0.014  -revang=-0.002  -leash=-0.018
+[unscrew-diag] raw접촉=0.13 밴드내=0.06 손바닥면=1.19(cos +0.38) 인정=0.01 대향=0%  풀림=2.6deg 상승=0.15mm 손목거리=113mm 손목높이=+193mm (초기 캡윗면기준 20~100 평균 60mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 5.93mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 -0.012m/s  캡 표면 0.061m/s  차이 -0.074m/s  전달률 12238492%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 +2.469 rad/s  절대평균 4.166  비율 0.59   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.444Nm (yaw +0.045)  힘 11.3N   캡 각속도 +0.081rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 -29.1deg  캡 회전 32.3deg  공전비 -0.90   (1.0=캡과 함께 공전, 0=제자리 자전)   n=20
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 0.16mm 실제 0.15mm 오차 0.005mm  드라이브 +1.0N (한계 200N)  캡 z힘 -0.1N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 53%  검지 27%  중지 13%  약지 6%  새끼 45%  전체 29%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 1%/+0.18/94.6/92.6  검지 0%/+0.43/136.4/139.2  중지 0%/+0.60/121.8/119.3  약지 0%/+0.27/150.4/148.2  새끼 0%/+0.41/99.6/112.4
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 0.00mm  최대 5.93mm  10mm 도달 0%  현재 대비 -0.01mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=41 풀림중앙 0 | 60~120도 n=38 풀림중앙 0 | 120~180도 n=50 풀림중앙 0 | 180~240도 n=41 풀림중앙 0 | 240~300도 n=42 풀림중앙 0 | 300~360도 n=44 풀림중앙 0
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 0 / 중앙 0 / 75% 0 / 최대 108deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -119(-134~-101)  검지 10(-63~79)  중지 -14(-56~60)  약지 -11(-59~53)  새끼 -67(-93~-30)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 208  검지-중지 75  중지-약지 43  약지-새끼 115
+[unscrew-diag] 손끝거리=73.7mm (엄지 94.6mm 최근접 89.7mm) 손바닥각=27deg
+[unscrew-diag] tip최소간격=50.5mm 엄지-검지=223.3mm 엄지-중지=205.7mm 방위각 엄지-검지 106deg 엄지-중지 105deg (기준 90deg)  품질=0.002 파지유지=0.00
+[unscrew-diag]   손목 캡 안(16개): tip간격 61.6mm 밴드접촉 0.25  |  캡 밖(240개): tip간격 49.7mm 밴드접촉 0.05
+[unscrew-diag] 10 steps  TOTAL=-1.697/step  kc=0.400  |  unscrew=+0.000  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.794  near=+0.492  pinch=+0.054  press=+0.005  -oppose=-0.145  -quality=-0.794  -grip=-0.400  -pen=-0.065  -reverse=-0.015  -revang=-0.003  -leash=-0.034
+[unscrew-diag] raw접촉=0.27 밴드내=0.31 손바닥면=2.21(cos +0.53) 인정=0.07 대향=1%  풀림=3.2deg 상승=0.19mm 손목거리=111mm 손목높이=+190mm (초기 캡윗면기준 20~100 평균 60mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 7.15mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.067m/s  캡 표면 0.212m/s  차이 -0.144m/s  전달률 314%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -0.108 rad/s  절대평균 2.844  비율 0.04   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.415Nm (yaw +0.055)  힘 10.7N   캡 각속도 +0.081rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 -29.3deg  캡 회전 32.2deg  공전비 -0.91   (1.0=캡과 함께 공전, 0=제자리 자전)   n=26
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 0.21mm 실제 0.19mm 오차 0.019mm  드라이브 +3.8N (한계 200N)  캡 z힘 -0.6N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 49%  검지 31%  중지 14%  약지 11%  새끼 42%  전체 29%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 5%/+0.33/79.8/81.6  검지 0%/+0.69/81.0/102.0  중지 0%/+0.69/86.8/98.1  약지 1%/+0.51/108.3/118.2  새끼 1%/+0.44/75.5/96.4
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 0.00mm  최대 7.15mm  10mm 도달 0%  현재 대비 -0.01mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=41 풀림중앙 0 | 60~120도 n=38 풀림중앙 0 | 120~180도 n=50 풀림중앙 0 | 180~240도 n=41 풀림중앙 0 | 240~300도 n=42 풀림중앙 0 | 300~360도 n=44 풀림중앙 0
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 0 / 중앙 0 / 75% 0 / 최대 130deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -135(-152~-107)  검지 45(-83~65)  중지 7(-36~41)  약지 -12(-46~24)  새끼 -57(-79~-17)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 167  검지-중지 58  중지-약지 42  약지-새끼 91
+[unscrew-diag] 손끝거리=51.9mm (엄지 79.8mm 최근접 59.5mm) 손바닥각=23deg
+[unscrew-diag] tip최소간격=47.6mm 엄지-검지=181.7mm 엄지-중지=191.0mm 방위각 엄지-검지 121deg 엄지-중지 125deg (기준 90deg)  품질=0.015 파지유지=0.02
+[unscrew-diag]   손목 캡 안(6개): tip간격 94.0mm 밴드접촉 0.17  |  캡 밖(250개): tip간격 46.5mm 밴드접촉 0.32
+fps step: 5099 fps step and policy inference: 3532 fps total: 2551 epoch: 1/25 frames: 0
+[unscrew-diag] 10 steps  TOTAL=-1.414/step  kc=0.401  |  unscrew=+0.002  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.794  near=+0.723  pinch=+0.106  press=+0.010  -oppose=-0.103  -quality=-0.795  -grip=-0.399  -pen=-0.109  -reverse=-0.030  -revang=-0.003  -leash=-0.020
+[unscrew-diag] raw접촉=0.25 밴드내=0.23 손바닥면=3.09(cos +0.68) 인정=0.04 대향=0%  풀림=4.0deg 상승=0.24mm 손목거리=86mm 손목높이=+187mm (초기 캡윗면기준 20~100 평균 60mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 4.34mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 -0.110m/s  캡 표면 -0.064m/s  차이 -0.047m/s  전달률 -57558781%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -2.021 rad/s  절대평균 3.667  비율 0.55   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.422Nm (yaw -0.064)  힘 9.9N   캡 각속도 +0.007rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 -25.4deg  캡 회전 30.2deg  공전비 -0.84   (1.0=캡과 함께 공전, 0=제자리 자전)   n=33
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 0.24mm 실제 0.24mm 오차 0.001mm  드라이브 +0.2N (한계 200N)  캡 z힘 -0.1N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 49%  검지 38%  중지 14%  약지 13%  새끼 41%  전체 31%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 1%/+0.32/51.4/78.1  검지 0%/+0.81/67.4/90.2  중지 0%/+0.88/74.9/77.5  약지 1%/+0.77/79.6/78.7  새끼 1%/+0.63/47.6/67.1
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 0.00mm  최대 7.15mm  10mm 도달 0%  현재 대비 -0.04mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=41 풀림중앙 0 | 60~120도 n=38 풀림중앙 0 | 120~180도 n=50 풀림중앙 0 | 180~240도 n=41 풀림중앙 0 | 240~300도 n=42 풀림중앙 0 | 300~360도 n=44 풀림중앙 0
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 0 / 중앙 0 / 75% 0 / 최대 79deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -107(-166~155)  검지 31(8~49)  중지 -16(-39~11)  약지 -38(-59~-1)  새끼 -72(-90~-24)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 121  검지-중지 71  중지-약지 38  약지-새끼 65
+[unscrew-diag] 손끝거리=34.9mm (엄지 51.4mm 최근접 41.4mm) 손바닥각=32deg
+[unscrew-diag] tip최소간격=44.0mm 엄지-검지=138.6mm 엄지-중지=175.3mm 방위각 엄지-검지 114deg 엄지-중지 134deg (기준 90deg)  품질=0.004 파지유지=0.00
+[unscrew-diag]   손목 캡 안(21개): tip간격 26.1mm 밴드접촉 0.57  |  캡 밖(235개): tip간격 45.6mm 밴드접촉 0.20
+[unscrew-diag] 10 steps  TOTAL=-1.411/step  kc=0.401  |  unscrew=+0.001  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.800  near=+0.849  pinch=+0.081  press=+0.007  -oppose=-0.090  -quality=-0.800  -grip=-0.400  -pen=-0.235  -reverse=-0.015  -revang=-0.004  -leash=-0.007
+[unscrew-diag] raw접촉=0.45 밴드내=0.61 손바닥면=3.15(cos +0.67) 인정=0.15 대향=0%  풀림=4.6deg 상승=0.27mm 손목거리=79mm 손목높이=+186mm (초기 캡윗면기준 20~100 평균 60mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 4.24mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.058m/s  캡 표면 0.027m/s  차이 0.031m/s  전달률 47%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 +0.167 rad/s  절대평균 1.801  비율 0.09   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.413Nm (yaw +0.053)  힘 9.4N   캡 각속도 +0.078rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 -2.5deg  캡 회전 31.8deg  공전비 -0.08   (1.0=캡과 함께 공전, 0=제자리 자전)   n=37
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 0.27mm 실제 0.27mm 오차 0.008mm  드라이브 +1.6N (한계 200N)  캡 z힘 -0.2N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 45%  검지 35%  중지 14%  약지 15%  새끼 42%  전체 30%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 1%/+0.14/38.3/72.8  검지 0%/+0.77/57.7/78.7  중지 0%/+0.90/72.1/62.1  약지 5%/+0.83/70.4/60.8  새끼 9%/+0.70/45.5/57.1
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 0.00mm  최대 7.15mm  10mm 도달 0%  현재 대비 -0.06mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=41 풀림중앙 0 | 60~120도 n=38 풀림중앙 0 | 120~180도 n=50 풀림중앙 0 | 180~240도 n=41 풀림중앙 0 | 240~300도 n=42 풀림중앙 0 | 300~360도 n=44 풀림중앙 0
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 0 / 중앙 0 / 75% 0 / 최대 78deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -77(-164~166)  검지 -11(-37~33)  중지 -36(-57~9)  약지 -56(-69~-6)  새끼 -80(-98~-29)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 105  검지-중지 58  중지-약지 36  약지-새끼 54
+[unscrew-diag] 손끝거리=27.8mm (엄지 38.3mm 최근접 37.9mm) 손바닥각=34deg
+[unscrew-diag] tip최소간격=37.0mm 엄지-검지=120.3mm 엄지-중지=157.5mm 방위각 엄지-검지 123deg 엄지-중지 132deg (기준 90deg)  품질=0.004 파지유지=0.00
+[unscrew-diag]   손목 캡 안(13개): tip간격 18.8mm 밴드접촉 1.23  |  캡 밖(243개): tip간격 37.9mm 밴드접촉 0.58
+[unscrew-diag] 10 steps  TOTAL=-1.362/step  kc=0.401  |  unscrew=+0.002  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.796  near=+0.961  pinch=+0.164  press=+0.030  -oppose=-0.112  -quality=-0.791  -grip=-0.399  -pen=-0.389  -reverse=-0.024  -revang=-0.004  -leash=-0.005
+[unscrew-diag] raw접촉=0.70 밴드내=0.91 손바닥면=2.89(cos +0.66) 인정=0.30 대향=2%  풀림=7.8deg 상승=0.44mm 손목거리=82mm 손목높이=+183mm (초기 캡윗면기준 20~100 평균 60mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 4.61mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.120m/s  캡 표면 0.066m/s  차이 0.054m/s  전달률 55%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 +0.458 rad/s  절대평균 2.108  비율 0.22   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.409Nm (yaw +0.083)  힘 9.4N   캡 각속도 +0.724rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +0.3deg  캡 회전 32.7deg  공전비 0.01   (1.0=캡과 함께 공전, 0=제자리 자전)   n=64
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 0.48mm 실제 0.44mm 오차 0.038mm  드라이브 +7.6N (한계 200N)  캡 z힘 -0.3N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 42%  검지 35%  중지 14%  약지 16%  새끼 42%  전체 30%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 4%/+0.23/34.7/68.1  검지 0%/+0.65/57.7/74.4  중지 0%/+0.91/64.4/54.4  약지 14%/+0.80/64.1/55.6  새끼 11%/+0.70/45.1/53.4
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 0.00mm  최대 7.15mm  10mm 도달 0%  현재 대비 -0.06mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=41 풀림중앙 0 | 60~120도 n=38 풀림중앙 12 | 120~180도 n=50 풀림중앙 0 | 180~240도 n=41 풀림중앙 0 | 240~300도 n=42 풀림중앙 0 | 300~360도 n=44 풀림중앙 0
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 0 / 중앙 0 / 75% 8 / 최대 83deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -136(-164~161)  검지 -4(-59~40)  중지 -30(-68~17)  약지 -56(-80~-2)  새끼 -74(-106~-20)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 100  검지-중지 55  중지-약지 34  약지-새끼 33
+[unscrew-diag] 손끝거리=26.2mm (엄지 34.7mm 최근접 33.2mm) 손바닥각=34deg
+[unscrew-diag] tip최소간격=34.9mm 엄지-검지=114.2mm 엄지-중지=149.3mm 방위각 엄지-검지 112deg 엄지-중지 131deg (기준 90deg)  품질=0.018 파지유지=0.01
+[unscrew-diag]   손목 캡 안(23개): tip간격 16.8mm 밴드접촉 1.00  |  캡 밖(233개): tip간격 36.7mm 밴드접촉 0.90
+fps step: 6780 fps step and policy inference: 6295 fps total: 3745 epoch: 2/25 frames: 8192
+[unscrew-diag] 10 steps  TOTAL=-1.420/step  kc=0.402  |  unscrew=+0.005  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.791  near=+1.037  pinch=+0.199  press=+0.056  -oppose=-0.123  -quality=-0.784  -grip=-0.397  -pen=-0.561  -reverse=-0.050  -revang=-0.003  -leash=-0.008
+[unscrew-diag] raw접촉=0.83 밴드내=1.06 손바닥면=3.09(cos +0.68) 인정=0.34 대향=3%  풀림=13.2deg 상승=0.74mm 손목거리=80mm 손목높이=+179mm (초기 캡윗면기준 20~100 평균 60mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 5.32mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.100m/s  캡 표면 -0.011m/s  차이 0.111m/s  전달률 -11%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 +0.553 rad/s  절대평균 1.973  비율 0.28   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.416Nm (yaw +0.063)  힘 9.5N   캡 각속도 +0.500rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +7.6deg  캡 회전 38.7deg  공전비 0.20   (1.0=캡과 함께 공전, 0=제자리 자전)   n=86
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 0.76mm 실제 0.74mm 오차 0.028mm  드라이브 +5.6N (한계 200N)  캡 z힘 -0.3N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 41%  검지 34%  중지 14%  약지 17%  새끼 42%  전체 30%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 8%/+0.32/32.8/61.9  검지 0%/+0.64/57.8/73.4  중지 0%/+0.91/61.9/52.8  약지 15%/+0.78/60.1/55.6  새끼 11%/+0.75/44.3/50.2
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 0.10mm  최대 7.15mm  10mm 도달 0%  현재 대비 -0.08mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=41 풀림중앙 0 | 60~120도 n=38 풀림중앙 20 | 120~180도 n=50 풀림중앙 1 | 180~240도 n=41 풀림중앙 0 | 240~300도 n=42 풀림중앙 0 | 300~360도 n=44 풀림중앙 0
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 0 / 중앙 0 / 75% 18 / 최대 96deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -145(-167~160)  검지 14(-69~46)  중지 -10(-65~22)  약지 -30(-82~4)  새끼 -48(-105~-15)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 97  검지-중지 48  중지-약지 31  약지-새끼 27
+[unscrew-diag] 손끝거리=25.6mm (엄지 32.8mm 최근접 32.3mm) 손바닥각=32deg
+[unscrew-diag] tip최소간격=31.7mm 엄지-검지=112.9mm 엄지-중지=145.1mm 방위각 엄지-검지 110deg 엄지-중지 135deg (기준 90deg)  품질=0.030 파지유지=0.02
+[unscrew-diag]   손목 캡 안(36개): tip간격 19.2mm 밴드접촉 1.44  |  캡 밖(220개): tip간격 33.7mm 밴드접촉 1.00
+[unscrew-diag] 10 steps  TOTAL=-1.425/step  kc=0.402  |  unscrew=+0.012  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.786  near=+1.094  pinch=+0.241  press=+0.079  -oppose=-0.132  -quality=-0.777  -grip=-0.394  -pen=-0.670  -reverse=-0.078  -revang=-0.003  -leash=-0.011
+[unscrew-diag] raw접촉=1.07 밴드내=1.07 손바닥면=3.21(cos +0.69) 인정=0.38 대향=3%  풀림=20.5deg 상승=1.14mm 손목거리=78mm 손목높이=+176mm (초기 캡윗면기준 20~100 평균 60mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 6.81mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.078m/s  캡 표면 0.121m/s  차이 -0.042m/s  전달률 154%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 +0.324 rad/s  절대평균 2.129  비율 0.15   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.408Nm (yaw +0.032)  힘 9.7N   캡 각속도 +1.230rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 -0.2deg  캡 회전 42.3deg  공전비 -0.01   (1.0=캡과 함께 공전, 0=제자리 자전)   n=131
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 1.22mm 실제 1.14mm 오차 0.079mm  드라이브 +15.8N (한계 200N)  캡 z힘 -0.4N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 40%  검지 34%  중지 15%  약지 18%  새끼 42%  전체 29%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 7%/+0.35/31.2/56.6  검지 0%/+0.65/54.4/71.6  중지 1%/+0.90/58.2/52.1  약지 18%/+0.76/57.1/56.1  새끼 12%/+0.78/44.4/49.0
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 0.65mm  최대 7.15mm  10mm 도달 0%  현재 대비 -0.12mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=41 풀림중앙 1 | 60~120도 n=38 풀림중앙 34 | 120~180도 n=50 풀림중앙 2 | 180~240도 n=41 풀림중앙 0 | 240~300도 n=42 풀림중앙 8 | 300~360도 n=44 풀림중앙 2
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 0 / 중앙 8 / 75% 38 / 최대 123deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -154(-167~-34)  검지 24(-61~49)  중지 -1(-53~25)  약지 -22(-79~5)  새끼 -39(-96~-12)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 99  검지-중지 44  중지-약지 29  약지-새끼 24
+[unscrew-diag] 손끝거리=23.9mm (엄지 31.2mm 최근접 31.4mm) 손바닥각=31deg
+[unscrew-diag] tip최소간격=29.3mm 엄지-검지=112.9mm 엄지-중지=139.9mm 방위각 엄지-검지 112deg 엄지-중지 137deg (기준 90deg)  품질=0.025 파지유지=0.02
+[unscrew-diag]   손목 캡 안(42개): tip간격 19.5mm 밴드접촉 1.10  |  캡 밖(214개): tip간격 31.2mm 밴드접촉 1.07
+[unscrew-diag] 10 steps  TOTAL=-1.445/step  kc=0.402  |  unscrew=+0.020  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.783  near=+1.122  pinch=+0.241  press=+0.081  -oppose=-0.116  -quality=-0.780  -grip=-0.395  -pen=-0.743  -reverse=-0.078  -revang=-0.002  -leash=-0.011
+[unscrew-diag] raw접촉=1.04 밴드내=1.16 손바닥면=3.32(cos +0.69) 인정=0.39 대향=6%  풀림=29.7deg 상승=1.65mm 손목거리=75mm 손목높이=+175mm (초기 캡윗면기준 20~100 평균 60mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 7.22mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.086m/s  캡 표면 0.036m/s  차이 0.050m/s  전달률 42%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 +0.222 rad/s  절대평균 2.221  비율 0.10   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.425Nm (yaw -0.004)  힘 9.8N   캡 각속도 +0.713rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 -3.5deg  캡 회전 47.5deg  공전비 -0.07   (1.0=캡과 함께 공전, 0=제자리 자전)   n=162
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 1.70mm 실제 1.65mm 오차 0.044mm  드라이브 +8.8N (한계 200N)  캡 z힘 -0.8N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 40%  검지 33%  중지 15%  약지 17%  새끼 42%  전체 29%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 10%/+0.30/30.1/53.9  검지 0%/+0.69/52.3/69.6  중지 1%/+0.91/58.7/52.8  약지 19%/+0.76/58.3/57.8  새끼 10%/+0.81/44.7/49.1
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 1.30mm  최대 7.22mm  10mm 도달 0%  현재 대비 -0.14mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=41 풀림중앙 17 | 60~120도 n=38 풀림중앙 33 | 120~180도 n=50 풀림중앙 5 | 180~240도 n=41 풀림중앙 10 | 240~300도 n=42 풀림중앙 29 | 300~360도 n=44 풀림중앙 35
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 0 / 중앙 19 / 75% 52 / 최대 130deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -155(-166~-130)  검지 24(-40~50)  중지 0(-57~26)  약지 -19(-69~7)  새끼 -36(-92~-12)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 101  검지-중지 41  중지-약지 28  약지-새끼 24
+[unscrew-diag] 손끝거리=23.5mm (엄지 30.1mm 최근접 31.6mm) 손바닥각=30deg
+[unscrew-diag] tip최소간격=28.8mm 엄지-검지=115.5mm 엄지-중지=138.4mm 방위각 엄지-검지 119deg 엄지-중지 137deg (기준 90deg)  품질=0.042 파지유지=0.03
+[unscrew-diag]   손목 캡 안(47개): tip간격 21.1mm 밴드접촉 1.26  |  캡 밖(209개): tip간격 30.5mm 밴드접촉 1.14
+fps step: 6404 fps step and policy inference: 5971 fps total: 3666 epoch: 3/25 frames: 16384
+[unscrew-diag] 10 steps  TOTAL=-1.496/step  kc=0.403  |  unscrew=+0.020  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.777  near=+1.110  pinch=+0.255  press=+0.073  -oppose=-0.123  -quality=-0.777  -grip=-0.393  -pen=-0.747  -reverse=-0.124  -revang=-0.002  -leash=-0.011
+[unscrew-diag] raw접촉=1.09 밴드내=1.05 손바닥면=3.30(cos +0.68) 인정=0.38 대향=5%  풀림=36.3deg 상승=2.01mm 손목거리=75mm 손목높이=+175mm (초기 캡윗면기준 20~100 평균 60mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 7.23mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.063m/s  캡 표면 0.111m/s  차이 -0.048m/s  전달률 177%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -0.121 rad/s  절대평균 2.101  비율 0.06   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.424Nm (yaw -0.038)  힘 10.0N   캡 각속도 +0.543rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +7.2deg  캡 회전 51.4deg  공전비 0.14   (1.0=캡과 함께 공전, 0=제자리 자전)   n=182
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 2.05mm 실제 2.01mm 오차 0.031mm  드라이브 +6.2N (한계 200N)  캡 z힘 -0.8N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 41%  검지 32%  중지 15%  약지 17%  새끼 42%  전체 29%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 12%/+0.26/31.1/53.4  검지 0%/+0.71/55.4/69.2  중지 2%/+0.90/62.3/54.7  약지 16%/+0.73/63.3/60.9  새끼 7%/+0.81/48.3/51.2
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 2.26mm  최대 7.23mm  10mm 도달 0%  현재 대비 -0.22mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=41 풀림중앙 42 | 60~120도 n=38 풀림중앙 49 | 120~180도 n=50 풀림중앙 14 | 180~240도 n=41 풀림중앙 23 | 240~300도 n=42 풀림중앙 43 | 300~360도 n=44 풀림중앙 44
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 2 / 중앙 35 / 75% 61 / 최대 130deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -151(-163~-130)  검지 24(-44~50)  중지 -1(-60~25)  약지 -20(-72~5)  새끼 -37(-93~-14)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 102  검지-중지 39  중지-약지 28  약지-새끼 24
+[unscrew-diag] 손끝거리=25.8mm (엄지 31.1mm 최근접 37.0mm) 손바닥각=29deg
+[unscrew-diag] tip최소간격=28.4mm 엄지-검지=119.8mm 엄지-중지=137.0mm 방위각 엄지-검지 119deg 엄지-중지 132deg (기준 90deg)  품질=0.044 파지유지=0.04
+[unscrew-diag]   손목 캡 안(42개): tip간격 19.8mm 밴드접촉 1.07  |  캡 밖(214개): tip간격 30.1mm 밴드접촉 1.04
+[unscrew-diag] 10 steps  TOTAL=-1.516/step  kc=0.403  |  unscrew=+0.026  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.769  near=+1.093  pinch=+0.240  press=+0.083  -oppose=-0.143  -quality=-0.776  -grip=-0.395  -pen=-0.742  -reverse=-0.119  -revang=-0.002  -leash=-0.012
+[unscrew-diag] raw접촉=1.03 밴드내=1.02 손바닥면=3.29(cos +0.67) 인정=0.31 대향=4%  풀림=41.7deg 상승=2.32mm 손목거리=77mm 손목높이=+175mm (초기 캡윗면기준 20~100 평균 60mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 7.23mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.029m/s  캡 표면 0.016m/s  차이 0.014m/s  전달률 54%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -0.313 rad/s  절대평균 2.160  비율 0.15   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.423Nm (yaw -0.038)  힘 9.6N   캡 각속도 +0.160rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +3.9deg  캡 회전 58.6deg  공전비 0.07   (1.0=캡과 함께 공전, 0=제자리 자전)   n=183
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 2.34mm 실제 2.32mm 오차 0.025mm  드라이브 +4.9N (한계 200N)  캡 z힘 -0.6N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 41%  검지 31%  중지 16%  약지 17%  새끼 43%  전체 30%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 9%/+0.24/35.0/53.8  검지 0%/+0.71/62.2/70.6  중지 1%/+0.89/69.6/58.4  약지 15%/+0.69/72.3/66.3  새끼 7%/+0.82/54.4/53.6
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 2.95mm  최대 7.23mm  10mm 도달 0%  현재 대비 -0.32mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=41 풀림중앙 59 | 60~120도 n=38 풀림중앙 46 | 120~180도 n=50 풀림중앙 25 | 180~240도 n=41 풀림중앙 31 | 240~300도 n=42 풀림중앙 52 | 300~360도 n=44 풀림중앙 54
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 3 / 중앙 45 / 75% 67 / 최대 130deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -149(-164~-130)  검지 14(-46~50)  중지 -6(-60~26)  약지 -27(-75~8)  새끼 -44(-97~-10)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 105  검지-중지 37  중지-약지 27  약지-새끼 24
+[unscrew-diag] 손끝거리=30.6mm (엄지 35.0mm 최근접 43.9mm) 손바닥각=28deg
+[unscrew-diag] tip최소간격=29.7mm 엄지-검지=126.8mm 엄지-중지=138.6mm 방위각 엄지-검지 121deg 엄지-중지 129deg (기준 90deg)  품질=0.035 파지유지=0.05
+[unscrew-diag]   손목 캡 안(50개): tip간격 20.1mm 밴드접촉 1.26  |  캡 밖(206개): tip간격 32.0mm 밴드접촉 0.97
+[unscrew-diag] 10 steps  TOTAL=-1.651/step  kc=0.403  |  unscrew=+0.044  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.771  near=+1.037  pinch=+0.187  press=+0.074  -oppose=-0.175  -quality=-0.780  -grip=-0.395  -pen=-0.743  -reverse=-0.114  -revang=-0.002  -leash=-0.014
+[unscrew-diag] raw접촉=0.88 밴드내=0.88 손바닥면=3.15(cos +0.64) 인정=0.23 대향=3%  풀림=46.3deg 상승=2.57mm 손목거리=80mm 손목높이=+175mm (초기 캡윗면기준 20~100 평균 60mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 7.23mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.031m/s  캡 표면 0.079m/s  차이 -0.048m/s  전달률 252%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -0.711 rad/s  절대평균 1.948  비율 0.37   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.417Nm (yaw -0.058)  힘 9.9N   캡 각속도 +0.529rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +4.4deg  캡 회전 61.5deg  공전비 0.07   (1.0=캡과 함께 공전, 0=제자리 자전)   n=193
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 2.60mm 실제 2.57mm 오차 0.022mm  드라이브 +4.5N (한계 200N)  캡 z힘 -0.3N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 43%  검지 31%  중지 16%  약지 16%  새끼 44%  전체 30%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 5%/+0.18/40.7/55.6  검지 0%/+0.71/73.3/75.5  중지 1%/+0.86/79.7/64.5  약지 12%/+0.64/82.4/73.4  새끼 6%/+0.82/61.0/57.0
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 3.41mm  최대 7.23mm  10mm 도달 0%  현재 대비 -0.36mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=41 풀림중앙 65 | 60~120도 n=38 풀림중앙 40 | 120~180도 n=50 풀림중앙 22 | 180~240도 n=41 풀림중앙 37 | 240~300도 n=42 풀림중앙 55 | 300~360도 n=44 풀림중앙 58
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 12 / 중앙 52 / 75% 73 / 최대 130deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -147(-164~-123)  검지 9(-54~44)  중지 -13(-73~23)  약지 -31(-78~3)  새끼 -48(-99~-16)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 107  검지-중지 38  중지-약지 28  약지-새끼 26
+[unscrew-diag] 손끝거리=35.9mm (엄지 40.7mm 최근접 51.4mm) 손바닥각=28deg
+[unscrew-diag] tip최소간격=29.6mm 엄지-검지=133.3mm 엄지-중지=141.3mm 방위각 엄지-검지 121deg 엄지-중지 125deg (기준 90deg)  품질=0.021 파지유지=0.04
+[unscrew-diag]   손목 캡 안(55개): tip간격 19.6mm 밴드접촉 1.24  |  캡 밖(201개): tip간격 32.3mm 밴드접촉 0.78
+fps step: 6199 fps step and policy inference: 5785 fps total: 3545 epoch: 4/25 frames: 24576
+[unscrew-diag] 10 steps  TOTAL=-1.836/step  kc=0.404  |  unscrew=+0.033  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.781  near=+0.977  pinch=+0.159  press=+0.053  -oppose=-0.229  -quality=-0.789  -grip=-0.399  -pen=-0.741  -reverse=-0.100  -revang=-0.001  -leash=-0.017
+[unscrew-diag] raw접촉=0.90 밴드내=0.95 손바닥면=3.01(cos +0.60) 인정=0.27 대향=4%  풀림=49.7deg 상승=2.76mm 손목거리=84mm 손목높이=+176mm (초기 캡윗면기준 20~100 평균 60mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 7.23mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.025m/s  캡 표면 0.042m/s  차이 -0.017m/s  전달률 169%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -0.273 rad/s  절대평균 2.190  비율 0.12   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.422Nm (yaw -0.021)  힘 10.0N   캡 각속도 -0.025rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +7.3deg  캡 회전 62.8deg  공전비 0.12   (1.0=캡과 함께 공전, 0=제자리 자전)   n=203
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 2.78mm 실제 2.76mm 오차 0.013mm  드라이브 +2.6N (한계 200N)  캡 z힘 -0.4N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 44%  검지 29%  중지 16%  약지 15%  새끼 45%  전체 30%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 6%/+0.09/46.0/58.3  검지 0%/+0.68/84.7/80.1  중지 1%/+0.84/91.7/70.2  약지 12%/+0.58/96.1/81.0  새끼 7%/+0.81/70.1/61.9
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 3.70mm  최대 7.23mm  10mm 도달 0%  현재 대비 -0.38mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=41 풀림중앙 71 | 60~120도 n=38 풀림중앙 54 | 120~180도 n=50 풀림중앙 29 | 180~240도 n=41 풀림중앙 46 | 240~300도 n=42 풀림중앙 54 | 300~360도 n=44 풀림중앙 61
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 17 / 중앙 56 / 75% 76 / 최대 130deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -143(-160~-117)  검지 -4(-61~40)  중지 -24(-78~16)  약지 -46(-82~-2)  새끼 -62(-100~-19)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 111  검지-중지 38  중지-약지 29  약지-새끼 27
+[unscrew-diag] 손끝거리=39.7mm (엄지 46.0mm 최근접 58.9mm) 손바닥각=28deg
+[unscrew-diag] tip최소간격=31.0mm 엄지-검지=141.7mm 엄지-중지=144.9mm 방위각 엄지-검지 114deg 엄지-중지 115deg (기준 90deg)  품질=0.026 파지유지=0.03
+[unscrew-diag]   손목 캡 안(52개): tip간격 21.9mm 밴드접촉 1.29  |  캡 밖(204개): tip간격 33.3mm 밴드접촉 0.86
+[unscrew-diag] 10 steps  TOTAL=-1.929/step  kc=0.404  |  unscrew=+0.030  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.788  near=+0.904  pinch=+0.168  press=+0.052  -oppose=-0.285  -quality=-0.789  -grip=-0.398  -pen=-0.675  -reverse=-0.127  -revang=-0.001  -leash=-0.020
+[unscrew-diag] raw접촉=0.80 밴드내=0.82 손바닥면=2.79(cos +0.57) 인정=0.22 대향=3%  풀림=51.7deg 상승=2.87mm 손목거리=89mm 손목높이=+178mm (초기 캡윗면기준 20~100 평균 60mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 7.23mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.029m/s  캡 표면 0.002m/s  차이 0.027m/s  전달률 8%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -0.385 rad/s  절대평균 1.915  비율 0.20   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.419Nm (yaw -0.071)  힘 10.1N   캡 각속도 +0.053rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +5.6deg  캡 회전 64.4deg  공전비 0.09   (1.0=캡과 함께 공전, 0=제자리 자전)   n=206
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 2.89mm 실제 2.87mm 오차 0.017mm  드라이브 +3.4N (한계 200N)  캡 z힘 -0.3N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 46%  검지 29%  중지 16%  약지 14%  새끼 47%  전체 31%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 4%/+0.05/52.5/62.3  검지 0%/+0.66/100.7/87.7  중지 3%/+0.82/106.6/76.9  약지 11%/+0.53/113.0/89.8  새끼 5%/+0.79/80.1/66.2
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 3.90mm  최대 7.23mm  10mm 도달 0%  현재 대비 -0.46mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=41 풀림중앙 67 | 60~120도 n=38 풀림중앙 62 | 120~180도 n=50 풀림중앙 32 | 180~240도 n=41 풀림중앙 55 | 240~300도 n=42 풀림중앙 59 | 300~360도 n=44 풀림중앙 62
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 21 / 중앙 60 / 75% 76 / 최대 130deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -143(-159~-105)  검지 -19(-67~35)  중지 -38(-82~13)  약지 -54(-85~-7)  새끼 -71(-102~-23)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 117  검지-중지 39  중지-약지 29  약지-새끼 34
+[unscrew-diag] 손끝거리=45.7mm (엄지 52.5mm 최근접 69.4mm) 손바닥각=28deg
+[unscrew-diag] tip최소간격=33.4mm 엄지-검지=150.0mm 엄지-중지=150.1mm 방위각 엄지-검지 109deg 엄지-중지 107deg (기준 90deg)  품질=0.017 파지유지=0.02
+[unscrew-diag]   손목 캡 안(45개): tip간격 21.3mm 밴드접촉 1.22  |  캡 밖(211개): tip간격 36.0mm 밴드접촉 0.73
+[unscrew-diag] 10 steps  TOTAL=-2.072/step  kc=0.404  |  unscrew=+0.013  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.789  near=+0.823  pinch=+0.134  press=+0.042  -oppose=-0.353  -quality=-0.794  -grip=-0.400  -pen=-0.624  -reverse=-0.100  -revang=-0.001  -leash=-0.024
+[unscrew-diag] raw접촉=0.66 밴드내=0.70 손바닥면=2.55(cos +0.53) 인정=0.18 대향=4%  풀림=53.8deg 상승=2.99mm 손목거리=96mm 손목높이=+178mm (초기 캡윗면기준 20~100 평균 60mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 7.23mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.019m/s  캡 표면 0.089m/s  차이 -0.069m/s  전달률 461%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -0.380 rad/s  절대평균 1.922  비율 0.20   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.426Nm (yaw -0.057)  힘 10.3N   캡 각속도 +0.469rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +5.9deg  캡 회전 66.4deg  공전비 0.09   (1.0=캡과 함께 공전, 0=제자리 자전)   n=208
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 3.01mm 실제 2.99mm 오차 0.021mm  드라이브 +4.3N (한계 200N)  캡 z힘 -0.3N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 48%  검지 29%  중지 16%  약지 13%  새끼 48%  전체 31%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 5%/-0.01/59.3/65.6  검지 0%/+0.62/118.1/96.7  중지 0%/+0.79/123.0/85.4  약지 9%/+0.46/129.9/99.4  새끼 4%/+0.77/90.9/70.7
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 4.11mm  최대 7.23mm  10mm 도달 0%  현재 대비 -0.51mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=41 풀림중앙 72 | 60~120도 n=38 풀림중앙 64 | 120~180도 n=50 풀림중앙 35 | 180~240도 n=41 풀림중앙 36 | 240~300도 n=42 풀림중앙 63 | 300~360도 n=44 풀림중앙 62
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 23 / 중앙 63 / 75% 80 / 최대 130deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -137(-158~-97)  검지 -30(-71~26)  중지 -48(-85~8)  약지 -66(-87~-12)  새끼 -81(-103~-30)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 122  검지-중지 41  중지-약지 30  약지-새끼 41
+[unscrew-diag] 손끝거리=52.9mm (엄지 59.3mm 최근접 80.9mm) 손바닥각=29deg
+[unscrew-diag] tip최소간격=35.3mm 엄지-검지=161.0mm 엄지-중지=158.0mm 방위각 엄지-검지 103deg 엄지-중지 100deg (기준 90deg)  품질=0.023 파지유지=0.03
+[unscrew-diag]   손목 캡 안(39개): tip간격 22.5mm 밴드접촉 1.36  |  캡 밖(217개): tip간격 37.6mm 밴드접촉 0.58
+[unscrew-diag] 10 steps  TOTAL=-2.152/step  kc=0.406  |  unscrew=+0.017  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.794  near=+0.755  pinch=+0.116  press=+0.034  -oppose=-0.408  -quality=-0.796  -grip=-0.401  -pen=-0.559  -reverse=-0.085  -revang=-0.001  -leash=-0.030
+[unscrew-diag] raw접촉=0.60 밴드내=0.72 손바닥면=2.36(cos +0.49) 인정=0.19 대향=3%  풀림=55.3deg 상승=3.07mm 손목거리=104mm 손목높이=+178mm (초기 캡윗면기준 20~100 평균 60mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 7.23mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.028m/s  캡 표면 -0.083m/s  차이 0.111m/s  전달률 -297%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -0.476 rad/s  절대평균 1.909  비율 0.25   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.426Nm (yaw -0.041)  힘 10.2N   캡 각속도 -0.358rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +0.3deg  캡 회전 67.0deg  공전비 0.00   (1.0=캡과 함께 공전, 0=제자리 자전)   n=211
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 3.08mm 실제 3.07mm 오차 0.006mm  드라이브 +1.3N (한계 200N)  캡 z힘 -0.3N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 50%  검지 29%  중지 16%  약지 12%  새끼 49%  전체 31%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 4%/-0.04/66.4/69.4  검지 0%/+0.56/132.0/104.6  중지 2%/+0.78/137.1/91.6  약지 9%/+0.40/144.4/106.2  새끼 4%/+0.75/99.8/73.3
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 4.19mm  최대 7.23mm  10mm 도달 0%  현재 대비 -0.52mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=41 풀림중앙 73 | 60~120도 n=38 풀림중앙 64 | 120~180도 n=50 풀림중앙 35 | 180~240도 n=41 풀림중앙 42 | 240~300도 n=42 풀림중앙 69 | 300~360도 n=44 풀림중앙 66
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 26 / 중앙 64 / 75% 82 / 최대 130deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -134(-158~-87)  검지 -41(-72~17)  중지 -61(-86~-2)  약지 -72(-89~-23)  새끼 -88(-103~-40)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 130  검지-중지 51  중지-약지 31  약지-새끼 74
+[unscrew-diag] 손끝거리=60.1mm (엄지 66.4mm 최근접 91.3mm) 손바닥각=30deg
+[unscrew-diag] tip최소간격=36.9mm 엄지-검지=166.9mm 엄지-중지=163.5mm 방위각 엄지-검지 98deg 엄지-중지 94deg (기준 90deg)  품질=0.019 파지유지=0.02
+[unscrew-diag]   손목 캡 안(33개): tip간격 22.4mm 밴드접촉 1.00  |  캡 밖(223개): tip간격 39.0mm 밴드접촉 0.68
+fps step: 6265 fps step and policy inference: 5839 fps total: 3602 epoch: 5/25 frames: 32768
+[unscrew-diag] 10 steps  TOTAL=-2.201/step  kc=0.406  |  unscrew=+0.016  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.792  near=+0.691  pinch=+0.128  press=+0.044  -oppose=-0.468  -quality=-0.793  -grip=-0.399  -pen=-0.500  -reverse=-0.092  -revang=-0.001  -leash=-0.036
+[unscrew-diag] raw접촉=0.58 밴드내=0.66 손바닥면=2.23(cos +0.46) 인정=0.20 대향=3%  풀림=56.4deg 상승=3.13mm 손목거리=111mm 손목높이=+177mm (초기 캡윗면기준 20~100 평균 60mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 7.23mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.117m/s  캡 표면 0.093m/s  차이 0.024m/s  전달률 80%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -0.255 rad/s  절대평균 1.946  비율 0.13   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.431Nm (yaw -0.052)  힘 10.3N   캡 각속도 +0.167rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +1.9deg  캡 회전 66.9deg  공전비 0.03   (1.0=캡과 함께 공전, 0=제자리 자전)   n=216
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 3.15mm 실제 3.13mm 오차 0.014mm  드라이브 +2.9N (한계 200N)  캡 z힘 -0.2N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 52%  검지 29%  중지 17%  약지 11%  새끼 50%  전체 32%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 5%/-0.02/74.4/72.3  검지 0%/+0.51/146.5/111.1  중지 3%/+0.75/152.3/99.7  약지 8%/+0.33/161.6/116.4  새끼 5%/+0.73/111.7/79.1
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 4.22mm  최대 7.23mm  10mm 도달 0%  현재 대비 -0.55mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=41 풀림중앙 73 | 60~120도 n=38 풀림중앙 64 | 120~180도 n=50 풀림중앙 43 | 180~240도 n=41 풀림중앙 43 | 240~300도 n=42 풀림중앙 68 | 300~360도 n=44 풀림중앙 72
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 30 / 중앙 62 / 75% 83 / 최대 130deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -129(-155~-81)  검지 -54(-73~13)  중지 -74(-87~-7)  약지 -78(-90~-25)  새끼 -89(-105~-42)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 167  검지-중지 68  중지-약지 33  약지-새끼 101
+[unscrew-diag] 손끝거리=67.8mm (엄지 74.4mm 최근접 102.2mm) 손바닥각=31deg
+[unscrew-diag] tip최소간격=39.6mm 엄지-검지=174.4mm 엄지-중지=168.8mm 방위각 엄지-검지 90deg 엄지-중지 87deg (기준 90deg)  품질=0.021 파지유지=0.02
+[unscrew-diag]   손목 캡 안(38개): tip간격 21.7mm 밴드접촉 1.21  |  캡 밖(218개): tip간격 42.7mm 밴드접촉 0.56
+[unscrew-diag] 10 steps  TOTAL=-2.290/step  kc=0.406  |  unscrew=+0.016  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.795  near=+0.644  pinch=+0.117  press=+0.036  -oppose=-0.527  -quality=-0.798  -grip=-0.402  -pen=-0.460  -reverse=-0.078  -revang=-0.001  -leash=-0.042
+[unscrew-diag] raw접촉=0.53 밴드내=0.56 손바닥면=2.10(cos +0.43) 인정=0.18 대향=1%  풀림=59.0deg 상승=3.28mm 손목거리=119mm 손목높이=+176mm (초기 캡윗면기준 20~100 평균 60mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 7.23mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.039m/s  캡 표면 0.085m/s  차이 -0.047m/s  전달률 221%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -0.254 rad/s  절대평균 1.809  비율 0.14   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.428Nm (yaw -0.063)  힘 10.3N   캡 각속도 +0.273rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +3.2deg  캡 회전 69.2deg  공전비 0.05   (1.0=캡과 함께 공전, 0=제자리 자전)   n=219
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 3.30mm 실제 3.28mm 오차 0.020mm  드라이브 +3.9N (한계 200N)  캡 z힘 -0.3N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 53%  검지 29%  중지 17%  약지 10%  새끼 51%  전체 32%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 4%/-0.04/82.3/74.5  검지 0%/+0.46/160.3/119.4  중지 2%/+0.73/166.7/107.8  약지 9%/+0.27/175.8/125.4  새끼 4%/+0.72/122.3/82.5
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 4.25mm  최대 7.23mm  10mm 도달 0%  현재 대비 -0.50mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=41 풀림중앙 73 | 60~120도 n=38 풀림중앙 64 | 120~180도 n=50 풀림중앙 54 | 180~240도 n=41 풀림중앙 58 | 240~300도 n=42 풀림중앙 73 | 300~360도 n=44 풀림중앙 72
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 35 / 중앙 64 / 75% 84 / 최대 130deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -122(-156~-83)  검지 -58(-72~13)  중지 -76(-87~-8)  약지 -82(-90~-27)  새끼 -91(-105~-45)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 194  검지-중지 83  중지-약지 34  약지-새끼 122
+[unscrew-diag] 손끝거리=75.8mm (엄지 82.3mm 최근접 113.4mm) 손바닥각=31deg
+[unscrew-diag] tip최소간격=40.2mm 엄지-검지=181.6mm 엄지-중지=175.2mm 방위각 엄지-검지 87deg 엄지-중지 83deg (기준 90deg)  품질=0.013 파지유지=0.02
+[unscrew-diag]   손목 캡 안(28개): tip간격 21.9mm 밴드접촉 1.39  |  캡 밖(228개): tip간격 42.5mm 밴드접촉 0.46
+[unscrew-diag] 10 steps  TOTAL=-2.353/step  kc=0.406  |  unscrew=+0.022  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.799  near=+0.593  pinch=+0.110  press=+0.034  -oppose=-0.575  -quality=-0.796  -grip=-0.400  -pen=-0.419  -reverse=-0.072  -revang=-0.001  -leash=-0.049
+[unscrew-diag] raw접촉=0.50 밴드내=0.55 손바닥면=1.95(cos +0.39) 인정=0.18 대향=3%  풀림=60.6deg 상승=3.37mm 손목거리=127mm 손목높이=+174mm (초기 캡윗면기준 20~100 평균 60mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 7.23mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.038m/s  캡 표면 0.030m/s  차이 0.008m/s  전달률 80%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -0.267 rad/s  절대평균 1.732  비율 0.15   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.431Nm (yaw -0.055)  힘 10.6N   캡 각속도 +0.146rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +1.2deg  캡 회전 70.3deg  공전비 0.02   (1.0=캡과 함께 공전, 0=제자리 자전)   n=221
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 3.38mm 실제 3.37mm 오차 0.011mm  드라이브 +2.3N (한계 200N)  캡 z힘 -0.3N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 55%  검지 29%  중지 17%  약지 10%  새끼 52%  전체 32%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 4%/-0.07/89.8/75.4  검지 0%/+0.38/172.0/127.5  중지 2%/+0.71/180.4/115.3  약지 8%/+0.22/189.3/134.2  새끼 4%/+0.71/133.0/85.8
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 4.37mm  최대 7.23mm  10mm 도달 0%  현재 대비 -0.49mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=41 풀림중앙 77 | 60~120도 n=38 풀림중앙 75 | 120~180도 n=50 풀림중앙 57 | 180~240도 n=41 풀림중앙 53 | 240~300도 n=42 풀림중앙 73 | 300~360도 n=44 풀림중앙 76
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 36 / 중앙 67 / 75% 85 / 최대 130deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -113(-147~-82)  검지 -62(-74~7)  중지 -77(-87~-13)  약지 -82(-91~-32)  새끼 -90(-103~-51)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 201  검지-중지 84  중지-약지 35  약지-새끼 126
+[unscrew-diag] 손끝거리=82.6mm (엄지 89.8mm 최근접 123.9mm) 손바닥각=32deg
+[unscrew-diag] tip최소간격=40.9mm 엄지-검지=188.8mm 엄지-중지=181.2mm 방위각 엄지-검지 84deg 엄지-중지 80deg (기준 90deg)  품질=0.023 파지유지=0.02
+[unscrew-diag]   손목 캡 안(27개): tip간격 20.9mm 밴드접촉 1.74  |  캡 밖(229개): tip간격 43.2mm 밴드접촉 0.41
+fps step: 6519 fps step and policy inference: 6073 fps total: 3682 epoch: 6/25 frames: 40960
+[unscrew-diag] 10 steps  TOTAL=-2.445/step  kc=0.407  |  unscrew=+0.023  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.799  near=+0.541  pinch=+0.093  press=+0.030  -oppose=-0.624  -quality=-0.799  -grip=-0.402  -pen=-0.390  -reverse=-0.062  -revang=-0.001  -leash=-0.056
+[unscrew-diag] raw접촉=0.36 밴드내=0.50 손바닥면=1.79(cos +0.34) 인정=0.14 대향=2%  풀림=62.1deg 상승=3.45mm 손목거리=134mm 손목높이=+172mm (초기 캡윗면기준 20~100 평균 60mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 7.23mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 -0.014m/s  캡 표면 -0.044m/s  차이 0.029m/s  전달률 -161035675%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -0.286 rad/s  절대평균 1.734  비율 0.16   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.420Nm (yaw -0.071)  힘 10.6N   캡 각속도 +0.228rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +4.8deg  캡 회전 71.1deg  공전비 0.07   (1.0=캡과 함께 공전, 0=제자리 자전)   n=224
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 3.46mm 실제 3.45mm 오차 0.010mm  드라이브 +2.0N (한계 200N)  캡 z힘 -0.4N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 56%  검지 29%  중지 17%  약지 9%  새끼 53%  전체 33%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 3%/-0.11/96.6/74.6  검지 0%/+0.32/180.8/132.0  중지 2%/+0.65/192.4/122.1  약지 5%/+0.15/200.7/141.5  새끼 4%/+0.71/141.9/88.1
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 4.44mm  최대 7.23mm  10mm 도달 0%  현재 대비 -0.49mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=41 풀림중앙 82 | 60~120도 n=38 풀림중앙 73 | 120~180도 n=50 풀림중앙 64 | 180~240도 n=41 풀림중앙 50 | 240~300도 n=42 풀림중앙 73 | 300~360도 n=44 풀림중앙 76
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 36 / 중앙 69 / 75% 86 / 최대 130deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -114(-148~-84)  검지 -63(-76~-5)  중지 -78(-89~-25)  약지 -82(-92~-44)  새끼 -91(-104~-61)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 205  검지-중지 89  중지-약지 34  약지-새끼 128
+[unscrew-diag] 손끝거리=88.8mm (엄지 96.6mm 최근접 132.9mm) 손바닥각=33deg
+[unscrew-diag] tip최소간격=40.8mm 엄지-검지=192.8mm 엄지-중지=186.5mm 방위각 엄지-검지 80deg 엄지-중지 76deg (기준 90deg)  품질=0.014 파지유지=0.02
+[unscrew-diag]   손목 캡 안(22개): tip간격 19.8mm 밴드접촉 1.59  |  캡 밖(234개): tip간격 42.8mm 밴드접촉 0.40
+[unscrew-diag] 10 steps  TOTAL=-2.538/step  kc=0.407  |  unscrew=+0.012  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.803  near=+0.505  pinch=+0.088  press=+0.022  -oppose=-0.666  -quality=-0.803  -grip=-0.403  -pen=-0.359  -reverse=-0.070  -revang=-0.001  -leash=-0.060
+[unscrew-diag] raw접촉=0.30 밴드내=0.47 손바닥면=1.69(cos +0.32) 인정=0.11 대향=2%  풀림=63.3deg 상승=3.52mm 손목거리=139mm 손목높이=+171mm (초기 캡윗면기준 20~100 평균 60mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 7.23mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 -0.104m/s  캡 표면 0.012m/s  차이 -0.116m/s  전달률 31320609%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -0.473 rad/s  절대평균 1.736  비율 0.27   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.430Nm (yaw -0.061)  힘 10.6N   캡 각속도 +0.011rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +6.6deg  캡 회전 73.4deg  공전비 0.09   (1.0=캡과 함께 공전, 0=제자리 자전)   n=221
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 3.53mm 실제 3.52mm 오차 0.010mm  드라이브 +2.0N (한계 200N)  캡 z힘 -0.1N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 57%  검지 29%  중지 17%  약지 8%  새끼 53%  전체 33%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 2%/-0.11/102.3/74.4  검지 0%/+0.27/190.6/136.0  중지 1%/+0.63/202.4/126.5  약지 5%/+0.10/210.9/147.6  새끼 2%/+0.71/150.3/90.3
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 4.51mm  최대 7.23mm  10mm 도달 0%  현재 대비 -0.51mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=41 풀림중앙 82 | 60~120도 n=38 풀림중앙 74 | 120~180도 n=50 풀림중앙 63 | 180~240도 n=41 풀림중앙 58 | 240~300도 n=42 풀림중앙 73 | 300~360도 n=44 풀림중앙 76
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 39 / 중앙 72 / 75% 88 / 최대 130deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -108(-145~-81)  검지 -66(-76~-16)  중지 -81(-90~-32)  약지 -84(-93~-54)  새끼 -93(-105~-72)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 210  검지-중지 93  중지-약지 35  약지-새끼 131
+[unscrew-diag] 손끝거리=94.7mm (엄지 102.3mm 최근접 141.1mm) 손바닥각=33deg
+[unscrew-diag] tip최소간격=43.2mm 엄지-검지=196.4mm 엄지-중지=188.5mm 방위각 엄지-검지 75deg 엄지-중지 70deg (기준 90deg)  품질=0.008 파지유지=0.01
+[unscrew-diag]   손목 캡 안(21개): tip간격 24.5mm 밴드접촉 1.48  |  캡 밖(235개): tip간격 44.8mm 밴드접촉 0.38
+[unscrew-diag] 10 steps  TOTAL=-2.606/step  kc=0.407  |  unscrew=+0.012  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.804  near=+0.453  pinch=+0.069  press=+0.019  -oppose=-0.713  -quality=-0.805  -grip=-0.404  -pen=-0.319  -reverse=-0.049  -revang=-0.001  -leash=-0.064
+[unscrew-diag] raw접촉=0.24 밴드내=0.40 손바닥면=1.55(cos +0.29) 인정=0.09 대향=1%  풀림=64.7deg 상승=3.59mm 손목거리=144mm 손목높이=+170mm (초기 캡윗면기준 20~100 평균 60mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 7.23mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.126m/s  캡 표면 0.082m/s  차이 0.044m/s  전달률 65%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -0.234 rad/s  절대평균 1.586  비율 0.15   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.425Nm (yaw -0.041)  힘 10.9N   캡 각속도 +0.154rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +7.4deg  캡 회전 74.6deg  공전비 0.10   (1.0=캡과 함께 공전, 0=제자리 자전)   n=222
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 3.60mm 실제 3.59mm 오차 0.007mm  드라이브 +1.5N (한계 200N)  캡 z힘 -0.1N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 59%  검지 29%  중지 18%  약지 8%  새끼 54%  전체 34%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 2%/-0.17/106.7/75.8  검지 0%/+0.24/204.5/143.2  중지 0%/+0.63/216.3/133.3  약지 4%/+0.06/224.3/154.2  새끼 2%/+0.70/158.7/92.9
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 4.53mm  최대 7.23mm  10mm 도달 0%  현재 대비 -0.46mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=41 풀림중앙 83 | 60~120도 n=38 풀림중앙 75 | 120~180도 n=50 풀림중앙 63 | 180~240도 n=41 풀림중앙 58 | 240~300도 n=42 풀림중앙 73 | 300~360도 n=44 풀림중앙 82
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 43 / 중앙 73 / 75% 88 / 최대 130deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -105(-145~-81)  검지 -67(-77~-27)  중지 -82(-92~-47)  약지 -86(-94~-66)  새끼 -93(-105~-81)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 211  검지-중지 94  중지-약지 36  약지-새끼 131
+[unscrew-diag] 손끝거리=99.3mm (엄지 106.7mm 최근접 151.4mm) 손바닥각=34deg
+[unscrew-diag] tip최소간격=44.4mm 엄지-검지=200.9mm 엄지-중지=194.5mm 방위각 엄지-검지 70deg 엄지-중지 64deg (기준 90deg)  품질=0.009 파지유지=0.01
+[unscrew-diag]   손목 캡 안(17개): tip간격 23.6mm 밴드접촉 1.76  |  캡 밖(239개): tip간격 45.9mm 밴드접촉 0.30
+fps step: 6383 fps step and policy inference: 5944 fps total: 3599 epoch: 7/25 frames: 49152
+[unscrew-diag] 10 steps  TOTAL=-2.678/step  kc=0.408  |  unscrew=+0.012  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.803  near=+0.409  pinch=+0.062  press=+0.017  -oppose=-0.773  -quality=-0.806  -grip=-0.405  -pen=-0.267  -reverse=-0.055  -revang=-0.001  -leash=-0.068
+[unscrew-diag] raw접촉=0.21 밴드내=0.34 손바닥면=1.37(cos +0.26) 인정=0.08 대향=1%  풀림=64.8deg 상승=3.60mm 손목거리=151mm 손목높이=+169mm (초기 캡윗면기준 20~100 평균 60mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 7.23mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.027m/s  캡 표면 0.051m/s  차이 -0.024m/s  전달률 192%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 +0.232 rad/s  절대평균 1.738  비율 0.13   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.434Nm (yaw -0.027)  힘 10.9N   캡 각속도 -0.238rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +7.6deg  캡 회전 74.8deg  공전비 0.10   (1.0=캡과 함께 공전, 0=제자리 자전)   n=221
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 3.60mm 실제 3.60mm 오차 -0.007mm  드라이브 -1.4N (한계 200N)  캡 z힘 -0.2N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 60%  검지 30%  중지 18%  약지 7%  새끼 55%  전체 34%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 4%/-0.20/111.0/77.0  검지 0%/+0.20/212.6/149.5  중지 1%/+0.61/226.7/138.0  약지 2%/+0.03/235.0/159.1  새끼 1%/+0.68/165.3/93.7
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 4.54mm  최대 7.23mm  10mm 도달 0%  현재 대비 -0.49mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=41 풀림중앙 79 | 60~120도 n=38 풀림중앙 77 | 120~180도 n=50 풀림중앙 58 | 180~240도 n=41 풀림중앙 62 | 240~300도 n=42 풀림중앙 77 | 300~360도 n=44 풀림중앙 76
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 46 / 중앙 73 / 75% 88 / 최대 130deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -102(-138~-78)  검지 -67(-78~-45)  중지 -81(-92~-66)  약지 -86(-95~-74)  새끼 -92(-104~-82)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 212  검지-중지 94  중지-약지 36  약지-새끼 131
+[unscrew-diag] 손끝거리=102.6mm (엄지 111.0mm 최근접 157.4mm) 손바닥각=35deg
+[unscrew-diag] tip최소간격=45.0mm 엄지-검지=204.4mm 엄지-중지=200.0mm 방위각 엄지-검지 65deg 엄지-중지 61deg (기준 90deg)  품질=0.010 파지유지=0.01
+[unscrew-diag]   손목 캡 안(11개): tip간격 21.9mm 밴드접촉 1.45  |  캡 밖(245개): tip간격 46.0mm 밴드접촉 0.29
+[unscrew-diag] 10 steps  TOTAL=-2.695/step  kc=0.408  |  unscrew=+0.013  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.802  near=+0.377  pinch=+0.074  press=+0.016  -oppose=-0.800  -quality=-0.805  -grip=-0.405  -pen=-0.233  -reverse=-0.057  -revang=-0.001  -leash=-0.072
+[unscrew-diag] raw접촉=0.18 밴드내=0.34 손바닥면=1.32(cos +0.24) 인정=0.07 대향=1%  풀림=64.3deg 상승=3.58mm 손목거리=157mm 손목높이=+166mm (초기 캡윗면기준 20~100 평균 60mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 7.23mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.083m/s  캡 표면 0.252m/s  차이 -0.169m/s  전달률 304%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 +0.461 rad/s  절대평균 1.812  비율 0.25   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.426Nm (yaw -0.026)  힘 11.0N   캡 각속도 +0.178rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +8.4deg  캡 회전 75.4deg  공전비 0.11   (1.0=캡과 함께 공전, 0=제자리 자전)   n=218
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 3.58mm 실제 3.58mm 오차 -0.001mm  드라이브 -0.3N (한계 200N)  캡 z힘 -0.2N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 61%  검지 30%  중지 18%  약지 7%  새끼 55%  전체 34%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 3%/-0.23/115.5/75.7  검지 0%/+0.16/209.9/150.4  중지 0%/+0.58/229.3/139.2  약지 3%/+0.01/239.7/161.9  새끼 2%/+0.67/169.7/93.7
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 4.58mm  최대 7.23mm  10mm 도달 0%  현재 대비 -0.54mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=41 풀림중앙 83 | 60~120도 n=38 풀림중앙 79 | 120~180도 n=50 풀림중앙 62 | 180~240도 n=41 풀림중앙 58 | 240~300도 n=42 풀림중앙 74 | 300~360도 n=44 풀림중앙 82
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 45 / 중앙 73 / 75% 89 / 최대 130deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -103(-134~-82)  검지 -66(-77~-50)  중지 -80(-90~-68)  약지 -85(-93~-74)  새끼 -93(-104~-82)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 213  검지-중지 95  중지-약지 36  약지-새끼 132
+[unscrew-diag] 손끝거리=106.6mm (엄지 115.5mm 최근접 160.1mm) 손바닥각=35deg
+[unscrew-diag] tip최소간격=46.3mm 엄지-검지=206.2mm 엄지-중지=202.0mm 방위각 엄지-검지 63deg 엄지-중지 58deg (기준 90deg)  품질=0.009 파지유지=0.02
+[unscrew-diag]   손목 캡 안(10개): tip간격 20.6mm 밴드접촉 1.80  |  캡 밖(246개): tip간격 47.3mm 밴드접촉 0.28
+[unscrew-diag] 10 steps  TOTAL=-2.653/step  kc=0.408  |  unscrew=+0.016  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.803  near=+0.355  pinch=+0.074  press=+0.014  -oppose=-0.784  -quality=-0.809  -grip=-0.406  -pen=-0.192  -reverse=-0.041  -revang=-0.001  -leash=-0.076
+[unscrew-diag] raw접촉=0.15 밴드내=0.22 손바닥면=1.26(cos +0.22) 인정=0.05 대향=1%  풀림=64.6deg 상승=3.59mm 손목거리=163mm 손목높이=+164mm (초기 캡윗면기준 20~100 평균 60mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 7.23mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.115m/s  캡 표면 0.091m/s  차이 0.024m/s  전달률 79%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 +0.167 rad/s  절대평균 1.590  비율 0.10   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.422Nm (yaw -0.046)  힘 10.7N   캡 각속도 +0.223rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +7.3deg  캡 회전 76.7deg  공전비 0.10   (1.0=캡과 함께 공전, 0=제자리 자전)   n=215
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 3.59mm 실제 3.59mm 오차 -0.000mm  드라이브 -0.1N (한계 200N)  캡 z힘 -0.1N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 61%  검지 29%  중지 18%  약지 7%  새끼 55%  전체 34%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 2%/-0.21/121.7/73.5  검지 0%/+0.09/206.0/150.8  중지 0%/+0.54/231.3/142.2  약지 2%/-0.03/242.4/165.5  새끼 1%/+0.69/175.1/94.5
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 4.59mm  최대 7.23mm  10mm 도달 0%  현재 대비 -0.56mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=41 풀림중앙 79 | 60~120도 n=38 풀림중앙 79 | 120~180도 n=50 풀림중앙 64 | 180~240도 n=41 풀림중앙 59 | 240~300도 n=42 풀림중앙 75 | 300~360도 n=44 풀림중앙 82
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 45 / 중앙 73 / 75% 90 / 최대 130deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -105(-131~-86)  검지 -65(-75~-54)  중지 -78(-88~-68)  약지 -82(-92~-74)  새끼 -93(-104~-83)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 216  검지-중지 95  중지-약지 37  약지-새끼 134
+[unscrew-diag] 손끝거리=112.4mm (엄지 121.7mm 최근접 162.9mm) 손바닥각=35deg
+[unscrew-diag] tip최소간격=46.7mm 엄지-검지=211.0mm 엄지-중지=206.8mm 방위각 엄지-검지 64deg 엄지-중지 59deg (기준 90deg)  품질=0.007 파지유지=0.01
+[unscrew-diag]   손목 캡 안(6개): tip간격 21.6mm 밴드접촉 0.83  |  캡 밖(250개): tip간격 47.3mm 밴드접촉 0.20
+fps step: 6942 fps step and policy inference: 6430 fps total: 3770 epoch: 8/25 frames: 57344
+[unscrew-diag] 10 steps  TOTAL=-2.639/step  kc=0.409  |  unscrew=+0.016  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.806  near=+0.329  pinch=+0.066  press=+0.012  -oppose=-0.765  -quality=-0.809  -grip=-0.406  -pen=-0.166  -reverse=-0.029  -revang=-0.001  -leash=-0.080
+[unscrew-diag] raw접촉=0.16 밴드내=0.23 손바닥면=1.29(cos +0.19) 인정=0.07 대향=2%  풀림=65.1deg 상승=3.62mm 손목거리=169mm 손목높이=+160mm (초기 캡윗면기준 20~100 평균 60mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 7.23mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 -0.029m/s  캡 표면 0.004m/s  차이 -0.033m/s  전달률 6931341%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 +0.393 rad/s  절대평균 1.577  비율 0.25   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.423Nm (yaw -0.040)  힘 10.8N   캡 각속도 -0.050rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +5.7deg  캡 회전 77.0deg  공전비 0.07   (1.0=캡과 함께 공전, 0=제자리 자전)   n=216
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 3.62mm 실제 3.62mm 오차 -0.000mm  드라이브 -0.1N (한계 200N)  캡 z힘 -0.1N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 61%  검지 29%  중지 18%  약지 7%  새끼 55%  전체 34%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 2%/-0.18/130.9/70.9  검지 0%/+0.01/201.1/148.4  중지 0%/+0.48/231.7/144.7  약지 2%/-0.09/242.6/169.5  새끼 2%/+0.73/181.7/97.1
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 4.61mm  최대 7.23mm  10mm 도달 0%  현재 대비 -0.55mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=41 풀림중앙 81 | 60~120도 n=38 풀림중앙 79 | 120~180도 n=50 풀림중앙 64 | 180~240도 n=41 풀림중앙 56 | 240~300도 n=42 풀림중앙 74 | 300~360도 n=44 풀림중앙 82
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 46 / 중앙 73 / 75% 91 / 최대 130deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -106(-129~-87)  검지 -64(-74~-54)  중지 -77(-87~-69)  약지 -82(-91~-73)  새끼 -94(-106~-84)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 220  검지-중지 96  중지-약지 37  약지-새끼 134
+[unscrew-diag] 손끝거리=119.9mm (엄지 130.9mm 최근접 165.8mm) 손바닥각=36deg
+[unscrew-diag] tip최소간격=47.1mm 엄지-검지=215.2mm 엄지-중지=210.6mm 방위각 엄지-검지 65deg 엄지-중지 60deg (기준 90deg)  품질=0.012 파지유지=0.01
+[unscrew-diag]   손목 캡 안(2개): tip간격 16.0mm 밴드접촉 1.50  |  캡 밖(254개): tip간격 47.4mm 밴드접촉 0.22
+[unscrew-diag] 10 steps  TOTAL=-2.650/step  kc=0.409  |  unscrew=+0.014  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.808  near=+0.308  pinch=+0.049  press=+0.010  -oppose=-0.744  -quality=-0.813  -grip=-0.407  -pen=-0.154  -reverse=-0.021  -revang=-0.001  -leash=-0.083
+[unscrew-diag] raw접촉=0.11 밴드내=0.14 손바닥면=1.33(cos +0.17) 인정=0.03 대향=0%  풀림=65.6deg 상승=3.65mm 손목거리=172mm 손목높이=+158mm (초기 캡윗면기준 20~100 평균 60mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 7.23mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.029m/s  캡 표면 0.214m/s  차이 -0.184m/s  전달률 726%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 +0.243 rad/s  절대평균 1.588  비율 0.15   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.416Nm (yaw -0.041)  힘 10.4N   캡 각속도 +0.026rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +8.7deg  캡 회전 77.0deg  공전비 0.11   (1.0=캡과 함께 공전, 0=제자리 자전)   n=218
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 3.65mm 실제 3.65mm 오차 0.004mm  드라이브 +0.7N (한계 200N)  캡 z힘 -0.1N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 61%  검지 28%  중지 18%  약지 7%  새끼 55%  전체 34%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 2%/-0.15/139.6/68.5  검지 0%/-0.05/190.4/141.0  중지 0%/+0.42/225.7/142.3  약지 1%/-0.13/237.3/168.6  새끼 0%/+0.75/184.6/97.9
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 4.63mm  최대 7.23mm  10mm 도달 0%  현재 대비 -0.55mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=41 풀림중앙 79 | 60~120도 n=38 풀림중앙 79 | 120~180도 n=50 풀림중앙 64 | 180~240도 n=41 풀림중앙 56 | 240~300도 n=42 풀림중앙 77 | 300~360도 n=44 풀림중앙 82
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 47 / 중앙 73 / 75% 91 / 최대 130deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -109(-128~-91)  검지 -64(-74~-55)  중지 -77(-86~-69)  약지 -80(-89~-73)  새끼 -94(-104~-85)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 223  검지-중지 95  중지-약지 36  약지-새끼 133
+[unscrew-diag] 손끝거리=124.5mm (엄지 139.6mm 최근접 161.4mm) 손바닥각=36deg
+[unscrew-diag] tip최소간격=47.8mm 엄지-검지=217.7mm 엄지-중지=212.7mm 방위각 엄지-검지 66deg 엄지-중지 62deg (기준 90deg)  품질=0.005 파지유지=0.01
+[unscrew-diag]   손목 캡 안(2개): tip간격 29.5mm 밴드접촉 0.50  |  캡 밖(254개): tip간격 47.9mm 밴드접촉 0.13
+[unscrew-diag] 10 steps  TOTAL=-2.598/step  kc=0.409  |  unscrew=+0.022  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.809  near=+0.294  pinch=+0.045  press=+0.011  -oppose=-0.712  -quality=-0.811  -grip=-0.407  -pen=-0.120  -reverse=-0.024  -revang=-0.001  -leash=-0.085
+[unscrew-diag] raw접촉=0.10 밴드내=0.18 손바닥면=1.30(cos +0.15) 인정=0.04 대향=1%  풀림=66.0deg 상승=3.67mm 손목거리=174mm 손목높이=+157mm (초기 캡윗면기준 20~100 평균 60mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 7.23mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 -0.076m/s  캡 표면 -0.051m/s  차이 -0.025m/s  전달률 -50624775%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 +0.082 rad/s  절대평균 1.581  비율 0.05   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.416Nm (yaw -0.045)  힘 10.4N   캡 각속도 +0.078rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +6.0deg  캡 회전 77.1deg  공전비 0.08   (1.0=캡과 함께 공전, 0=제자리 자전)   n=219
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 3.67mm 실제 3.67mm 오차 0.002mm  드라이브 +0.3N (한계 200N)  캡 z힘 -0.1N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 61%  검지 28%  중지 18%  약지 7%  새끼 55%  전체 34%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 2%/-0.13/144.9/67.9  검지 0%/-0.09/181.8/133.6  중지 1%/+0.37/220.2/139.1  약지 1%/-0.16/232.4/165.7  새끼 0%/+0.77/186.8/98.9
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 4.63mm  최대 7.23mm  10mm 도달 0%  현재 대비 -0.56mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=41 풀림중앙 79 | 60~120도 n=38 풀림중앙 79 | 120~180도 n=50 풀림중앙 64 | 180~240도 n=41 풀림중앙 53 | 240~300도 n=42 풀림중앙 78 | 300~360도 n=44 풀림중앙 82
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 47 / 중앙 73 / 75% 91 / 최대 130deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -112(-131~-95)  검지 -64(-74~-56)  중지 -77(-84~-68)  약지 -80(-88~-71)  새끼 -96(-105~-87)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 224  검지-중지 95  중지-약지 36  약지-새끼 134
+[unscrew-diag] 손끝거리=126.3mm (엄지 144.9mm 최근접 156.8mm) 손바닥각=37deg
+[unscrew-diag] tip최소간격=47.3mm 엄지-검지=219.5mm 엄지-중지=214.6mm 방위각 엄지-검지 66deg 엄지-중지 63deg (기준 90deg)  품질=0.007 파지유지=0.01
+[unscrew-diag]   손목 캡 안(2개): tip간격 27.2mm 밴드접촉 2.50  |  캡 밖(254개): tip간격 47.5mm 밴드접촉 0.16
+fps step: 6876 fps step and policy inference: 6375 fps total: 3777 epoch: 9/25 frames: 65536
+[unscrew-diag] 10 steps  TOTAL=-2.587/step  kc=0.410  |  unscrew=+0.013  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.810  near=+0.281  pinch=+0.040  press=+0.007  -oppose=-0.691  -quality=-0.815  -grip=-0.408  -pen=-0.102  -reverse=-0.016  -revang=-0.001  -leash=-0.086
+[unscrew-diag] raw접촉=0.12 밴드내=0.12 손바닥면=1.28(cos +0.14) 인정=0.03 대향=0%  풀림=66.3deg 상승=3.69mm 손목거리=176mm 손목높이=+155mm (초기 캡윗면기준 20~100 평균 60mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 7.23mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 -0.109m/s  캡 표면 -0.000m/s  차이 -0.109m/s  전달률 -46039%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 +0.365 rad/s  절대평균 1.563  비율 0.23   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.407Nm (yaw +0.010)  힘 10.2N   캡 각속도 +0.134rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +4.5deg  캡 회전 77.5deg  공전비 0.06   (1.0=캡과 함께 공전, 0=제자리 자전)   n=219
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 3.69mm 실제 3.69mm 오차 0.006mm  드라이브 +1.2N (한계 200N)  캡 z힘 -0.1N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 60%  검지 27%  중지 18%  약지 7%  새끼 55%  전체 33%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 1%/-0.15/148.9/66.2  검지 0%/-0.11/174.7/127.3  중지 1%/+0.36/216.5/135.4  약지 1%/-0.18/229.5/162.7  새끼 0%/+0.78/188.4/98.7
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 4.65mm  최대 7.23mm  10mm 도달 0%  현재 대비 -0.55mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=41 풀림중앙 85 | 60~120도 n=38 풀림중앙 79 | 120~180도 n=50 풀림중앙 64 | 180~240도 n=41 풀림중앙 58 | 240~300도 n=42 풀림중앙 78 | 300~360도 n=44 풀림중앙 82
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 48 / 중앙 74 / 75% 91 / 최대 130deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -115(-134~-99)  검지 -65(-74~-56)  중지 -77(-85~-68)  약지 -80(-88~-72)  새끼 -97(-106~-87)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 225  검지-중지 94  중지-약지 36  약지-새끼 134
+[unscrew-diag] 손끝거리=126.0mm (엄지 148.9mm 최근접 151.9mm) 손바닥각=37deg
+[unscrew-diag] tip최소간격=48.1mm 엄지-검지=220.9mm 엄지-중지=216.3mm 방위각 엄지-검지 68deg 엄지-중지 63deg (기준 90deg)  품질=0.004 파지유지=0.01
+[unscrew-diag]   손목 캡 안(1개): tip간격 17.2mm 밴드접촉 3.00  |  캡 밖(255개): tip간격 48.2mm 밴드접촉 0.11
+[unscrew-diag] 10 steps  TOTAL=-2.583/step  kc=0.410  |  unscrew=+0.012  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.813  near=+0.267  pinch=+0.024  press=+0.005  -oppose=-0.665  -quality=-0.817  -grip=-0.409  -pen=-0.085  -reverse=-0.014  -revang=-0.001  -leash=-0.086
+[unscrew-diag] raw접촉=0.05 밴드내=0.11 손바닥면=1.25(cos +0.12) 인정=0.02 대향=0%  풀림=66.9deg 상승=3.72mm 손목거리=177mm 손목높이=+155mm (초기 캡윗면기준 20~100 평균 60mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 7.23mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 -0.309m/s  캡 표면 -0.351m/s  차이 0.042m/s  전달률 -140515925%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 +0.098 rad/s  절대평균 1.456  비율 0.07   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.395Nm (yaw -0.026)  힘 9.6N   캡 각속도 +0.031rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +2.8deg  캡 회전 77.8deg  공전비 0.04   (1.0=캡과 함께 공전, 0=제자리 자전)   n=220
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 3.72mm 실제 3.72mm 오차 0.002mm  드라이브 +0.3N (한계 200N)  캡 z힘 -0.2N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 59%  검지 27%  중지 17%  약지 7%  새끼 54%  전체 33%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 0%/-0.16/152.1/65.2  검지 0%/-0.14/160.3/119.1  중지 0%/+0.31/204.4/129.4  약지 0%/-0.19/220.0/157.3  새끼 0%/+0.78/187.5/97.6
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 4.67mm  최대 7.23mm  10mm 도달 0%  현재 대비 -0.53mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=41 풀림중앙 85 | 60~120도 n=38 풀림중앙 79 | 120~180도 n=50 풀림중앙 64 | 180~240도 n=41 풀림중앙 58 | 240~300도 n=42 풀림중앙 78 | 300~360도 n=44 풀림중앙 82
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 49 / 중앙 75 / 75% 91 / 최대 130deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -116(-134~-100)  검지 -65(-75~-55)  중지 -77(-84~-67)  약지 -79(-86~-70)  새끼 -99(-108~-88)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 226  검지-중지 92  중지-약지 38  약지-새끼 133
+[unscrew-diag] 손끝거리=120.9mm (엄지 152.1mm 최근접 141.4mm) 손바닥각=37deg
+[unscrew-diag] tip최소간격=49.2mm 엄지-검지=221.1mm 엄지-중지=216.7mm 방위각 엄지-검지 69deg 엄지-중지 65deg (기준 90deg)  품질=0.004 파지유지=0.01
+[unscrew-diag]   손목 캡 안(1개): tip간격 23.4mm 밴드접촉 1.00  |  캡 밖(255개): tip간격 49.3mm 밴드접촉 0.10
+[unscrew-diag] 10 steps  TOTAL=-2.536/step  kc=0.410  |  unscrew=+0.015  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.815  near=+0.263  pinch=+0.023  press=+0.003  -oppose=-0.635  -quality=-0.817  -grip=-0.409  -pen=-0.061  -reverse=-0.016  -revang=-0.001  -leash=-0.085
+[unscrew-diag] raw접촉=0.04 밴드내=0.08 손바닥면=1.22(cos +0.11) 인정=0.02 대향=0%  풀림=66.9deg 상승=3.72mm 손목거리=175mm 손목높이=+158mm (초기 캡윗면기준 20~100 평균 60mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 7.23mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.000m/s  캡 표면 0.014m/s  차이 -0.014m/s  전달률 17356%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 +0.073 rad/s  절대평균 1.443  비율 0.05   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.397Nm (yaw -0.034)  힘 9.6N   캡 각속도 +0.038rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +0.9deg  캡 회전 77.7deg  공전비 0.01   (1.0=캡과 함께 공전, 0=제자리 자전)   n=220
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 3.72mm 실제 3.72mm 오차 -0.000mm  드라이브 -0.0N (한계 200N)  캡 z힘 -0.0N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 58%  검지 26%  중지 17%  약지 7%  새끼 53%  전체 32%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 1%/-0.15/153.3/65.6  검지 0%/-0.15/147.3/111.0  중지 0%/+0.28/193.0/123.8  약지 0%/-0.19/211.4/152.1  새끼 0%/+0.77/183.5/96.3
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 4.70mm  최대 7.23mm  10mm 도달 0%  현재 대비 -0.54mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=41 풀림중앙 85 | 60~120도 n=38 풀림중앙 79 | 120~180도 n=50 풀림중앙 64 | 180~240도 n=41 풀림중앙 54 | 240~300도 n=42 풀림중앙 78 | 300~360도 n=44 풀림중앙 82
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 50 / 중앙 75 / 75% 91 / 최대 130deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -119(-136~-105)  검지 -65(-75~-55)  중지 -76(-83~-67)  약지 -78(-86~-70)  새끼 -98(-110~-90)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 226  검지-중지 89  중지-약지 37  약지-새끼 132
+[unscrew-diag] 손끝거리=114.9mm (엄지 153.3mm 최근접 130.8mm) 손바닥각=37deg
+[unscrew-diag] tip최소간격=49.4mm 엄지-검지=217.7mm 엄지-중지=214.9mm 방위각 엄지-검지 68deg 엄지-중지 66deg (기준 90deg)  품질=0.003 파지유지=0.01
+[unscrew-diag] 10 steps  TOTAL=-2.514/step  kc=0.411  |  unscrew=+0.002  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.817  near=+0.262  pinch=+0.015  press=+0.002  -oppose=-0.610  -quality=-0.819  -grip=-0.410  -pen=-0.044  -reverse=-0.011  -revang=-0.001  -leash=-0.083
+[unscrew-diag] raw접촉=0.03 밴드내=0.07 손바닥면=1.18(cos +0.12) 인정=0.01 대향=0%  풀림=67.4deg 상승=3.75mm 손목거리=172mm 손목높이=+161mm (초기 캡윗면기준 20~100 평균 60mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 7.23mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.008m/s  캡 표면 0.197m/s  차이 -0.189m/s  전달률 2351%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 +0.024 rad/s  절대평균 1.515  비율 0.02   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.382Nm (yaw -0.022)  힘 9.2N   캡 각속도 -0.027rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +1.0deg  캡 회전 78.2deg  공전비 0.01   (1.0=캡과 함께 공전, 0=제자리 자전)   n=220
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 3.75mm 실제 3.75mm 오차 -0.000mm  드라이브 -0.0N (한계 200N)  캡 z힘 -0.1N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 57%  검지 27%  중지 17%  약지 7%  새끼 53%  전체 32%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 0%/-0.15/151.8/67.3  검지 0%/-0.15/136.3/103.1  중지 0%/+0.29/183.2/117.6  약지 0%/-0.17/204.3/146.7  새끼 0%/+0.76/179.4/96.8
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 4.70mm  최대 7.23mm  10mm 도달 0%  현재 대비 -0.55mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=41 풀림중앙 85 | 60~120도 n=38 풀림중앙 79 | 120~180도 n=50 풀림중앙 64 | 180~240도 n=41 풀림중앙 59 | 240~300도 n=42 풀림중앙 78 | 300~360도 n=44 풀림중앙 82
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 52 / 중앙 76 / 75% 91 / 최대 130deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -123(-140~-107)  검지 -65(-77~-56)  중지 -75(-84~-68)  약지 -78(-87~-70)  새끼 -100(-111~-91)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 223  검지-중지 86  중지-약지 38  약지-새끼 131
+[unscrew-diag] 손끝거리=108.3mm (엄지 151.8mm 최근접 121.7mm) 손바닥각=37deg
+[unscrew-diag] tip최소간격=50.5mm 엄지-검지=213.0mm 엄지-중지=212.2mm 방위각 엄지-검지 71deg 엄지-중지 67deg (기준 90deg)  품질=0.002 파지유지=0.00
+[unscrew-diag]   손목 캡 안(1개): tip간격 49.0mm 밴드접촉 0.00  |  캡 밖(255개): tip간격 50.5mm 밴드접촉 0.07
+fps step: 7183 fps step and policy inference: 6647 fps total: 3842 epoch: 10/25 frames: 73728
+[unscrew-diag] 10 steps  TOTAL=-2.469/step  kc=0.411  |  unscrew=+0.002  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.819  near=+0.269  pinch=+0.007  press=+0.000  -oppose=-0.576  -quality=-0.822  -grip=-0.411  -pen=-0.025  -reverse=-0.012  -revang=-0.001  -leash=-0.081
+[unscrew-diag] raw접촉=0.01 밴드내=0.04 손바닥면=1.09(cos +0.13) 인정=0.00 대향=0%  풀림=67.2deg 상승=3.74mm 손목거리=169mm 손목높이=+164mm (초기 캡윗면기준 20~100 평균 60mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 7.23mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 -0.068m/s  캡 표면 -0.073m/s  차이 0.005m/s  전달률 -7323419%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 +0.055 rad/s  절대평균 1.466  비율 0.04   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.375Nm (yaw -0.007)  힘 9.4N   캡 각속도 +0.000rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 -0.0deg  캡 회전 78.1deg  공전비 -0.00   (1.0=캡과 함께 공전, 0=제자리 자전)   n=220
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 3.74mm 실제 3.74mm 오차 0.001mm  드라이브 +0.2N (한계 200N)  캡 z힘 -0.0N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 56%  검지 27%  중지 18%  약지 8%  새끼 51%  전체 32%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 0%/-0.14/149.1/68.8  검지 0%/-0.12/128.3/98.8  중지 0%/+0.30/174.5/114.1  약지 0%/-0.15/198.1/143.2  새끼 0%/+0.76/176.4/96.4
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 4.70mm  최대 7.23mm  10mm 도달 0%  현재 대비 -0.57mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=41 풀림중앙 85 | 60~120도 n=38 풀림중앙 79 | 120~180도 n=50 풀림중앙 64 | 180~240도 n=41 풀림중앙 59 | 240~300도 n=42 풀림중앙 78 | 300~360도 n=44 풀림중앙 82
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 51 / 중앙 76 / 75% 91 / 최대 130deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -123(-140~-104)  검지 -66(-76~-55)  중지 -75(-83~-66)  약지 -78(-87~-70)  새끼 -101(-111~-92)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 218  검지-중지 85  중지-약지 40  약지-새끼 130
+[unscrew-diag] 손끝거리=102.9mm (엄지 149.1mm 최근접 114.0mm) 손바닥각=37deg
+[unscrew-diag] tip최소간격=51.9mm 엄지-검지=209.9mm 엄지-중지=210.1mm 방위각 엄지-검지 71deg 엄지-중지 70deg (기준 90deg)  품질=0.000 파지유지=0.00
+[unscrew-diag] 10 steps  TOTAL=-2.427/step  kc=0.411  |  unscrew=+0.000  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.822  near=+0.281  pinch=+0.008  press=+0.000  -oppose=-0.556  -quality=-0.822  -grip=-0.411  -pen=-0.018  -reverse=-0.007  -revang=-0.001  -leash=-0.079
+[unscrew-diag] raw접촉=0.02 밴드내=0.06 손바닥면=1.12(cos +0.14) 인정=0.00 대향=0%  풀림=67.4deg 상승=3.75mm 손목거리=167mm 손목높이=+166mm (초기 캡윗면기준 20~100 평균 60mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 7.23mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.000m/s  캡 표면 0.000m/s  차이 0.000m/s  전달률 0%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -0.056 rad/s  절대평균 1.466  비율 0.04   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.372Nm (yaw -0.022)  힘 9.4N   캡 각속도 +0.033rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 -2.8deg  캡 회전 78.0deg  공전비 -0.04   (1.0=캡과 함께 공전, 0=제자리 자전)   n=221
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 3.75mm 실제 3.75mm 오차 0.003mm  드라이브 +0.6N (한계 200N)  캡 z힘 -0.0N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 55%  검지 27%  중지 18%  약지 9%  새끼 51%  전체 32%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 0%/-0.10/147.6/70.0  검지 0%/-0.13/121.4/95.2  중지 0%/+0.29/168.3/111.4  약지 0%/-0.13/191.7/140.2  새끼 0%/+0.77/173.2/96.6
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 4.70mm  최대 7.23mm  10mm 도달 0%  현재 대비 -0.57mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=41 풀림중앙 85 | 60~120도 n=38 풀림중앙 79 | 120~180도 n=50 풀림중앙 64 | 180~240도 n=41 풀림중앙 59 | 240~300도 n=42 풀림중앙 78 | 300~360도 n=44 풀림중앙 82
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 51 / 중앙 76 / 75% 91 / 최대 130deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -124(-138~-103)  검지 -66(-77~-55)  중지 -75(-84~-68)  약지 -78(-85~-71)  새끼 -102(-111~-91)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 213  검지-중지 83  중지-약지 42  약지-새끼 128
+[unscrew-diag] 손끝거리=98.0mm (엄지 147.6mm 최근접 108.6mm) 손바닥각=36deg
+[unscrew-diag] tip최소간격=51.7mm 엄지-검지=205.1mm 엄지-중지=206.7mm 방위각 엄지-검지 71deg 엄지-중지 71deg (기준 90deg)  품질=0.000 파지유지=0.00
+[unscrew-diag] 10 steps  TOTAL=-2.407/step  kc=0.411  |  unscrew=+0.000  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.822  near=+0.291  pinch=+0.011  press=+0.000  -oppose=-0.541  -quality=-0.822  -grip=-0.411  -pen=-0.025  -reverse=-0.010  -revang=-0.001  -leash=-0.076
+[unscrew-diag] raw접촉=0.02 밴드내=0.04 손바닥면=1.13(cos +0.15) 인정=0.00 대향=0%  풀림=67.4deg 상승=3.75mm 손목거리=164mm 손목높이=+169mm (초기 캡윗면기준 20~100 평균 60mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 7.23mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.000m/s  캡 표면 0.000m/s  차이 0.000m/s  전달률 0%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -0.184 rad/s  절대평균 1.440  비율 0.13   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.370Nm (yaw -0.048)  힘 9.0N   캡 각속도 +0.073rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 -1.2deg  캡 회전 77.9deg  공전비 -0.02   (1.0=캡과 함께 공전, 0=제자리 자전)   n=221
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 3.75mm 실제 3.75mm 오차 0.001mm  드라이브 +0.1N (한계 200N)  캡 z힘 -0.0N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 55%  검지 27%  중지 19%  약지 10%  새끼 50%  전체 32%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 0%/-0.08/146.4/72.6  검지 0%/-0.10/115.6/92.5  중지 0%/+0.31/162.6/110.0  약지 0%/-0.12/187.1/138.9  새끼 0%/+0.76/169.3/97.9
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 4.70mm  최대 7.23mm  10mm 도달 0%  현재 대비 -0.57mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=41 풀림중앙 85 | 60~120도 n=38 풀림중앙 79 | 120~180도 n=50 풀림중앙 64 | 180~240도 n=41 풀림중앙 58 | 240~300도 n=42 풀림중앙 78 | 300~360도 n=44 풀림중앙 82
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 51 / 중앙 76 / 75% 91 / 최대 130deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -127(-140~-108)  검지 -67(-76~-54)  중지 -75(-83~-67)  약지 -77(-86~-70)  새끼 -102(-112~-91)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 210  검지-중지 83  중지-약지 43  약지-새끼 128
+[unscrew-diag] 손끝거리=92.8mm (엄지 146.4mm 최근접 102.7mm) 손바닥각=36deg
+[unscrew-diag] tip최소간격=53.1mm 엄지-검지=201.9mm 엄지-중지=204.0mm 방위각 엄지-검지 73deg 엄지-중지 72deg (기준 90deg)  품질=0.000 파지유지=0.00
+fps step: 7663 fps step and policy inference: 7056 fps total: 4010 epoch: 11/25 frames: 81920
+[unscrew-diag] 10 steps  TOTAL=-2.358/step  kc=0.412  |  unscrew=+0.000  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.824  near=+0.284  pinch=+0.006  press=+0.000  -oppose=-0.504  -quality=-0.824  -grip=-0.412  -pen=-0.013  -reverse=-0.004  -revang=-0.001  -leash=-0.066
+[unscrew-diag] raw접촉=0.54 밴드내=0.00 손바닥면=0.00(cos +0.03) 인정=0.00 대향=0%  풀림=0.0deg 상승=0.00mm 손목거리=13mm 손목높이=+93mm (초기 캡윗면기준 15~98 평균 57mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 0.09mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.000m/s  캡 표면 0.000m/s  차이 0.000m/s  전달률 0%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -0.066 rad/s  절대평균 1.017  비율 0.06   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.461Nm (yaw -0.218)  힘 11.3N   캡 각속도 +0.166rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +0.0deg  캡 회전 0.0deg  공전비 0.00   (1.0=캡과 함께 공전, 0=제자리 자전)   n=0
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 0.00mm 실제 0.00mm 오차 0.003mm  드라이브 +0.6N (한계 200N)  캡 z힘 -2.9N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 6%  검지 4%  중지 3%  약지 1%  새끼 5%  전체 4%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 0%/-0.16/74.3/53.8  검지 0%/+0.03/146.5/77.2  중지 0%/+0.06/148.2/77.3  약지 0%/+0.02/141.3/77.9  새끼 0%/+0.19/113.6/67.3
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 0.00mm  최대 0.09mm  10mm 도달 0%  현재 대비 +0.00mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=40 풀림중앙 0 | 60~120도 n=36 풀림중앙 0 | 120~180도 n=40 풀림중앙 0 | 180~240도 n=42 풀림중앙 0 | 240~300도 n=48 풀림중앙 0 | 300~360도 n=50 풀림중앙 0
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 0 / 25% 0 / 중앙 0 / 75% 0 / 최대 0deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -11(-87~72)  검지 -7(-88~81)  중지 -11(-92~77)  약지 -17(-98~73)  새끼 -24(-102~85)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 178  검지-중지 34  중지-약지 22  약지-새끼 51
+[unscrew-diag] 손끝거리=74.3mm (엄지 74.3mm 최근접 113.6mm) 손바닥각=8deg
+[unscrew-diag] tip최소간격=23.1mm 엄지-검지=199.1mm 엄지-중지=222.9mm 방위각 엄지-검지 64deg 엄지-중지 73deg (기준 90deg)  품질=0.000 파지유지=0.00
+[unscrew-diag] 10 steps  TOTAL=-2.419/step  kc=0.412  |  unscrew=+0.000  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.824  near=+0.262  pinch=+0.000  press=+0.001  -oppose=-0.609  -quality=-0.824  -grip=-0.412  -pen=-0.002  -reverse=-0.009  -revang=-0.001  -leash=-0.000
+[unscrew-diag] raw접촉=0.61 밴드내=0.11 손바닥면=0.65(cos +0.43) 인정=0.00 대향=0%  풀림=1.7deg 상승=0.10mm 손목거리=49mm 손목높이=+155mm (초기 캡윗면기준 15~98 평균 57mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 2.22mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.000m/s  캡 표면 0.000m/s  차이 0.000m/s  전달률 0%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -3.655 rad/s  절대평균 4.216  비율 0.87   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.460Nm (yaw -0.130)  힘 11.3N   캡 각속도 -0.015rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 -18.1deg  캡 회전 21.3deg  공전비 -0.85   (1.0=캡과 함께 공전, 0=제자리 자전)   n=19
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 0.10mm 실제 0.10mm 오차 0.004mm  드라이브 +0.8N (한계 200N)  캡 z힘 -0.1N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 42%  검지 28%  중지 12%  약지 7%  새끼 38%  전체 25%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 0%/+0.31/35.9/50.5  검지 0%/+0.41/171.1/141.7  중지 0%/+0.49/163.4/123.0  약지 0%/+0.28/155.9/121.3  새끼 0%/+0.68/63.6/51.8
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 0.00mm  최대 2.22mm  10mm 도달 0%  현재 대비 -0.00mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=40 풀림중앙 0 | 60~120도 n=36 풀림중앙 0 | 120~180도 n=40 풀림중앙 0 | 180~240도 n=42 풀림중앙 0 | 240~300도 n=48 풀림중앙 0 | 300~360도 n=50 풀림중앙 0
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 0 / 중앙 0 / 75% 0 / 최대 40deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -59(-96~47)  검지 -12(-84~56)  중지 -26(-86~57)  약지 -30(-88~61)  새끼 -53(-103~39)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 164  검지-중지 79  중지-약지 23  약지-새끼 108
+[unscrew-diag] 손끝거리=28.0mm (엄지 35.9mm 최근접 63.6mm) 손바닥각=37deg
+[unscrew-diag] tip최소간격=27.9mm 엄지-검지=169.7mm 엄지-중지=185.8mm 방위각 엄지-검지 30deg 엄지-중지 51deg (기준 90deg)  품질=0.000 파지유지=0.00
+[unscrew-diag]   손목 캡 안(147개): tip간격 28.0mm 밴드접촉 0.15  |  캡 밖(109개): tip간격 27.7mm 밴드접촉 0.06
+[unscrew-diag] 10 steps  TOTAL=-2.366/step  kc=0.412  |  unscrew=+0.000  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.822  near=+0.332  pinch=+0.001  press=+0.002  -oppose=-0.556  -quality=-0.823  -grip=-0.412  -pen=-0.051  -reverse=-0.022  -revang=-0.002  -leash=-0.013
+[unscrew-diag] raw접촉=0.33 밴드내=0.05 손바닥면=1.24(cos +0.30) 인정=0.01 대향=0%  풀림=3.1deg 상승=0.18mm 손목거리=98mm 손목높이=+181mm (초기 캡윗면기준 15~98 평균 57mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 3.50mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.241m/s  캡 표면 0.115m/s  차이 0.126m/s  전달률 48%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 +0.084 rad/s  절대평균 2.291  비율 0.04   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.436Nm (yaw -0.093)  힘 10.7N   캡 각속도 +0.109rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 -24.4deg  캡 회전 27.5deg  공전비 -0.88   (1.0=캡과 함께 공전, 0=제자리 자전)   n=28
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 0.18mm 실제 0.18mm 오차 0.003mm  드라이브 +0.7N (한계 200N)  캡 z힘 -0.7N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 53%  검지 28%  중지 14%  약지 6%  새끼 50%  전체 30%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 1%/-0.12/76.4/72.5  검지 0%/+0.33/147.0/133.1  중지 0%/+0.53/162.2/130.5  약지 0%/+0.19/167.6/141.2  새끼 0%/+0.59/102.0/92.8
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 0.00mm  최대 3.50mm  10mm 도달 0%  현재 대비 -0.00mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=40 풀림중앙 0 | 60~120도 n=36 풀림중앙 0 | 120~180도 n=40 풀림중앙 0 | 180~240도 n=42 풀림중앙 0 | 240~300도 n=48 풀림중앙 0 | 300~360도 n=50 풀림중앙 0
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 0 / 중앙 0 / 75% 0 / 최대 63deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -98(-120~-77)  검지 -31(-84~24)  중지 -37(-80~37)  약지 -35(-78~42)  새끼 -67(-102~-29)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 191  검지-중지 85  중지-약지 27  약지-새끼 117
+[unscrew-diag] 손끝거리=62.3mm (엄지 76.4mm 최근접 95.9mm) 손바닥각=33deg
+[unscrew-diag] tip최소간격=34.5mm 엄지-검지=200.5mm 엄지-중지=211.4mm 방위각 엄지-검지 84deg 엄지-중지 90deg (기준 90deg)  품질=0.002 파지유지=0.00
+[unscrew-diag]   손목 캡 안(44개): tip간격 35.3mm 밴드접촉 0.18  |  캡 밖(212개): tip간격 34.4mm 밴드접촉 0.02
+fps step: 7326 fps step and policy inference: 5056 fps total: 3289 epoch: 12/25 frames: 90112
+saving next best rewards:  [-772.71]
+=> saving checkpoint 'runs/CapUnscrewCurrDG5FS_OrbitCheck_20260804_120722__08-04-12-07-25/nn/CapUnscrewCurrDG5FS_OrbitCheck_20260804_120722.pth'
+[unscrew-diag] 10 steps  TOTAL=-2.124/step  kc=0.413  |  unscrew=+0.000  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.824  near=+0.331  pinch=+0.001  press=+0.000  -oppose=-0.336  -quality=-0.825  -grip=-0.413  -pen=-0.014  -reverse=-0.006  -revang=-0.002  -leash=-0.035
+[unscrew-diag] raw접촉=0.21 밴드내=0.00 손바닥면=1.52(cos +0.30) 인정=0.00 대향=0%  풀림=3.3deg 상승=0.19mm 손목거리=126mm 손목높이=+190mm (초기 캡윗면기준 15~98 평균 57mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 3.74mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.000m/s  캡 표면 0.000m/s  차이 0.000m/s  전달률 0%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -0.798 rad/s  절대평균 2.396  비율 0.33   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.442Nm (yaw -0.052)  힘 9.9N   캡 각속도 +0.010rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 -34.8deg  캡 회전 27.0deg  공전비 -1.29   (1.0=캡과 함께 공전, 0=제자리 자전)   n=30
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 0.19mm 실제 0.19mm 오차 0.000mm  드라이브 +0.1N (한계 200N)  캡 z힘 +0.0N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 52%  검지 28%  중지 14%  약지 7%  새끼 49%  전체 30%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 0%/-0.28/99.5/85.2  검지 0%/+0.30/114.1/114.6  중지 0%/+0.57/137.0/110.1  약지 0%/+0.31/148.1/120.3  새끼 0%/+0.60/113.4/92.8
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 0.00mm  최대 3.74mm  10mm 도달 0%  현재 대비 -0.01mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=40 풀림중앙 0 | 60~120도 n=36 풀림중앙 0 | 120~180도 n=40 풀림중앙 0 | 180~240도 n=42 풀림중앙 0 | 240~300도 n=48 풀림중앙 0 | 300~360도 n=50 풀림중앙 0
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 0 / 중앙 0 / 75% 0 / 최대 67deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -119(-140~-79)  검지 -48(-83~-0)  중지 -43(-78~4)  약지 -50(-80~-2)  새끼 -81(-103~-40)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 173  검지-중지 83  중지-약지 32  약지-새끼 114
+[unscrew-diag] 손끝거리=70.8mm (엄지 99.5mm 최근접 84.6mm) 손바닥각=38deg
+[unscrew-diag] tip최소간격=38.6mm 엄지-검지=191.3mm 엄지-중지=206.2mm 방위각 엄지-검지 99deg 엄지-중지 97deg (기준 90deg)  품질=0.000 파지유지=0.00
+[unscrew-diag]   손목 캡 안(4개): tip간격 41.8mm 밴드접촉 0.00  |  캡 밖(252개): tip간격 38.6mm 밴드접촉 0.00
+[unscrew-diag] 10 steps  TOTAL=-1.934/step  kc=0.413  |  unscrew=+0.000  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.826  near=+0.426  pinch=+0.015  press=+0.000  -oppose=-0.239  -quality=-0.826  -grip=-0.413  -pen=-0.028  -reverse=-0.002  -revang=-0.002  -leash=-0.039
+[unscrew-diag] raw접촉=0.21 밴드내=0.17 손바닥면=1.50(cos +0.35) 인정=0.05 대향=0%  풀림=3.3deg 상승=0.19mm 손목거리=125mm 손목높이=+190mm (초기 캡윗면기준 15~98 평균 57mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 3.74mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.126m/s  캡 표면 0.000m/s  차이 0.126m/s  전달률 0%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -0.582 rad/s  절대평균 2.052  비율 0.28   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.435Nm (yaw +0.043)  힘 9.8N   캡 각속도 +0.005rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 -28.0deg  캡 회전 27.0deg  공전비 -1.04   (1.0=캡과 함께 공전, 0=제자리 자전)   n=30
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 0.19mm 실제 0.19mm 오차 0.000mm  드라이브 +0.0N (한계 200N)  캡 z힘 -0.0N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 49%  검지 29%  중지 13%  약지 10%  새끼 46%  전체 29%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 0%/-0.20/89.4/83.9  검지 0%/+0.36/92.3/96.7  중지 0%/+0.59/115.8/88.6  약지 2%/+0.42/126.9/95.6  새끼 3%/+0.59/103.4/79.6
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 0.00mm  최대 3.74mm  10mm 도달 0%  현재 대비 -0.01mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=40 풀림중앙 0 | 60~120도 n=36 풀림중앙 0 | 120~180도 n=40 풀림중앙 0 | 180~240도 n=42 풀림중앙 0 | 240~300도 n=48 풀림중앙 0 | 300~360도 n=50 풀림중앙 0
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 0 / 중앙 0 / 75% 0 / 최대 67deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -119(-145~-46)  검지 -49(-84~-8)  중지 -59(-89~-27)  약지 -67(-87~-31)  새끼 -90(-107~-49)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 151  검지-중지 69  중지-약지 37  약지-새끼 99
+[unscrew-diag] 손끝거리=55.5mm (엄지 89.4mm 최근접 68.5mm) 손바닥각=37deg
+[unscrew-diag] tip최소간격=41.6mm 엄지-검지=174.5mm 엄지-중지=199.5mm 방위각 엄지-검지 99deg 엄지-중지 99deg (기준 90deg)  품질=0.000 파지유지=0.00
+[unscrew-diag]   손목 캡 안(3개): tip간격 49.4mm 밴드접촉 0.00  |  캡 밖(253개): tip간격 41.6mm 밴드접촉 0.17
+[unscrew-diag] 10 steps  TOTAL=-1.723/step  kc=0.413  |  unscrew=+0.001  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.823  near=+0.576  pinch=+0.079  press=+0.015  -oppose=-0.201  -quality=-0.818  -grip=-0.411  -pen=-0.098  -reverse=-0.009  -revang=-0.002  -leash=-0.033
+[unscrew-diag] raw접촉=0.34 밴드내=0.41 손바닥면=1.71(cos +0.44) 인정=0.18 대향=3%  풀림=4.8deg 상승=0.27mm 손목거리=116mm 손목높이=+186mm (초기 캡윗면기준 15~98 평균 57mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 3.71mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.208m/s  캡 표면 0.239m/s  차이 -0.031m/s  전달률 115%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 +0.025 rad/s  절대평균 1.901  비율 0.01   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.442Nm (yaw +0.102)  힘 10.0N   캡 각속도 +0.462rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 -0.0deg  캡 회전 28.3deg  공전비 -0.00   (1.0=캡과 함께 공전, 0=제자리 자전)   n=46
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 0.30mm 실제 0.27mm 오차 0.025mm  드라이브 +4.9N (한계 200N)  캡 z힘 -0.2N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 47%  검지 30%  중지 12%  약지 12%  새끼 43%  전체 29%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 5%/+0.03/73.6/77.7  검지 0%/+0.38/84.2/85.3  중지 0%/+0.65/95.2/73.3  약지 6%/+0.50/104.4/78.1  새끼 7%/+0.61/86.5/68.5
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 0.00mm  최대 3.74mm  10mm 도달 0%  현재 대비 -0.01mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=40 풀림중앙 0 | 60~120도 n=36 풀림중앙 0 | 120~180도 n=40 풀림중앙 0 | 180~240도 n=42 풀림중앙 0 | 240~300도 n=48 풀림중앙 0 | 300~360도 n=50 풀림중앙 0
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 0 / 중앙 0 / 75% 0 / 최대 67deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -88(-150~145)  검지 -48(-86~-4)  중지 -53(-90~-27)  약지 -74(-93~-45)  새끼 -92(-106~-54)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 140  검지-중지 66  중지-약지 41  약지-새끼 78
+[unscrew-diag] 손끝거리=44.0mm (엄지 73.6mm 최근접 56.8mm) 손바닥각=36deg
+[unscrew-diag] tip최소간격=41.9mm 엄지-검지=153.3mm 엄지-중지=185.2mm 방위각 엄지-검지 92deg 엄지-중지 107deg (기준 90deg)  품질=0.023 파지유지=0.01
+[unscrew-diag]   손목 캡 안(4개): tip간격 20.6mm 밴드접촉 1.75  |  캡 밖(252개): tip간격 42.2mm 밴드접촉 0.39
+fps step: 6961 fps step and policy inference: 6433 fps total: 3826 epoch: 13/25 frames: 98304
+[unscrew-diag] 10 steps  TOTAL=-1.434/step  kc=0.414  |  unscrew=+0.022  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.802  near=+0.730  pinch=+0.186  press=+0.074  -oppose=-0.187  -quality=-0.792  -grip=-0.401  -pen=-0.204  -reverse=-0.034  -revang=-0.002  -leash=-0.025
+[unscrew-diag] raw접촉=0.69 밴드내=0.82 손바닥면=2.18(cos +0.53) 인정=0.39 대향=8%  풀림=11.2deg 상승=0.62mm 손목거리=104mm 손목높이=+182mm (초기 캡윗면기준 15~98 평균 57mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 4.97mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.222m/s  캡 표면 0.160m/s  차이 0.063m/s  전달률 72%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 +0.438 rad/s  절대평균 1.976  비율 0.22   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.443Nm (yaw +0.117)  힘 10.0N   캡 각속도 +0.832rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 -6.7deg  캡 회전 37.2deg  공전비 -0.18   (1.0=캡과 함께 공전, 0=제자리 자전)   n=82
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 0.68mm 실제 0.62mm 오차 0.063mm  드라이브 +12.6N (한계 200N)  캡 z힘 -0.7N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 44%  검지 31%  중지 13%  약지 14%  새끼 43%  전체 29%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 12%/+0.23/61.8/72.5  검지 0%/+0.45/82.5/79.6  중지 1%/+0.74/83.7/65.1  약지 12%/+0.58/89.9/70.1  새끼 13%/+0.66/72.3/62.4
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 0.00mm  최대 4.97mm  10mm 도달 0%  현재 대비 -0.02mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=40 풀림중앙 3 | 60~120도 n=36 풀림중앙 12 | 120~180도 n=40 풀림중앙 0 | 180~240도 n=42 풀림중앙 0 | 240~300도 n=48 풀림중앙 0 | 300~360도 n=50 풀림중앙 0
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 0 / 중앙 0 / 75% 16 / 최대 90deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -59(-149~158)  검지 -35(-83~16)  중지 -45(-85~-15)  약지 -68(-91~-38)  새끼 -81(-104~-49)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 112  검지-중지 61  중지-약지 36  약지-새끼 50
+[unscrew-diag] 손끝거리=42.8mm (엄지 61.8mm 최근접 53.3mm) 손바닥각=34deg
+[unscrew-diag] tip최소간격=37.9mm 엄지-검지=142.2mm 엄지-중지=171.1mm 방위각 엄지-검지 94deg 엄지-중지 119deg (기준 90deg)  품질=0.056 파지유지=0.05
+[unscrew-diag]   손목 캡 안(12개): tip간격 20.9mm 밴드접촉 1.58  |  캡 밖(244개): tip간격 38.7mm 밴드접촉 0.78
+[unscrew-diag] 10 steps  TOTAL=-0.985/step  kc=0.414  |  unscrew=+0.099  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.756  near=+0.856  pinch=+0.377  press=+0.160  -oppose=-0.201  -quality=-0.748  -grip=-0.384  -pen=-0.294  -reverse=-0.073  -revang=-0.001  -leash=-0.019
+[unscrew-diag] raw접촉=1.04 밴드내=1.37 손바닥면=2.62(cos +0.60) 인정=0.74 대향=20%  풀림=20.7deg 상승=1.14mm 손목거리=95mm 손목높이=+180mm (초기 캡윗면기준 15~98 평균 57mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 5.75mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.152m/s  캡 표면 0.138m/s  차이 0.015m/s  전달률 90%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 +1.257 rad/s  절대평균 2.420  비율 0.52   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.450Nm (yaw +0.122)  힘 10.1N   캡 각속도 +1.201rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +6.0deg  캡 회전 46.1deg  공전비 0.13   (1.0=캡과 함께 공전, 0=제자리 자전)   n=120
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 1.22mm 실제 1.14mm 오차 0.075mm  드라이브 +15.0N (한계 200N)  캡 z힘 -1.7N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 42%  검지 29%  중지 13%  약지 15%  새끼 44%  전체 29%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 24%/+0.33/53.5/68.3  검지 0%/+0.53/79.6/77.6  중지 3%/+0.80/78.8/61.6  약지 23%/+0.63/83.3/67.4  새끼 23%/+0.71/65.2/59.1
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 0.24mm  최대 5.75mm  10mm 도달 0%  현재 대비 -0.04mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=40 풀림중앙 34 | 60~120도 n=36 풀림중앙 37 | 120~180도 n=40 풀림중앙 3 | 180~240도 n=42 풀림중앙 0 | 240~300도 n=48 풀림중앙 0 | 300~360도 n=50 풀림중앙 0
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 0 / 중앙 4 / 75% 39 / 최대 103deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -118(-157~148)  검지 -3(-75~37)  중지 -32(-79~7)  약지 -55(-87~-14)  새끼 -72(-99~-32)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 106  검지-중지 56  중지-약지 32  약지-새끼 39
+[unscrew-diag] 손끝거리=39.2mm (엄지 53.5mm 최근접 48.0mm) 손바닥각=33deg
+[unscrew-diag] tip최소간격=34.8mm 엄지-검지=138.5mm 엄지-중지=161.5mm 방위각 엄지-검지 95deg 엄지-중지 122deg (기준 90deg)  품질=0.127 파지유지=0.13
+[unscrew-diag]   손목 캡 안(15개): tip간격 20.2mm 밴드접촉 2.13  |  캡 밖(241개): tip간격 35.7mm 밴드접촉 1.32
+[unscrew-diag] 10 steps  TOTAL=-0.489/step  kc=0.414  |  unscrew=+0.233  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.688  near=+0.948  pinch=+0.573  press=+0.249  -oppose=-0.207  -quality=-0.707  -grip=-0.367  -pen=-0.379  -reverse=-0.123  -revang=-0.001  -leash=-0.019
+[unscrew-diag] raw접촉=1.25 밴드내=1.64 손바닥면=2.91(cos +0.63) 인정=0.88 대향=23%  풀림=31.3deg 상승=1.72mm 손목거리=91mm 손목높이=+177mm (초기 캡윗면기준 15~98 평균 57mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 6.50mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.084m/s  캡 표면 0.091m/s  차이 -0.007m/s  전달률 108%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 +1.215 rad/s  절대평균 2.619  비율 0.46   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.445Nm (yaw +0.095)  힘 10.2N   캡 각속도 +1.059rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +2.4deg  캡 회전 52.5deg  공전비 0.04   (1.0=캡과 함께 공전, 0=제자리 자전)   n=156
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 1.79mm 실제 1.72mm 오차 0.063mm  드라이브 +12.7N (한계 200N)  캡 z힘 -2.5N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 41%  검지 28%  중지 14%  약지 15%  새끼 44%  전체 28%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 32%/+0.32/47.0/62.0  검지 0%/+0.62/71.9/74.8  중지 6%/+0.81/74.5/59.3  약지 25%/+0.65/79.3/66.1  새끼 24%/+0.75/60.7/54.7
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 1.43mm  최대 6.50mm  10mm 도달 0%  현재 대비 -0.07mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=40 풀림중앙 62 | 60~120도 n=36 풀림중앙 46 | 120~180도 n=40 풀림중앙 12 | 180~240도 n=42 풀림중앙 0 | 240~300도 n=48 풀림중앙 7 | 300~360도 n=50 풀림중앙 30
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 0 / 중앙 25 / 75% 57 / 최대 117deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -141(-157~-64)  검지 17(-65~55)  중지 -12(-73~28)  약지 -32(-80~8)  새끼 -53(-102~-11)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 106  검지-중지 41  중지-약지 28  약지-새끼 27
+[unscrew-diag] 손끝거리=36.5mm (엄지 47.0mm 최근접 45.6mm) 손바닥각=32deg
+[unscrew-diag] tip최소간격=31.7mm 엄지-검지=139.5mm 엄지-중지=155.3mm 방위각 엄지-검지 107deg 엄지-중지 126deg (기준 90deg)  품질=0.157 파지유지=0.20
+[unscrew-diag]   손목 캡 안(32개): tip간격 20.0mm 밴드접촉 3.03  |  캡 밖(224개): tip간격 33.3mm 밴드접촉 1.45
+fps step: 6167 fps step and policy inference: 5742 fps total: 3575 epoch: 14/25 frames: 106496
+[unscrew-diag] 10 steps  TOTAL=-0.080/step  kc=0.415  |  unscrew=+0.407  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.610  near=+0.989  pinch=+0.671  press=+0.319  -oppose=-0.202  -quality=-0.665  -grip=-0.351  -pen=-0.447  -reverse=-0.169  -revang=-0.000  -leash=-0.020
+[unscrew-diag] raw접촉=1.49 밴드내=1.85 손바닥면=3.04(cos +0.64) 인정=1.07 대향=31%  풀림=39.6deg 상승=2.19mm 손목거리=88mm 손목높이=+175mm (초기 캡윗면기준 15~98 평균 57mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 6.51mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.044m/s  캡 표면 0.054m/s  차이 -0.010m/s  전달률 123%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 +0.550 rad/s  절대평균 2.453  비율 0.22   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.437Nm (yaw +0.054)  힘 10.2N   캡 각속도 +0.891rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +3.6deg  캡 회전 59.5deg  공전비 0.06   (1.0=캡과 함께 공전, 0=제자리 자전)   n=174
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 2.25mm 실제 2.19mm 오차 0.065mm  드라이브 +13.0N (한계 200N)  캡 z힘 -2.9N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 39%  검지 28%  중지 14%  약지 15%  새끼 43%  전체 28%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 38%/+0.33/42.3/55.8  검지 0%/+0.63/63.0/71.1  중지 9%/+0.82/67.6/57.1  약지 33%/+0.66/74.4/64.2  새끼 28%/+0.75/59.1/51.2
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 2.81mm  최대 6.51mm  10mm 도달 0%  현재 대비 -0.15mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=40 풀림중앙 72 | 60~120도 n=36 풀림중앙 57 | 120~180도 n=40 풀림중앙 12 | 180~240도 n=42 풀림중앙 1 | 240~300도 n=48 풀림중앙 18 | 300~360도 n=50 풀림중앙 54
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 0 / 중앙 43 / 75% 67 / 최대 117deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -145(-159~-123)  검지 29(-64~63)  중지 2(-74~39)  약지 -19(-78~20)  새끼 -39(-103~1)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 107  검지-중지 34  중지-약지 26  약지-새끼 24
+[unscrew-diag] 손끝거리=30.8mm (엄지 42.3mm 최근접 41.3mm) 손바닥각=31deg
+[unscrew-diag] tip최소간격=30.3mm 엄지-검지=136.3mm 엄지-중지=149.0mm 방위각 엄지-검지 113deg 엄지-중지 128deg (기준 90deg)  품질=0.207 파지유지=0.30
+[unscrew-diag]   손목 캡 안(42개): tip간격 21.3mm 밴드접촉 2.90  |  캡 밖(214개): tip간격 32.1mm 밴드접촉 1.64
+[unscrew-diag] 10 steps  TOTAL=+0.134/step  kc=0.415  |  unscrew=+0.531  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.550  near=+1.046  pinch=+0.698  press=+0.332  -oppose=-0.181  -quality=-0.664  -grip=-0.351  -pen=-0.503  -reverse=-0.205  -revang=-0.000  -leash=-0.019
+[unscrew-diag] raw접촉=1.54 밴드내=1.96 손바닥면=3.26(cos +0.67) 인정=1.09 대향=29%  풀림=45.7deg 상승=2.52mm 손목거리=84mm 손목높이=+173mm (초기 캡윗면기준 15~98 평균 57mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 7.31mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.002m/s  캡 표면 0.034m/s  차이 -0.033m/s  전달률 1769%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 +0.236 rad/s  절대평균 2.416  비율 0.10   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.442Nm (yaw +0.043)  힘 10.6N   캡 각속도 +0.390rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +8.6deg  캡 회전 62.6deg  공전비 0.14   (1.0=캡과 함께 공전, 0=제자리 자전)   n=188
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 2.56mm 실제 2.52mm 오차 0.032mm  드라이브 +6.3N (한계 200N)  캡 z힘 -3.9N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 38%  검지 28%  중지 14%  약지 16%  새끼 42%  전체 28%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 38%/+0.36/36.9/51.7  검지 0%/+0.66/55.0/67.8  중지 18%/+0.85/58.9/54.6  약지 32%/+0.69/68.2/61.0  새끼 22%/+0.79/54.4/47.5
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 3.35mm  최대 7.31mm  10mm 도달 0%  현재 대비 -0.23mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=40 풀림중앙 71 | 60~120도 n=36 풀림중앙 54 | 120~180도 n=40 풀림중앙 32 | 180~240도 n=42 풀림중앙 16 | 240~300도 n=48 풀림중앙 36 | 300~360도 n=50 풀림중앙 66
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 0 / 중앙 54 / 75% 73 / 최대 132deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -144(-154~-126)  검지 32(-57~67)  중지 4(-69~42)  약지 -13(-79~22)  새끼 -36(-104~2)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 105  검지-중지 34  중지-약지 26  약지-새끼 24
+[unscrew-diag] 손끝거리=26.8mm (엄지 36.9mm 최근접 36.4mm) 손바닥각=30deg
+[unscrew-diag] tip최소간격=29.9mm 엄지-검지=130.3mm 엄지-중지=141.8mm 방위각 엄지-검지 118deg 엄지-중지 133deg (기준 90deg)  품질=0.205 파지유지=0.36
+[unscrew-diag]   손목 캡 안(57개): tip간격 20.9mm 밴드접촉 2.88  |  캡 밖(199개): tip간격 32.5mm 밴드접촉 1.70
+[unscrew-diag] 10 steps  TOTAL=+0.226/step  kc=0.415  |  unscrew=+0.560  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.543  near=+1.093  pinch=+0.736  press=+0.334  -oppose=-0.156  -quality=-0.664  -grip=-0.351  -pen=-0.550  -reverse=-0.215  -revang=-0.000  -leash=-0.018
+[unscrew-diag] raw접촉=1.63 밴드내=1.95 손바닥면=3.41(cos +0.70) 인정=0.99 대향=25%  풀림=49.9deg 상승=2.76mm 손목거리=81mm 손목높이=+171mm (초기 캡윗면기준 15~98 평균 57mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 7.56mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.037m/s  캡 표면 0.070m/s  차이 -0.033m/s  전달률 191%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -0.023 rad/s  절대평균 2.490  비율 0.01   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.433Nm (yaw +0.022)  힘 10.4N   캡 각속도 +0.607rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +11.2deg  캡 회전 65.8deg  공전비 0.17   (1.0=캡과 함께 공전, 0=제자리 자전)   n=195
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 2.79mm 실제 2.76mm 오차 0.037mm  드라이브 +7.3N (한계 200N)  캡 z힘 -3.3N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 38%  검지 28%  중지 15%  약지 17%  새끼 42%  전체 28%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 36%/+0.44/33.8/49.3  검지 0%/+0.66/53.8/66.1  중지 17%/+0.86/55.0/53.8  약지 30%/+0.71/63.3/59.8  새끼 16%/+0.82/51.9/46.5
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 3.78mm  최대 7.56mm  10mm 도달 0%  현재 대비 -0.29mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=40 풀림중앙 75 | 60~120도 n=36 풀림중앙 62 | 120~180도 n=40 풀림중앙 31 | 180~240도 n=42 풀림중앙 22 | 240~300도 n=48 풀림중앙 47 | 300~360도 n=50 풀림중앙 69
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 13 / 중앙 59 / 75% 75 / 최대 136deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -142(-155~-127)  검지 35(-37~66)  중지 9(-51~41)  약지 -10(-75~21)  새끼 -27(-98~3)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 106  검지-중지 33  중지-약지 26  약지-새끼 23
+[unscrew-diag] 손끝거리=25.5mm (엄지 33.8mm 최근접 35.5mm) 손바닥각=30deg
+[unscrew-diag] tip최소간격=28.5mm 엄지-검지=130.1mm 엄지-중지=138.1mm 방위각 엄지-검지 121deg 엄지-중지 138deg (기준 90deg)  품질=0.183 파지유지=0.34
+[unscrew-diag]   손목 캡 안(70개): tip간격 20.5mm 밴드접촉 2.76  |  캡 밖(186개): tip간격 31.5mm 밴드접촉 1.65
+[unscrew-diag] 10 steps  TOTAL=+0.221/step  kc=0.416  |  unscrew=+0.546  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.543  near=+1.130  pinch=+0.769  press=+0.344  -oppose=-0.154  -quality=-0.663  -grip=-0.352  -pen=-0.611  -reverse=-0.228  -revang=-0.000  -leash=-0.017
+[unscrew-diag] raw접촉=1.62 밴드내=1.98 손바닥면=3.53(cos +0.71) 인정=1.02 대향=27%  풀림=54.3deg 상승=3.00mm 손목거리=79mm 손목높이=+170mm (초기 캡윗면기준 15~98 평균 57mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 7.57mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.039m/s  캡 표면 0.016m/s  차이 0.022m/s  전달률 42%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 +0.149 rad/s  절대평균 2.538  비율 0.06   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.439Nm (yaw +0.018)  힘 10.4N   캡 각속도 +0.788rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +14.7deg  캡 회전 66.5deg  공전비 0.22   (1.0=캡과 함께 공전, 0=제자리 자전)   n=213
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 3.07mm 실제 3.00mm 오차 0.072mm  드라이브 +14.4N (한계 200N)  캡 z힘 -3.4N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 38%  검지 27%  중지 15%  약지 17%  새끼 42%  전체 28%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 34%/+0.45/32.7/48.2  검지 0%/+0.70/52.9/65.1  중지 17%/+0.86/54.9/54.7  약지 31%/+0.71/62.0/61.1  새끼 20%/+0.83/51.7/47.3
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 4.01mm  최대 7.57mm  10mm 도달 0%  현재 대비 -0.38mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=40 풀림중앙 79 | 60~120도 n=36 풀림중앙 68 | 120~180도 n=40 풀림중앙 40 | 180~240도 n=42 풀림중앙 33 | 240~300도 n=48 풀림중앙 53 | 300~360도 n=50 풀림중앙 68
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 25 / 중앙 63 / 75% 79 / 최대 136deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -141(-156~-124)  검지 34(-28~63)  중지 13(-42~41)  약지 -8(-65~21)  새끼 -26(-83~2)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 110  검지-중지 32  중지-약지 26  약지-새끼 23
+[unscrew-diag] 손끝거리=25.0mm (엄지 32.7mm 최근접 35.3mm) 손바닥각=29deg
+[unscrew-diag] tip최소간격=27.0mm 엄지-검지=130.9mm 엄지-중지=134.8mm 방위각 엄지-검지 124deg 엄지-중지 138deg (기준 90deg)  품질=0.180 파지유지=0.35
+[unscrew-diag]   손목 캡 안(80개): tip간격 20.1mm 밴드접촉 2.67  |  캡 밖(176개): tip간격 30.2mm 밴드접촉 1.67
+fps step: 6092 fps step and policy inference: 5664 fps total: 3484 epoch: 15/25 frames: 114688
+[unscrew-diag] 10 steps  TOTAL=+0.011/step  kc=0.416  |  unscrew=+0.503  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.552  near=+1.122  pinch=+0.708  press=+0.320  -oppose=-0.150  -quality=-0.671  -grip=-0.355  -pen=-0.664  -reverse=-0.231  -revang=-0.000  -leash=-0.017
+[unscrew-diag] raw접촉=1.66 밴드내=1.98 손바닥면=3.50(cos +0.70) 인정=1.09 대향=29%  풀림=59.6deg 상승=3.30mm 손목거리=79mm 손목높이=+171mm (초기 캡윗면기준 15~98 평균 57mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 7.57mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 -0.007m/s  캡 표면 0.017m/s  차이 -0.023m/s  전달률 460274850%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 +0.075 rad/s  절대평균 2.561  비율 0.03   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.441Nm (yaw -0.025)  힘 10.2N   캡 각속도 +0.041rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +4.4deg  캡 회전 69.3deg  공전비 0.06   (1.0=캡과 함께 공전, 0=제자리 자전)   n=220
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 3.32mm 실제 3.30mm 오차 0.018mm  드라이브 +3.6N (한계 200N)  캡 z힘 -3.4N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 38%  검지 27%  중지 15%  약지 17%  새끼 42%  전체 28%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 36%/+0.42/34.1/47.5  검지 0%/+0.69/55.0/64.6  중지 18%/+0.86/56.0/55.1  약지 33%/+0.70/63.0/62.8  새끼 22%/+0.85/52.4/47.9
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 4.21mm  최대 7.57mm  10mm 도달 0%  현재 대비 -0.43mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=40 풀림중앙 76 | 60~120도 n=36 풀림중앙 66 | 120~180도 n=40 풀림중앙 54 | 180~240도 n=42 풀림중앙 47 | 240~300도 n=48 풀림중앙 58 | 300~360도 n=50 풀림중앙 70
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 38 / 중앙 65 / 75% 81 / 최대 136deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -144(-158~-128)  검지 34(-37~60)  중지 14(-53~40)  약지 -7(-65~20)  새끼 -25(-90~0)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 112  검지-중지 32  중지-약지 26  약지-새끼 23
+[unscrew-diag] 손끝거리=26.2mm (엄지 34.1mm 최근접 37.6mm) 손바닥각=28deg
+[unscrew-diag] tip최소간격=27.2mm 엄지-검지=135.2mm 엄지-중지=134.2mm 방위각 엄지-검지 125deg 엄지-중지 136deg (기준 90deg)  품질=0.211 파지유지=0.32
+[unscrew-diag]   손목 캡 안(88개): tip간격 19.7mm 밴드접촉 2.77  |  캡 밖(168개): tip간격 31.2mm 밴드접촉 1.57
+[unscrew-diag] 10 steps  TOTAL=-0.124/step  kc=0.416  |  unscrew=+0.496  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.565  near=+1.094  pinch=+0.691  press=+0.303  -oppose=-0.152  -quality=-0.674  -grip=-0.357  -pen=-0.694  -reverse=-0.247  -revang=-0.000  -leash=-0.017
+[unscrew-diag] raw접촉=1.55 밴드내=1.79 손바닥면=3.55(cos +0.68) 인정=0.94 대향=25%  풀림=63.2deg 상승=3.50mm 손목거리=79mm 손목높이=+170mm (초기 캡윗면기준 15~98 평균 57mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 7.64mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.021m/s  캡 표면 -0.005m/s  차이 0.026m/s  전달률 -25%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -0.353 rad/s  절대평균 2.352  비율 0.15   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.435Nm (yaw -0.029)  힘 10.2N   캡 각속도 +0.441rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +2.6deg  캡 회전 71.0deg  공전비 0.04   (1.0=캡과 함께 공전, 0=제자리 자전)   n=229
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 3.54mm 실제 3.50mm 오차 0.039mm  드라이브 +7.7N (한계 200N)  캡 z힘 -3.1N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 38%  검지 26%  중지 15%  약지 16%  새끼 42%  전체 28%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 34%/+0.37/36.7/46.9  검지 0%/+0.68/57.6/63.7  중지 18%/+0.84/59.8/56.3  약지 25%/+0.67/68.0/64.9  새끼 16%/+0.86/56.7/50.3
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 4.40mm  최대 7.64mm  10mm 도달 0%  현재 대비 -0.52mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=40 풀림중앙 75 | 60~120도 n=36 풀림중앙 77 | 120~180도 n=40 풀림중앙 61 | 180~240도 n=42 풀림중앙 55 | 240~300도 n=48 풀림중앙 65 | 300~360도 n=50 풀림중앙 76
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 43 / 중앙 67 / 75% 84 / 최대 138deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -146(-157~-131)  검지 29(-43~58)  중지 7(-58~39)  약지 -14(-66~20)  새끼 -32(-91~0)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 113  검지-중지 34  중지-약지 26  약지-새끼 24
+[unscrew-diag] 손끝거리=28.3mm (엄지 36.7mm 최근접 40.5mm) 손바닥각=28deg
+[unscrew-diag] tip최소간격=27.7mm 엄지-검지=138.5mm 엄지-중지=135.0mm 방위각 엄지-검지 125deg 엄지-중지 132deg (기준 90deg)  품질=0.187 파지유지=0.32
+[unscrew-diag]   손목 캡 안(85개): tip간격 20.8mm 밴드접촉 2.45  |  캡 밖(171개): tip간격 31.2mm 밴드접촉 1.46
+[unscrew-diag] 10 steps  TOTAL=-0.420/step  kc=0.416  |  unscrew=+0.467  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.572  near=+1.041  pinch=+0.568  press=+0.270  -oppose=-0.165  -quality=-0.695  -grip=-0.364  -pen=-0.723  -reverse=-0.230  -revang=-0.000  -leash=-0.019
+[unscrew-diag] raw접촉=1.42 밴드내=1.61 손바닥면=3.38(cos +0.66) 인정=0.82 대향=22%  풀림=66.3deg 상승=3.67mm 손목거리=83mm 손목높이=+171mm (초기 캡윗면기준 15~98 평균 57mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 7.99mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.022m/s  캡 표면 0.033m/s  차이 -0.010m/s  전달률 147%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -0.709 rad/s  절대평균 2.352  비율 0.30   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.438Nm (yaw -0.053)  힘 10.2N   캡 각속도 +0.530rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +8.8deg  캡 회전 72.9deg  공전비 0.12   (1.0=캡과 함께 공전, 0=제자리 자전)   n=234
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 3.71mm 실제 3.67mm 오차 0.037mm  드라이브 +7.3N (한계 200N)  캡 z힘 -2.7N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 39%  검지 26%  중지 15%  약지 16%  새끼 43%  전체 28%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 29%/+0.32/41.0/48.2  검지 0%/+0.66/63.1/65.6  중지 14%/+0.82/66.9/59.6  약지 22%/+0.64/75.5/69.4  새끼 17%/+0.86/61.9/53.3
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 4.51mm  최대 7.99mm  10mm 도달 0%  현재 대비 -0.57mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=40 풀림중앙 73 | 60~120도 n=36 풀림중앙 72 | 120~180도 n=40 풀림중앙 66 | 180~240도 n=42 풀림중앙 61 | 240~300도 n=48 풀림중앙 59 | 300~360도 n=50 풀림중앙 71
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 47 / 중앙 70 / 75% 88 / 최대 144deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -144(-157~-132)  검지 15(-51~58)  중지 -6(-62~38)  약지 -28(-68~17)  새끼 -42(-95~-2)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 116  검지-중지 35  중지-약지 26  약지-새끼 25
+[unscrew-diag] 손끝거리=32.5mm (엄지 41.0mm 최근접 44.9mm) 손바닥각=28deg
+[unscrew-diag] tip최소간격=29.0mm 엄지-검지=143.3mm 엄지-중지=137.6mm 방위각 엄지-검지 124deg 엄지-중지 128deg (기준 90deg)  품질=0.165 파지유지=0.29
+[unscrew-diag]   손목 캡 안(76개): tip간격 20.0mm 밴드접촉 2.61  |  캡 밖(180개): tip간격 32.8mm 밴드접촉 1.19
+fps step: 6091 fps step and policy inference: 5643 fps total: 3540 epoch: 16/25 frames: 122880
+[unscrew-diag] 10 steps  TOTAL=-0.661/step  kc=0.418  |  unscrew=+0.464  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.616  near=+0.985  pinch=+0.494  press=+0.228  -oppose=-0.190  -quality=-0.713  -grip=-0.371  -pen=-0.706  -reverse=-0.214  -revang=-0.000  -leash=-0.021
+[unscrew-diag] raw접촉=1.28 밴드내=1.47 손바닥면=3.21(cos +0.62) 인정=0.68 대향=19%  풀림=69.1deg 상승=3.83mm 손목거리=88mm 손목높이=+171mm (초기 캡윗면기준 15~98 평균 57mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 8.00mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 -0.035m/s  캡 표면 -0.020m/s  차이 -0.015m/s  전달률 -351571075%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -0.327 rad/s  절대평균 2.253  비율 0.15   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.426Nm (yaw -0.044)  힘 10.2N   캡 각속도 -0.304rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +2.6deg  캡 회전 73.5deg  공전비 0.04   (1.0=캡과 함께 공전, 0=제자리 자전)   n=240
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 3.83mm 실제 3.83mm 오차 0.001mm  드라이브 +0.3N (한계 200N)  캡 z힘 -2.6N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 40%  검지 25%  중지 15%  약지 15%  새끼 43%  전체 28%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 24%/+0.25/47.0/49.8  검지 0%/+0.64/69.1/67.3  중지 13%/+0.79/73.5/61.8  약지 18%/+0.59/83.8/72.8  새끼 13%/+0.85/69.0/56.2
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 4.64mm  최대 8.00mm  10mm 도달 0%  현재 대비 -0.60mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=40 풀림중앙 81 | 60~120도 n=36 풀림중앙 80 | 120~180도 n=40 풀림중앙 78 | 180~240도 n=42 풀림중앙 60 | 240~300도 n=48 풀림중앙 61 | 300~360도 n=50 풀림중앙 78
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 50 / 중앙 73 / 75% 90 / 최대 144deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -145(-157~-128)  검지 4(-53~55)  중지 -20(-67~35)  약지 -39(-71~15)  새끼 -57(-95~-4)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 120  검지-중지 37  중지-약지 28  약지-새끼 27
+[unscrew-diag] 손끝거리=36.3mm (엄지 47.0mm 최근접 49.3mm) 손바닥각=28deg
+[unscrew-diag] tip최소간격=29.5mm 엄지-검지=149.6mm 엄지-중지=140.0mm 방위각 엄지-검지 121deg 엄지-중지 122deg (기준 90deg)  품질=0.134 파지유지=0.24
+[unscrew-diag]   손목 캡 안(59개): tip간격 20.1mm 밴드접촉 2.42  |  캡 밖(197개): tip간격 32.3mm 밴드접촉 1.19
+[unscrew-diag] 10 steps  TOTAL=-0.952/step  kc=0.418  |  unscrew=+0.382  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.651  near=+0.944  pinch=+0.449  press=+0.201  -oppose=-0.215  -quality=-0.727  -grip=-0.377  -pen=-0.686  -reverse=-0.247  -revang=-0.000  -leash=-0.024
+[unscrew-diag] raw접촉=1.20 밴드내=1.46 손바닥면=3.07(cos +0.60) 인정=0.69 대향=18%  풀림=67.3deg 상승=3.73mm 손목거리=93mm 손목높이=+172mm (초기 캡윗면기준 15~98 평균 57mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 8.00mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 -0.007m/s  캡 표면 0.003m/s  차이 -0.010m/s  전달률 50126075%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -0.486 rad/s  절대평균 2.135  비율 0.23   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.418Nm (yaw -0.035)  힘 10.0N   캡 각속도 +0.169rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +6.1deg  캡 회전 72.9deg  공전비 0.08   (1.0=캡과 함께 공전, 0=제자리 자전)   n=237
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 3.75mm 실제 3.73mm 오차 0.024mm  드라이브 +4.8N (한계 200N)  캡 z힘 -2.3N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 41%  검지 25%  중지 15%  약지 15%  새끼 44%  전체 28%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 24%/+0.24/51.5/52.3  검지 0%/+0.59/71.0/69.6  중지 10%/+0.76/78.4/65.5  약지 20%/+0.54/90.4/78.0  새끼 15%/+0.86/75.0/59.7
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 4.66mm  최대 8.00mm  10mm 도달 0%  현재 대비 -0.81mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=40 풀림중앙 70 | 60~120도 n=36 풀림중앙 74 | 120~180도 n=40 풀림중앙 62 | 180~240도 n=42 풀림중앙 63 | 240~300도 n=48 풀림중앙 64 | 300~360도 n=50 풀림중앙 74
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 49 / 중앙 69 / 75% 88 / 최대 144deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -143(-160~-124)  검지 -12(-57~49)  중지 -29(-68~27)  약지 -52(-72~6)  새끼 -70(-97~-12)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 123  검지-중지 39  중지-약지 29  약지-새끼 29
+[unscrew-diag] 손끝거리=38.1mm (엄지 51.5mm 최근접 51.8mm) 손바닥각=28deg
+[unscrew-diag] tip최소간격=31.4mm 엄지-검지=152.3mm 엄지-중지=142.9mm 방위각 엄지-검지 119deg 엄지-중지 118deg (기준 90deg)  품질=0.134 파지유지=0.21
+[unscrew-diag]   손목 캡 안(50개): tip간격 20.5mm 밴드접촉 2.40  |  캡 밖(206개): tip간격 34.0mm 밴드접촉 1.24
+[unscrew-diag] 10 steps  TOTAL=-0.975/step  kc=0.418  |  unscrew=+0.373  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.660  near=+0.930  pinch=+0.435  press=+0.189  -oppose=-0.229  -quality=-0.732  -grip=-0.379  -pen=-0.648  -reverse=-0.227  -revang=-0.000  -leash=-0.027
+[unscrew-diag] raw접촉=1.11 밴드내=1.41 손바닥면=3.03(cos +0.59) 인정=0.66 대향=15%  풀림=68.0deg 상승=3.77mm 손목거리=97mm 손목높이=+171mm (초기 캡윗면기준 15~98 평균 57mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 8.00mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.022m/s  캡 표면 -0.024m/s  차이 0.046m/s  전달률 -111%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -0.084 rad/s  절대평균 2.100  비율 0.04   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.421Nm (yaw -0.012)  힘 10.1N   캡 각속도 -0.097rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +3.1deg  캡 회전 74.1deg  공전비 0.04   (1.0=캡과 함께 공전, 0=제자리 자전)   n=235
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 3.79mm 실제 3.77mm 오차 0.019mm  드라이브 +3.7N (한계 200N)  캡 z힘 -2.3N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 41%  검지 25%  중지 15%  약지 14%  새끼 44%  전체 28%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 19%/+0.28/56.7/53.2  검지 0%/+0.55/74.2/70.7  중지 11%/+0.73/82.7/68.5  약지 20%/+0.50/94.7/81.7  새끼 16%/+0.86/79.8/61.6
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 4.77mm  최대 8.00mm  10mm 도달 0%  현재 대비 -0.91mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=40 풀림중앙 78 | 60~120도 n=36 풀림중앙 76 | 120~180도 n=40 풀림중앙 70 | 180~240도 n=42 풀림중앙 70 | 240~300도 n=48 풀림중앙 58 | 300~360도 n=50 풀림중앙 72
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 48 / 중앙 72 / 75% 92 / 최대 144deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -143(-161~-117)  검지 -13(-56~42)  중지 -31(-69~23)  약지 -55(-73~5)  새끼 -72(-98~-13)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 124  검지-중지 38  중지-약지 29  약지-새끼 30
+[unscrew-diag] 손끝거리=42.5mm (엄지 56.7mm 최근접 55.2mm) 손바닥각=29deg
+[unscrew-diag] tip최소간격=31.9mm 엄지-검지=156.2mm 엄지-중지=146.6mm 방위각 엄지-검지 116deg 엄지-중지 117deg (기준 90deg)  품질=0.116 파지유지=0.21
+[unscrew-diag]   손목 캡 안(46개): tip간격 20.1mm 밴드접촉 2.50  |  캡 밖(210개): tip간격 34.5mm 밴드접촉 1.17
+fps step: 6265 fps step and policy inference: 5793 fps total: 3599 epoch: 17/25 frames: 131072
+[unscrew-diag] 10 steps  TOTAL=-0.931/step  kc=0.419  |  unscrew=+0.384  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.656  near=+0.896  pinch=+0.450  press=+0.200  -oppose=-0.240  -quality=-0.724  -grip=-0.376  -pen=-0.631  -reverse=-0.204  -revang=-0.000  -leash=-0.030
+[unscrew-diag] raw접촉=1.18 밴드내=1.38 손바닥면=2.99(cos +0.57) 인정=0.80 대향=21%  풀림=70.4deg 상승=3.90mm 손목거리=102mm 손목높이=+170mm (초기 캡윗면기준 15~98 평균 57mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 8.00mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.065m/s  캡 표면 0.068m/s  차이 -0.003m/s  전달률 104%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -0.113 rad/s  절대평균 2.245  비율 0.05   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.424Nm (yaw -0.020)  힘 10.1N   캡 각속도 +0.371rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +3.9deg  캡 회전 76.3deg  공전비 0.05   (1.0=캡과 함께 공전, 0=제자리 자전)   n=237
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 3.93mm 실제 3.90mm 오차 0.028mm  드라이브 +5.6N (한계 200N)  캡 z힘 -2.1N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 42%  검지 25%  중지 15%  약지 14%  새끼 44%  전체 28%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 24%/+0.28/62.7/53.4  검지 0%/+0.52/74.4/71.2  중지 12%/+0.70/86.1/70.7  약지 25%/+0.46/98.9/85.4  새끼 19%/+0.87/85.1/63.8
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 4.92mm  최대 8.00mm  10mm 도달 0%  현재 대비 -0.87mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=40 풀림중앙 82 | 60~120도 n=36 풀림중앙 77 | 120~180도 n=40 풀림중앙 71 | 180~240도 n=42 풀림중앙 70 | 240~300도 n=48 풀림중앙 53 | 300~360도 n=50 풀림중앙 79
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 50 / 중앙 76 / 75% 97 / 최대 144deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -147(-161~-117)  검지 -21(-57~43)  중지 -40(-68~26)  약지 -55(-73~5)  새끼 -75(-97~-13)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 125  검지-중지 41  중지-약지 29  약지-새끼 33
+[unscrew-diag] 손끝거리=44.3mm (엄지 62.7mm 최근접 56.6mm) 손바닥각=29deg
+[unscrew-diag] tip최소간격=32.4mm 엄지-검지=160.5mm 엄지-중지=150.6mm 방위각 엄지-검지 116deg 엄지-중지 115deg (기준 90deg)  품질=0.154 파지유지=0.22
+[unscrew-diag]   손목 캡 안(32개): tip간격 20.4mm 밴드접촉 2.38  |  캡 밖(224개): tip간격 34.1mm 밴드접촉 1.23
+[unscrew-diag] 10 steps  TOTAL=-0.982/step  kc=0.419  |  unscrew=+0.393  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.650  near=+0.853  pinch=+0.429  press=+0.200  -oppose=-0.254  -quality=-0.726  -grip=-0.377  -pen=-0.615  -reverse=-0.202  -revang=-0.000  -leash=-0.033
+[unscrew-diag] raw접촉=1.00 밴드내=1.33 손바닥면=2.90(cos +0.54) 인정=0.66 대향=15%  풀림=71.9deg 상승=3.99mm 손목거리=105mm 손목높이=+170mm (초기 캡윗면기준 15~98 평균 57mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 8.00mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.090m/s  캡 표면 0.131m/s  차이 -0.040m/s  전달률 145%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -0.208 rad/s  절대평균 2.092  비율 0.10   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.422Nm (yaw -0.023)  힘 9.8N   캡 각속도 +0.672rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +3.7deg  캡 회전 77.4deg  공전비 0.05   (1.0=캡과 함께 공전, 0=제자리 자전)   n=239
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 4.02mm 실제 3.99mm 오차 0.028mm  드라이브 +5.5N (한계 200N)  캡 z힘 -1.9N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 42%  검지 24%  중지 15%  약지 13%  새끼 44%  전체 28%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 23%/+0.25/67.4/54.5  검지 0%/+0.49/76.0/71.4  중지 11%/+0.68/90.3/71.9  약지 18%/+0.43/104.2/87.5  새끼 13%/+0.86/89.6/65.0
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 4.99mm  최대 8.00mm  10mm 도달 0%  현재 대비 -0.86mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=40 풀림중앙 94 | 60~120도 n=36 풀림중앙 79 | 120~180도 n=40 풀림중앙 72 | 180~240도 n=42 풀림중앙 73 | 240~300도 n=48 풀림중앙 62 | 300~360도 n=50 풀림중앙 79
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 52 / 중앙 75 / 75% 97 / 최대 144deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -141(-159~-115)  검지 -26(-57~47)  중지 -46(-67~28)  약지 -59(-72~8)  새끼 -82(-99~-10)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 131  검지-중지 43  중지-약지 31  약지-새끼 43
+[unscrew-diag] 손끝거리=44.4mm (엄지 67.4mm 최근접 57.2mm) 손바닥각=30deg
+[unscrew-diag] tip최소간격=34.5mm 엄지-검지=164.9mm 엄지-중지=154.5mm 방위각 엄지-검지 112deg 엄지-중지 111deg (기준 90deg)  품질=0.128 파지유지=0.23
+[unscrew-diag]   손목 캡 안(41개): tip간격 20.5mm 밴드접촉 2.78  |  캡 밖(215개): tip간격 37.2mm 밴드접촉 1.05
+[unscrew-diag] 10 steps  TOTAL=-1.068/step  kc=0.419  |  unscrew=+0.355  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.645  near=+0.813  pinch=+0.409  press=+0.185  -oppose=-0.275  -quality=-0.733  -grip=-0.381  -pen=-0.558  -reverse=-0.201  -revang=-0.000  -leash=-0.036
+[unscrew-diag] raw접촉=1.05 밴드내=1.30 손바닥면=2.74(cos +0.51) 인정=0.74 대향=17%  풀림=73.0deg 상승=4.05mm 손목거리=109mm 손목높이=+171mm (초기 캡윗면기준 15~98 평균 57mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 8.00mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 -0.035m/s  캡 표면 -0.061m/s  차이 0.026m/s  전달률 -1152471700%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 +0.162 rad/s  절대평균 1.961  비율 0.08   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.410Nm (yaw -0.010)  힘 9.8N   캡 각속도 -0.156rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +6.0deg  캡 회전 79.1deg  공전비 0.08   (1.0=캡과 함께 공전, 0=제자리 자전)   n=236
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 4.06mm 실제 4.05mm 오차 0.011mm  드라이브 +2.2N (한계 200N)  캡 z힘 -2.5N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 43%  검지 24%  중지 15%  약지 13%  새끼 45%  전체 28%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 22%/+0.25/72.5/56.4  검지 1%/+0.44/76.5/71.4  중지 13%/+0.64/93.0/73.2  약지 21%/+0.39/109.2/90.6  새끼 17%/+0.84/93.2/67.4
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 5.04mm  최대 8.00mm  10mm 도달 0%  현재 대비 -0.87mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=40 풀림중앙 91 | 60~120도 n=36 풀림중앙 86 | 120~180도 n=40 풀림중앙 72 | 180~240도 n=42 풀림중앙 73 | 240~300도 n=48 풀림중앙 67 | 300~360도 n=50 풀림중앙 79
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 52 / 중앙 77 / 75% 99 / 최대 144deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -145(-159~-116)  검지 -36(-58~41)  중지 -53(-69~22)  약지 -62(-75~3)  새끼 -86(-101~-16)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 136  검지-중지 46  중지-약지 31  약지-새끼 54
+[unscrew-diag] 손끝거리=46.0mm (엄지 72.5mm 최근접 58.1mm) 손바닥각=30deg
+[unscrew-diag] tip최소간격=36.1mm 엄지-검지=168.5mm 엄지-중지=158.2mm 방위각 엄지-검지 108deg 엄지-중지 107deg (기준 90deg)  품질=0.138 파지유지=0.23
+[unscrew-diag]   손목 캡 안(27개): tip간격 21.7mm 밴드접촉 2.41  |  캡 밖(229개): tip간격 37.7mm 밴드접촉 1.17
+fps step: 6288 fps step and policy inference: 5807 fps total: 3610 epoch: 18/25 frames: 139264
+[unscrew-diag] 10 steps  TOTAL=-1.007/step  kc=0.420  |  unscrew=+0.401  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.651  near=+0.780  pinch=+0.407  press=+0.180  -oppose=-0.288  -quality=-0.734  -grip=-0.381  -pen=-0.501  -reverse=-0.180  -revang=-0.001  -leash=-0.039
+[unscrew-diag] raw접촉=0.97 밴드내=1.17 손바닥면=2.57(cos +0.49) 인정=0.61 대향=17%  풀림=75.6deg 상승=4.19mm 손목거리=113mm 손목높이=+170mm (초기 캡윗면기준 15~98 평균 57mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 8.00mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.008m/s  캡 표면 0.031m/s  차이 -0.023m/s  전달률 368%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -0.067 rad/s  절대평균 1.979  비율 0.03   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.408Nm (yaw -0.040)  힘 9.7N   캡 각속도 +0.183rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +4.9deg  캡 회전 83.5deg  공전비 0.06   (1.0=캡과 함께 공전, 0=제자리 자전)   n=232
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 4.21mm 실제 4.19mm 오차 0.021mm  드라이브 +4.2N (한계 200N)  캡 z힘 -2.3N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 43%  검지 24%  중지 16%  약지 13%  새끼 45%  전체 28%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 21%/+0.24/78.3/57.2  검지 0%/+0.40/76.5/72.8  중지 12%/+0.61/95.0/75.3  약지 14%/+0.36/112.2/93.3  새끼 13%/+0.83/97.3/69.0
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 5.14mm  최대 8.00mm  10mm 도달 0%  현재 대비 -0.82mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=40 풀림중앙 95 | 60~120도 n=36 풀림중앙 92 | 120~180도 n=40 풀림중앙 74 | 180~240도 n=42 풀림중앙 77 | 240~300도 n=48 풀림중앙 76 | 300~360도 n=50 풀림중앙 85
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 59 / 중앙 82 / 75% 100 / 최대 144deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -133(-157~-114)  검지 -42(-59~44)  중지 -54(-70~23)  약지 -63(-75~4)  새끼 -86(-101~-18)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 135  검지-중지 48  중지-약지 31  약지-새끼 55
+[unscrew-diag] 손끝거리=47.2mm (엄지 78.3mm 최근접 58.1mm) 손바닥각=31deg
+[unscrew-diag] tip최소간격=36.3mm 엄지-검지=171.0mm 엄지-중지=160.8mm 방위각 엄지-검지 105deg 엄지-중지 105deg (기준 90deg)  품질=0.121 파지유지=0.22
+[unscrew-diag]   손목 캡 안(23개): tip간격 19.6mm 밴드접촉 2.83  |  캡 밖(233개): tip간격 38.0mm 밴드접촉 1.01
+[unscrew-diag] 10 steps  TOTAL=-1.148/step  kc=0.420  |  unscrew=+0.346  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.661  near=+0.754  pinch=+0.382  press=+0.164  -oppose=-0.295  -quality=-0.745  -grip=-0.386  -pen=-0.483  -reverse=-0.183  -revang=-0.001  -leash=-0.042
+[unscrew-diag] raw접촉=0.78 밴드내=1.19 손바닥면=2.38(cos +0.45) 인정=0.53 대향=15%  풀림=76.7deg 상승=4.25mm 손목거리=117mm 손목높이=+171mm (초기 캡윗면기준 15~98 평균 57mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 8.00mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.037m/s  캡 표면 0.042m/s  차이 -0.005m/s  전달률 113%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -0.194 rad/s  절대평균 2.004  비율 0.10   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.403Nm (yaw -0.027)  힘 9.5N   캡 각속도 +0.388rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +2.1deg  캡 회전 83.2deg  공전비 0.03   (1.0=캡과 함께 공전, 0=제자리 자전)   n=237
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 4.28mm 실제 4.25mm 오차 0.030mm  드라이브 +6.0N (한계 200N)  캡 z힘 -1.8N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 44%  검지 24%  중지 15%  약지 12%  새끼 45%  전체 28%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 20%/+0.19/82.9/57.7  검지 0%/+0.36/73.5/72.7  중지 5%/+0.57/95.9/77.0  약지 16%/+0.33/114.5/95.6  새끼 12%/+0.82/101.2/70.4
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 5.24mm  최대 8.00mm  10mm 도달 0%  현재 대비 -0.83mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=40 풀림중앙 95 | 60~120도 n=36 풀림중앙 99 | 120~180도 n=40 풀림중앙 80 | 180~240도 n=42 풀림중앙 78 | 240~300도 n=48 풀림중앙 71 | 300~360도 n=50 풀림중앙 83
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 60 / 중앙 82 / 75% 101 / 최대 144deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -137(-159~-119)  검지 -45(-62~38)  중지 -56(-69~23)  약지 -63(-74~-3)  새끼 -88(-100~-22)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 139  검지-중지 51  중지-약지 32  약지-새끼 68
+[unscrew-diag] 손끝거리=46.1mm (엄지 82.9mm 최근접 57.1mm) 손바닥각=32deg
+[unscrew-diag] tip최소간격=38.1mm 엄지-검지=172.3mm 엄지-중지=164.3mm 방위각 엄지-검지 102deg 엄지-중지 101deg (기준 90deg)  품질=0.109 파지유지=0.21
+[unscrew-diag]   손목 캡 안(19개): tip간격 20.2mm 밴드접촉 3.00  |  캡 밖(237개): tip간격 39.5mm 밴드접촉 1.04
+[unscrew-diag] 10 steps  TOTAL=-1.141/step  kc=0.420  |  unscrew=+0.343  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.662  near=+0.732  pinch=+0.375  press=+0.159  -oppose=-0.300  -quality=-0.747  -grip=-0.387  -pen=-0.443  -reverse=-0.166  -revang=-0.001  -leash=-0.043
+[unscrew-diag] raw접촉=0.76 밴드내=1.20 손바닥면=2.36(cos +0.44) 인정=0.56 대향=16%  풀림=77.3deg 상승=4.29mm 손목거리=118mm 손목높이=+173mm (초기 캡윗면기준 15~98 평균 57mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 8.00mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.031m/s  캡 표면 0.069m/s  차이 -0.038m/s  전달률 223%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -0.185 rad/s  절대평균 1.939  비율 0.10   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.400Nm (yaw -0.020)  힘 9.4N   캡 각속도 +0.411rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +2.9deg  캡 회전 85.2deg  공전비 0.03   (1.0=캡과 함께 공전, 0=제자리 자전)   n=233
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 4.32mm 실제 4.29mm 오차 0.030mm  드라이브 +6.0N (한계 200N)  캡 z힘 -1.7N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 44%  검지 25%  중지 16%  약지 12%  새끼 45%  전체 28%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 21%/+0.21/84.2/60.1  검지 0%/+0.33/69.3/70.4  중지 8%/+0.55/93.7/74.8  약지 14%/+0.31/115.4/95.5  새끼 13%/+0.81/102.0/71.3
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 5.31mm  최대 8.00mm  10mm 도달 0%  현재 대비 -0.87mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=40 풀림중앙 92 | 60~120도 n=36 풀림중앙 92 | 120~180도 n=40 풀림중앙 82 | 180~240도 n=42 풀림중앙 81 | 240~300도 n=48 풀림중앙 71 | 300~360도 n=50 풀림중앙 83
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 60 / 중앙 84 / 75% 103 / 최대 144deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -138(-157~-116)  검지 -47(-64~44)  중지 -59(-71~24)  약지 -64(-74~-1)  새끼 -90(-102~-20)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 146  검지-중지 55  중지-약지 36  약지-새끼 87
+[unscrew-diag] 손끝거리=42.4mm (엄지 84.2mm 최근접 53.3mm) 손바닥각=32deg
+[unscrew-diag] tip최소간격=40.6mm 엄지-검지=172.4mm 엄지-중지=165.5mm 방위각 엄지-검지 99deg 엄지-중지 100deg (기준 90deg)  품질=0.112 파지유지=0.21
+[unscrew-diag]   손목 캡 안(12개): tip간격 17.6mm 밴드접촉 3.17  |  캡 밖(244개): tip간격 41.7mm 밴드접촉 1.10
+fps step: 6487 fps step and policy inference: 6008 fps total: 3677 epoch: 19/25 frames: 147456
+[unscrew-diag] 10 steps  TOTAL=-1.102/step  kc=0.421  |  unscrew=+0.354  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.662  near=+0.718  pinch=+0.373  press=+0.152  -oppose=-0.305  -quality=-0.749  -grip=-0.387  -pen=-0.396  -reverse=-0.158  -revang=-0.001  -leash=-0.043
+[unscrew-diag] raw접촉=0.72 밴드내=1.12 손바닥면=2.21(cos +0.43) 인정=0.54 대향=14%  풀림=78.7deg 상승=4.37mm 손목거리=119mm 손목높이=+174mm (초기 캡윗면기준 15~98 평균 57mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 8.00mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.012m/s  캡 표면 -0.044m/s  차이 0.055m/s  전달률 -377%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -0.021 rad/s  절대평균 1.929  비율 0.01   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.388Nm (yaw -0.013)  힘 9.4N   캡 각속도 -0.257rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +2.7deg  캡 회전 84.1deg  공전비 0.03   (1.0=캡과 함께 공전, 0=제자리 자전)   n=239
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 4.37mm 실제 4.37mm 오차 -0.001mm  드라이브 -0.2N (한계 200N)  캡 z힘 -1.9N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 44%  검지 25%  중지 16%  약지 13%  새끼 45%  전체 29%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 21%/+0.19/86.5/61.3  검지 0%/+0.30/67.6/69.3  중지 9%/+0.56/93.0/73.6  약지 12%/+0.31/116.8/94.7  새끼 12%/+0.78/102.2/71.3
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 5.36mm  최대 8.00mm  10mm 도달 0%  현재 대비 -0.85mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=40 풀림중앙 97 | 60~120도 n=36 풀림중앙 96 | 120~180도 n=40 풀림중앙 89 | 180~240도 n=42 풀림중앙 82 | 240~300도 n=48 풀림중앙 73 | 300~360도 n=50 풀림중앙 87
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 62 / 중앙 88 / 75% 103 / 최대 144deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -138(-157~-116)  검지 -47(-64~40)  중지 -61(-71~22)  약지 -64(-75~0)  새끼 -92(-103~-20)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 148  검지-중지 59  중지-약지 35  약지-새끼 92
+[unscrew-diag] 손끝거리=42.3mm (엄지 86.5mm 최근접 51.9mm) 손바닥각=32deg
+[unscrew-diag] tip최소간격=41.8mm 엄지-검지=171.3mm 엄지-중지=166.3mm 방위각 엄지-검지 95deg 엄지-중지 97deg (기준 90deg)  품질=0.105 파지유지=0.22
+[unscrew-diag]   손목 캡 안(15개): tip간격 22.1mm 밴드접촉 3.00  |  캡 밖(241개): tip간격 43.0mm 밴드접촉 1.00
+[unscrew-diag] 10 steps  TOTAL=-1.068/step  kc=0.421  |  unscrew=+0.352  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.654  near=+0.702  pinch=+0.378  press=+0.153  -oppose=-0.311  -quality=-0.752  -grip=-0.388  -pen=-0.354  -reverse=-0.150  -revang=-0.001  -leash=-0.044
+[unscrew-diag] raw접촉=0.78 밴드내=1.11 손바닥면=2.08(cos +0.43) 인정=0.54 대향=14%  풀림=79.9deg 상승=4.43mm 손목거리=121mm 손목높이=+174mm (초기 캡윗면기준 15~98 평균 57mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 8.00mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.045m/s  캡 표면 0.083m/s  차이 -0.038m/s  전달률 184%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -0.010 rad/s  절대평균 1.928  비율 0.01   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.393Nm (yaw -0.020)  힘 9.3N   캡 각속도 +0.547rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +3.9deg  캡 회전 87.6deg  공전비 0.04   (1.0=캡과 함께 공전, 0=제자리 자전)   n=235
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 4.47mm 실제 4.43mm 오차 0.038mm  드라이브 +7.6N (한계 200N)  캡 z힘 -1.6N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 45%  검지 25%  중지 17%  약지 13%  새끼 45%  전체 29%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 19%/+0.22/88.8/63.3  검지 0%/+0.29/66.2/69.4  중지 9%/+0.55/92.8/73.7  약지 13%/+0.31/117.6/95.7  새끼 12%/+0.77/102.1/71.8
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 5.38mm  최대 8.00mm  10mm 도달 0%  현재 대비 -0.85mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=40 풀림중앙 95 | 60~120도 n=36 풀림중앙 92 | 120~180도 n=40 풀림중앙 87 | 180~240도 n=42 풀림중앙 83 | 240~300도 n=48 풀림중앙 78 | 300~360도 n=50 풀림중앙 89
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 63 / 중앙 88 / 75% 103 / 최대 144deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -132(-154~-114)  검지 -51(-64~42)  중지 -61(-73~24)  약지 -64(-76~-0)  새끼 -92(-104~-19)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 148  검지-중지 61  중지-약지 38  약지-새끼 100
+[unscrew-diag] 손끝거리=40.0mm (엄지 88.8mm 최근접 49.8mm) 손바닥각=32deg
+[unscrew-diag] tip최소간격=43.6mm 엄지-검지=173.3mm 엄지-중지=168.3mm 방위각 엄지-검지 94deg 엄지-중지 97deg (기준 90deg)  품질=0.096 파지유지=0.22
+[unscrew-diag]   손목 캡 안(8개): tip간격 19.4mm 밴드접촉 3.00  |  캡 밖(248개): tip간격 44.4mm 밴드접촉 1.05
+[unscrew-diag] 10 steps  TOTAL=-0.957/step  kc=0.421  |  unscrew=+0.411  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.658  near=+0.693  pinch=+0.381  press=+0.156  -oppose=-0.321  -quality=-0.746  -grip=-0.386  -pen=-0.313  -reverse=-0.130  -revang=-0.001  -leash=-0.044
+[unscrew-diag] raw접촉=0.74 밴드내=1.04 손바닥면=2.03(cos +0.42) 인정=0.54 대향=14%  풀림=82.2deg 상승=4.56mm 손목거리=122mm 손목높이=+176mm (초기 캡윗면기준 15~98 평균 57mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 8.00mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.013m/s  캡 표면 0.021m/s  차이 -0.008m/s  전달률 162%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 -0.080 rad/s  절대평균 1.937  비율 0.04   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.379Nm (yaw -0.022)  힘 9.4N   캡 각속도 +0.333rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 -0.7deg  캡 회전 87.2deg  공전비 -0.01   (1.0=캡과 함께 공전, 0=제자리 자전)   n=242
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 4.59mm 실제 4.56mm 오차 0.024mm  드라이브 +4.7N (한계 200N)  캡 z힘 -1.7N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 45%  검지 25%  중지 17%  약지 13%  새끼 44%  전체 29%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 21%/+0.21/91.0/64.8  검지 0%/+0.30/62.2/68.4  중지 8%/+0.54/91.8/73.6  약지 10%/+0.30/117.7/95.7  새끼 15%/+0.76/103.1/73.0
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 5.45mm  최대 8.00mm  10mm 도달 0%  현재 대비 -0.76mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=40 풀림중앙 97 | 60~120도 n=36 풀림중앙 101 | 120~180도 n=40 풀림중앙 92 | 180~240도 n=42 풀림중앙 85 | 240~300도 n=48 풀림중앙 83 | 300~360도 n=50 풀림중앙 90
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 69 / 중앙 90 / 75% 103 / 최대 144deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -137(-154~-116)  검지 -52(-67~39)  중지 -60(-73~18)  약지 -64(-76~-3)  새끼 -93(-105~-24)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 151  검지-중지 62  중지-약지 36  약지-새끼 98
+[unscrew-diag] 손끝거리=38.7mm (엄지 91.0mm 최근접 47.6mm) 손바닥각=32deg
+[unscrew-diag] tip최소간격=43.9mm 엄지-검지=172.2mm 엄지-중지=169.5mm 방위각 엄지-검지 95deg 엄지-중지 97deg (기준 90deg)  품질=0.110 파지유지=0.22
+[unscrew-diag]   손목 캡 안(3개): tip간격 19.3mm 밴드접촉 3.67  |  캡 밖(253개): tip간격 44.2mm 밴드접촉 1.01
+[unscrew-diag] 10 steps  TOTAL=-0.889/step  kc=0.422  |  unscrew=+0.477  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.665  near=+0.676  pinch=+0.390  press=+0.153  -oppose=-0.319  -quality=-0.744  -grip=-0.384  -pen=-0.293  -reverse=-0.134  -revang=-0.000  -leash=-0.045
+[unscrew-diag] raw접촉=0.70 밴드내=1.03 손바닥면=1.96(cos +0.41) 인정=0.59 대향=18%  풀림=84.5deg 상승=4.69mm 손목거리=123mm 손목높이=+178mm (초기 캡윗면기준 15~98 평균 57mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 8.00mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 -0.013m/s  캡 표면 0.005m/s  차이 -0.018m/s  전달률 72841094%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 +0.126 rad/s  절대평균 1.834  비율 0.07   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.380Nm (yaw -0.007)  힘 9.2N   캡 각속도 -0.069rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 -0.2deg  캡 회전 88.6deg  공전비 -0.00   (1.0=캡과 함께 공전, 0=제자리 자전)   n=244
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 4.69mm 실제 4.69mm 오차 0.007mm  드라이브 +1.4N (한계 200N)  캡 z힘 -1.8N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 45%  검지 25%  중지 17%  약지 13%  새끼 45%  전체 29%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 22%/+0.21/92.4/66.1  검지 0%/+0.28/60.7/67.5  중지 10%/+0.53/90.9/73.3  약지 12%/+0.29/118.4/96.2  새끼 14%/+0.76/104.3/73.8
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 5.53mm  최대 8.00mm  10mm 도달 0%  현재 대비 -0.73mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=40 풀림중앙 98 | 60~120도 n=36 풀림중앙 101 | 120~180도 n=40 풀림중앙 93 | 180~240도 n=42 풀림중앙 86 | 240~300도 n=48 풀림중앙 84 | 300~360도 n=50 풀림중앙 88
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 70 / 중앙 93 / 75% 106 / 최대 144deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -136(-155~-117)  검지 -55(-69~53)  중지 -62(-73~23)  약지 -65(-76~-3)  새끼 -93(-105~-25)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 164  검지-중지 64  중지-약지 39  약지-새끼 103
+[unscrew-diag] 손끝거리=37.2mm (엄지 92.4mm 최근접 46.2mm) 손바닥각=32deg
+[unscrew-diag] tip최소간격=45.4mm 엄지-검지=172.2mm 엄지-중지=170.5mm 방위각 엄지-검지 91deg 엄지-중지 96deg (기준 90deg)  품질=0.132 파지유지=0.21
+[unscrew-diag]   손목 캡 안(6개): tip간격 25.2mm 밴드접촉 3.00  |  캡 밖(250개): tip간격 45.9mm 밴드접촉 0.98
+fps step: 6477 fps step and policy inference: 5992 fps total: 3605 epoch: 20/25 frames: 155648
+[unscrew-diag] 10 steps  TOTAL=-0.718/step  kc=0.422  |  unscrew=+0.556  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.660  near=+0.665  pinch=+0.418  press=+0.167  -oppose=-0.334  -quality=-0.735  -grip=-0.381  -pen=-0.247  -reverse=-0.121  -revang=-0.000  -leash=-0.046
+[unscrew-diag] raw접촉=0.69 밴드내=1.04 손바닥면=1.92(cos +0.40) 인정=0.57 대향=16%  풀림=85.4deg 상승=4.74mm 손목거리=125mm 손목높이=+178mm (초기 캡윗면기준 15~98 평균 57mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 8.00mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 0.053m/s  캡 표면 0.102m/s  차이 -0.049m/s  전달률 193%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 +0.012 rad/s  절대평균 1.693  비율 0.01   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.370Nm (yaw -0.022)  힘 9.1N   캡 각속도 +0.395rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +2.5deg  캡 회전 90.7deg  공전비 0.03   (1.0=캡과 함께 공전, 0=제자리 자전)   n=242
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 4.77mm 실제 4.74mm 오차 0.028mm  드라이브 +5.5N (한계 200N)  캡 z힘 -1.7N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 45%  검지 25%  중지 17%  약지 13%  새끼 44%  전체 29%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 22%/+0.22/94.7/66.4  검지 0%/+0.26/58.0/66.1  중지 11%/+0.51/90.2/73.0  약지 9%/+0.27/118.2/96.4  새끼 15%/+0.75/105.5/74.4
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 5.57mm  최대 8.00mm  10mm 도달 0%  현재 대비 -0.73mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=40 풀림중앙 99 | 60~120도 n=36 풀림중앙 101 | 120~180도 n=40 풀림중앙 93 | 180~240도 n=42 풀림중앙 87 | 240~300도 n=48 풀림중앙 83 | 300~360도 n=50 풀림중앙 90
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 73 / 중앙 94 / 75% 107 / 최대 144deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -138(-156~-120)  검지 -56(-69~45)  중지 -62(-73~22)  약지 -64(-76~2)  새끼 -94(-107~-18)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 150  검지-중지 65  중지-약지 39  약지-새끼 105
+[unscrew-diag] 손끝거리=37.4mm (엄지 94.7mm 최근접 44.3mm) 손바닥각=32deg
+[unscrew-diag] tip최소간격=45.5mm 엄지-검지=171.8mm 엄지-중지=169.9mm 방위각 엄지-검지 91deg 엄지-중지 94deg (기준 90deg)  품질=0.126 파지유지=0.22
+[unscrew-diag]   손목 캡 안(4개): tip간격 20.0mm 밴드접촉 3.25  |  캡 밖(252개): tip간격 45.9mm 밴드접촉 1.00
+[unscrew-diag] 10 steps  TOTAL=-0.664/step  kc=0.422  |  unscrew=+0.611  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.665  near=+0.661  pinch=+0.437  press=+0.164  -oppose=-0.332  -quality=-0.735  -grip=-0.380  -pen=-0.257  -reverse=-0.122  -revang=-0.000  -leash=-0.046
+[unscrew-diag] raw접촉=0.72 밴드내=1.06 손바닥면=1.84(cos +0.40) 인정=0.61 대향=16%  풀림=86.9deg 상승=4.82mm 손목거리=124mm 손목높이=+179mm (초기 캡윗면기준 15~98 평균 57mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 8.00mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 -0.022m/s  캡 표면 -0.041m/s  차이 0.019m/s  전달률 -635633650%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 +0.131 rad/s  절대평균 1.857  비율 0.07   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.370Nm (yaw -0.021)  힘 9.1N   캡 각속도 -0.006rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +1.0deg  캡 회전 91.9deg  공전비 0.01   (1.0=캡과 함께 공전, 0=제자리 자전)   n=241
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 4.82mm 실제 4.82mm 오차 0.002mm  드라이브 +0.5N (한계 200N)  캡 z힘 -2.3N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 45%  검지 25%  중지 17%  약지 14%  새끼 44%  전체 29%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 22%/+0.22/94.6/67.2  검지 0%/+0.25/55.6/65.0  중지 10%/+0.51/88.3/71.7  약지 13%/+0.28/117.6/95.1  새끼 15%/+0.75/104.4/74.5
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 5.60mm  최대 8.00mm  10mm 도달 0%  현재 대비 -0.73mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=40 풀림중앙 98 | 60~120도 n=36 풀림중앙 103 | 120~180도 n=40 풀림중앙 96 | 180~240도 n=42 풀림중앙 94 | 240~300도 n=48 풀림중앙 84 | 300~360도 n=50 풀림중앙 90
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 74 / 중앙 96 / 75% 108 / 최대 144deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -137(-156~-120)  검지 -56(-69~49)  중지 -62(-74~26)  약지 -63(-77~4)  새끼 -93(-107~-21)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 149  검지-중지 68  중지-약지 43  약지-새끼 104
+[unscrew-diag] 손끝거리=35.9mm (엄지 94.6mm 최근접 42.0mm) 손바닥각=33deg
+[unscrew-diag] tip최소간격=46.1mm 엄지-검지=170.0mm 엄지-중지=169.7mm 방위각 엄지-검지 89deg 엄지-중지 94deg (기준 90deg)  품질=0.133 파지유지=0.21
+[unscrew-diag]   손목 캡 안(4개): tip간격 17.8mm 밴드접촉 4.00  |  캡 밖(252개): tip간격 46.6mm 밴드접촉 1.01
+[unscrew-diag] 10 steps  TOTAL=-0.731/step  kc=0.422  |  unscrew=+0.582  hold=+0.000  lift=+0.000  release=+0.000  -ghold=-0.669  near=+0.663  pinch=+0.415  press=+0.160  -oppose=-0.333  -quality=-0.739  -grip=-0.382  -pen=-0.258  -reverse=-0.125  -revang=-0.000  -leash=-0.045
+[unscrew-diag] raw접촉=0.65 밴드내=1.03 손바닥면=1.82(cos +0.40) 인정=0.54 대향=15%  풀림=88.5deg 상승=4.91mm 손목거리=124mm 손목높이=+180mm (초기 캡윗면기준 15~98 평균 57mm) 
+[unscrew-diag]   분리 전 들어올림: 0.0% (10mm 초과 & 미해제)  그 env 평균 0.00mm  전체 최대 8.00mm  해제 0.0%
+[unscrew-diag] 
+[unscrew-diag]   미끄러짐(접촉 손끝): 손끝 접선 -0.034m/s  캡 표면 -0.015m/s  차이 -0.019m/s  전달률 -207379438%
+[unscrew-diag] 
+[unscrew-diag]   손목 yaw: 부호평균 +0.041 rad/s  절대평균 1.738  비율 0.02   (1.0=순회전, 0=제자리 진동)
+[unscrew-diag]   손목 명령: 토크 0.363Nm (yaw -0.026)  힘 8.9N   캡 각속도 -0.225rad/s
+[unscrew-diag] 
+[unscrew-diag]   손목 공전: 방위각 이동 +2.0deg  캡 회전 92.9deg  공전비 0.02   (1.0=캡과 함께 공전, 0=제자리 자전)   n=243
+[unscrew-diag] 
+[unscrew-diag]   나사 힘균형: 목표 4.91mm 실제 4.91mm 오차 0.001mm  드라이브 +0.3N (한계 200N)  캡 z힘 -1.8N
+[unscrew-diag] 
+[unscrew-diag]   굽힘 소진율(가동범위 대비): 엄지 45%  검지 26%  중지 17%  약지 14%  새끼 44%  전체 29%
+[unscrew-diag] 
+[unscrew-diag]   손가락별 접촉률/cos/거리mm/높이mm: 엄지 20%/+0.20/93.9/66.9  검지 0%/+0.25/54.8/65.4  중지 9%/+0.52/86.9/71.2  약지 11%/+0.28/117.5/95.1  새끼 13%/+0.74/104.3/74.9
+[unscrew-diag] 
+[unscrew-diag]   에피소드 최고 상승: 중앙 5.70mm  최대 8.00mm  10mm 도달 0%  현재 대비 -0.72mm
+[unscrew-diag] 
+[unscrew-diag]   초기yaw별: 0~60도 n=40 풀림중앙 99 | 60~120도 n=36 풀림중앙 101 | 120~180도 n=40 풀림중앙 99 | 180~240도 n=42 풀림중앙 94 | 240~300도 n=48 풀림중앙 90 | 300~360도 n=50 풀림중앙 89
+[unscrew-diag] 
+[unscrew-diag]   풀림 분포: 최소 -1 / 25% 76 / 중앙 96 / 75% 110 / 최대 144deg   180도 도달 0.0%
+[unscrew-diag]   손끝 월드 방위각 중앙(25~75%): 엄지 -136(-155~-120)  검지 -57(-69~47)  중지 -61(-73~23)  약지 -63(-76~-4)  새끼 -93(-106~-25)   손잡이 -8~+13deg
+[unscrew-diag]   인접 손끝 간격mm: 엄지-검지 149  검지-중지 66  중지-약지 44  약지-새끼 107
+[unscrew-diag] 손끝거리=34.6mm (엄지 93.9mm 최근접 40.9mm) 손바닥각=32deg
+[unscrew-diag] tip최소간격=47.6mm 엄지-검지=167.8mm 엄지-중지=168.5mm 방위각 엄지-검지 88deg 엄지-중지 95deg (기준 90deg)  품질=0.120 파지유지=0.21

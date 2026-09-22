@@ -1,0 +1,614 @@
+Importing module 'gym_38' (/home/leegyuwon/Documents/isaacgym/python/isaacgym/_bindings/linux-x86_64/gym_38.so)
+Setting GYM_USD_PLUG_INFO_PATH to /home/leegyuwon/Documents/isaacgym/python/isaacgym/_bindings/linux-x86_64/usd/plugInfo.json
+PyTorch version 1.13.1+cu117
+Device count 1
+/home/leegyuwon/Documents/isaacgym/python/isaacgym/_bindings/src/gymtorch
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/hydra/_internal/hydra.py:119: UserWarning: Future Hydra versions will no longer change working directory at job runtime by default.
+See https://hydra.cc/docs/1.2/upgrades/1.1_to_1.2/changes_to_job_working_dir/ for more information.
+  ret = run_job(
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/torch/utils/cpp_extension.py:25: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+  from pkg_resources import packaging  # type: ignore[attr-defined]
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/pkg_resources/__init__.py:3154: DeprecationWarning: Deprecated call to `pkg_resources.declare_namespace('mpl_toolkits')`.
+Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages
+  declare_namespace(pkg)
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/pkg_resources/__init__.py:3154: DeprecationWarning: Deprecated call to `pkg_resources.declare_namespace('google')`.
+Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages
+  declare_namespace(pkg)
+Using /home/leegyuwon/.cache/torch_extensions/py38_cu117 as PyTorch extensions root...
+Emitting ninja build file /home/leegyuwon/.cache/torch_extensions/py38_cu117/gymtorch/build.ninja...
+Building extension module gymtorch...
+Allowing ninja to set a default number of workers... (overridable by setting the environment variable MAX_JOBS=N)
+ninja: no work to do.
+task: 
+    name: ResDexHandRH
+    physics_engine: physx
+    seed: 42
+    env: 
+        numEnvs: 512
+        dexhand: dg5fs
+        episodeLength: 1200
+        training: True
+        usePIDControl: False
+        rolloutStateInit: False
+        randomStateInit: True
+        dataIndices: [7]
+        obsFutureLength: 1
+        rolloutLen: None
+        rolloutBegin: None
+        clipObservations: 5.0
+        clipActions: 1.0
+        furniture: just_one_leg
+        frankaDofNoise: 0.25
+        targetLiftHeight: 0.05
+        distanceReward: 0.1
+        liftReward: 1.0
+        successReward: 1.0
+        aggregateMode: 3
+        tightenMethod: exp_decay
+        tightenFactor: 0.7
+        tightenSteps: 3200
+        actionScale: 1.0
+        useQuatRot: False
+        propDumpInfo: 
+            q_rh: 20
+            q_lh: 20
+            dq_rh: 20
+            dq_lh: 20
+            state_rh: 13
+            state_lh: 13
+            state_manip_obj_rh: 13
+            state_manip_obj_lh: 13
+            joint_state_rh: 338
+            joint_state_lh: 338
+            tip_force_rh: 15
+            tip_force_lh: 15
+            reward: 1
+        actionsMovingAverage: 1.0
+        translationScale: 1.0
+        orientationScale: 0.1
+        bimanual_mode: united
+        trajectory_dropout: 
+            enabled: False
+            mode: full_trajectory_free
+            schedule: linear
+            start_progress: 0.2
+            end_progress: 0.6
+            final_probability: 1.0
+            mask_scope: episode
+            append_availability_flag: False
+            curriculum_total_frames: 0
+            force_probability: -1.0
+            performance_gate: 
+                enabled: False
+                success_threshold: 0.7
+        trajectory_tracking_annealing: 
+            enabled: False
+            schedule: linear
+            start_progress: 0.3
+            end_progress: 0.7
+            final_scale: 0.0
+        observation: 
+            use_normalized_phase: False
+        propObsDim: 73
+        obsKeys: ['q', 'cos_q', 'sin_q', 'base_state']
+        privilegedObsDim: 57
+        privilegedObsKeys: ['dq', 'manip_obj_pos', 'manip_obj_quat', 'manip_obj_vel', 'manip_obj_ang_vel', 'tip_force', 'manip_obj_com', 'manip_obj_weight']
+        enableCameraSensors: False
+    sim: 
+        dt: 0.0166667
+        substeps: 2
+        up_axis: z
+        use_gpu_pipeline: True
+        gravity: [0.0, 0.0, -9.81]
+        physx: 
+            num_threads: 4
+            solver_type: 1
+            use_gpu: True
+            num_position_iterations: 8
+            num_velocity_iterations: 1
+            contact_offset: 0.005
+            rest_offset: 0.0
+            bounce_threshold_velocity: 0.2
+            max_depenetration_velocity: 1.0
+            default_buffer_size_multiplier: 5.0
+            max_gpu_contact_pairs: 1048576
+            num_subscenes: 4
+            contact_collection: 1
+    task: 
+        randomize: True
+        randomization_params: 
+            frequency: 32
+            sim_params: 
+                gravity: 
+                    operation: scaling
+                    schedule: linear_decay
+                    schedule_steps: 1920
+                    external_sample: 
+                        type: const_scale
+                        init_value: 0
+            actor_params: 
+                manip_obj: 
+                    color: True
+                    rigid_shape_properties: 
+                        friction: 
+                            num_buckets: 250
+                            operation: scaling
+                            schedule: linear_decay
+                            schedule_steps: 1920
+                            external_sample: 
+                                type: const_scale
+                                init_value: 3
+                                upper_bound: 6.0
+                                lower_bound: 1.0
+                manip_obj_rh: 
+                    color: True
+                    rigid_shape_properties: 
+                        friction: 
+                            num_buckets: 250
+                            operation: scaling
+                            schedule: linear_decay
+                            schedule_steps: 1920
+                            external_sample: 
+                                type: const_scale
+                                init_value: 3
+                                upper_bound: 6.0
+                                lower_bound: 1.0
+                manip_obj_lh: 
+                    color: True
+                    rigid_shape_properties: 
+                        friction: 
+                            num_buckets: 250
+                            operation: scaling
+                            schedule: linear_decay
+                            schedule_steps: 1920
+                            external_sample: 
+                                type: const_scale
+                                init_value: 3
+                                upper_bound: 6.0
+                                lower_bound: 1.0
+rl_train: 
+    params: 
+        seed: 42
+        algo: 
+            name: ppo
+        model: 
+            name: my_continuous_a2c_logstd
+        network: 
+            name: dict_obs_actor_critic
+            separate: False
+            space: 
+                continuous: 
+                    mu_activation: None
+                    sigma_activation: None
+                    mu_init: 
+                        name: default
+                    sigma_init: 
+                        name: const_initializer
+                        val: 0
+                    fixed_sigma: True
+            dict_feature_encoder: 
+                _target_: lib.nn.features.SimpleFeatureFusion
+                extractors: 
+                    privileged: 
+                        _target_: lib.nn.features.Identity
+                        input_dim: 57
+                    proprioception: 
+                        _target_: lib.nn.features.Identity
+                        input_dim: 73
+                    target: 
+                        _target_: lib.nn.features.Identity
+                        input_dim: 213
+                hidden_depth: 3
+                hidden_dim: 512
+                output_dim: 256
+                activation: swish
+                add_input_activation: False
+                add_output_activation: False
+            mlp: 
+                units: [256, 512, 128, 64]
+                activation: elu
+                d2rl: False
+                initializer: 
+                    name: default
+                regularizer: 
+                    name: None
+        load_checkpoint: False
+        load_path: 
+        dexhand: dg5fs
+        config: 
+            name: CapUnscrewDG5FS_Unscrew_20260730_142453
+            full_experiment_name: CapUnscrewDG5FS_Unscrew_20260730_142453
+            env_name: rlgpu
+            multi_gpu: False
+            ppo: True
+            mixed_precision: False
+            normalize_input: True
+            normalize_input_excluded_keys: []
+            normalize_value: True
+            use_pid_control: False
+            value_bootstrap: True
+            num_actors: 512
+            reward_shaper: 
+                scale_value: 1.0
+            normalize_advantage: True
+            gamma: 0.99
+            tau: 0.95
+            learning_rate: 0.0005
+            lr_schedule: adaptive
+            schedule_type: standard
+            kl_threshold: 0.008
+            score_to_win: 10000
+            max_epochs: 200
+            early_stop_epochs: 9999999999999
+            save_best_after: 10
+            save_frequency: 50
+            print_stats: True
+            grad_norm: 1.0
+            entropy_coef: 0.0
+            truncate_grads: True
+            e_clip: 0.2
+            horizon_length: 32
+            minibatch_size: 1024
+            mini_epochs: 5
+            critic_coef: 4
+            clip_value: True
+            seq_len: 4
+            bounds_loss_coef: 0.0001
+            use_soft_clamp: True
+task_name: ResDexHandRH
+experiment: CapUnscrewDG5FS_Unscrew_20260730_142453
+side: RH
+bimanual_mode: united
+dexhand: dg5fs
+rh_base_model_checkpoint: assets/imitator_rh_inspire.pth
+lh_base_model_checkpoint: assets/imitator_lh_inspire.pth
+num_envs: 512
+rolloutStateInit: False
+randomStateInit: True
+rolloutLen: None
+rolloutBegin: None
+learning_rate: 0.0005
+actionsMovingAverage: 1.0
+usePIDControl: False
+dataIndices: [7]
+seed: 42
+torch_deterministic: False
+max_iterations: 200
+early_stop_epochs: 9999999999999
+physics_engine: physx
+pipeline: gpu
+sim_device: cuda:0
+rl_device: cuda:0
+graphics_device_id: 0
+num_threads: 4
+solver_type: 1
+num_subscenes: 4
+test: False
+save_rollouts: False
+save_successful_rollouts_only: True
+num_rollouts_to_save: 20000
+num_rollouts_to_run: 9999999999999
+min_episode_length: 20
+checkpoint: 
+from_ckpt_epoch: False
+sigma: 
+multi_gpu: False
+wandb_activate: False
+wandb_group: 
+wandb_name: CapUnscrewDG5FS_Unscrew_20260730_142453
+wandb_entity: None
+wandb_project: None
+wandb_tags: []
+wandb_logcode_dir: 
+capture_video: False
+n_parallel_recorders: 8
+n_successful_videos_to_record: 50
+display: False
+headless: True
+Setting seed: 42
+Using rl_device: cuda:0
+Using sim_device: cuda:0
+{'name': 'CapUnscrewDG5FS_Unscrew_20260730_142453', 'full_experiment_name': None, 'env_name': 'rlgpu', 'multi_gpu': False, 'ppo': True, 'mixed_precision': False, 'normalize_input': True, 'normalize_input_excluded_keys': [], 'normalize_value': True, 'use_pid_control': False, 'value_bootstrap': True, 'num_actors': 512, 'reward_shaper': {'scale_value': 1.0}, 'normalize_advantage': True, 'gamma': 0.99, 'tau': 0.95, 'learning_rate': 0.0005, 'lr_schedule': 'adaptive', 'schedule_type': 'standard', 'kl_threshold': 0.008, 'score_to_win': 10000, 'max_epochs': 200, 'early_stop_epochs': 9999999999999, 'save_best_after': 10, 'save_frequency': 50, 'print_stats': True, 'grad_norm': 1.0, 'entropy_coef': 0.0, 'truncate_grads': True, 'e_clip': 0.2, 'horizon_length': 32, 'minibatch_size': 1024, 'mini_epochs': 5, 'critic_coef': 4, 'clip_value': True, 'seq_len': 4, 'bounds_loss_coef': 0.0001, 'use_soft_clamp': True, 'device': 'cuda:0', 'population_based_training': False, 'pbt_idx': None}
+self.seed = 42
+Started to train
+Exact experiment name requested from command line: CapUnscrewDG5FS_Unscrew_20260730_142453__07-30-14-24-56
+[cap_grasp] mode=on | wrist=servo + finger policy | grasp=1.00s settle=0.50s hold=0.30s | wrist_sampler=topdown reach_min_fingers=2 reach_margin=0.020m thumb_required=True thumb_margin=0.025m opposition_min=Nonedeg | zero_triangle_xy=True thumb_mcp_outside_margin=off reject_palm_collision=True:0.002m r=0.045~0.075m z=0.040~0.095m palm_down_max=20.0deg side_contact_margin=0.010m finger_radius=0.009m probe_steps=4 thumb_contact_w=0.50 grip_w=1.00 closure_w=1.00 closure_err_max=0.75 near_w=2.00 require_gravity_for_hold=True hold_decay=3.00 penetration_penalty_w=2.00 penetration_tol=0.005m cap_pre_gravity_lock=True:teleport | pedestal=False lift=0.060m@1.50s/1.00s lift_success=0.012m level_w=1.00 level_cos_min=0.87 | resample_wrist_on_reset=False |
+[Warning] [carb.gym.plugin] useGpu is set, forcing single scene (0 subscenes)
+Not connected to PVD
++++ Using GPU PhysX
+Physics Engine: PhysX
+Physics Device: cuda:0
+GPU Pipeline: enabled
+Num dexhand Bodies: 26
+Num dexhand DOFs: 20
+[cap_grasp] cap-only demo override | envs=512 steps=360 cap_z=0.640m urdf=/home/leegyuwon/Documents/task1/assets/cap_only/cap_only.urdf
+[cap_unscrew] cap_lift<-cap_spin x2.864789e-03 (pitch 18.0mm/rev)  target=200deg  band=14.3~30.0mm (고정)  lift>=12.0mm
+[cap_unscrew] actions=26 (wrist ON + fingers 20)
+[cap_unscrew] w: unscrew=10.0 hold=4.0 grasp=2.0 closure=1.0 grip=1.0 near=2.0 | pen=2.0 reverse=2.0 leash=0.3@0.16m
+[cap_grasp] contact bodies per finger: [('link_1_4', 'link_1_tip'), ('link_2_4', 'link_2_tip'), ('link_3_4', 'link_3_tip'), ('link_4_4', 'link_4_tip'), ('link_5_4', 'link_5_tip')]
+WARNING: seq_len is deprecated, use seq_length instead
+seq_length: 4
+current training device: cuda:0
+build mlp: 256
+RunningMeanStd:  (1,)
+RunningMeanStd:  (57,)
+RunningMeanStd:  (73,)
+RunningMeanStd:  (213,)
+[traj_dropout] target dim=213, trajectory cols=46, keep(obj/bps)=167, mode=full_trajectory_free
+fps step: 9567 fps step and policy inference: 6790 fps total: 4976 epoch: 1/200 frames: 0
+fps step: 13864 fps step and policy inference: 13030 fps total: 7640 epoch: 2/200 frames: 16384
+fps step: 13278 fps step and policy inference: 12498 fps total: 7515 epoch: 3/200 frames: 32768
+fps step: 13574 fps step and policy inference: 12762 fps total: 7590 epoch: 4/200 frames: 49152
+fps step: 13141 fps step and policy inference: 12375 fps total: 7474 epoch: 5/200 frames: 65536
+fps step: 13553 fps step and policy inference: 12758 fps total: 7628 epoch: 6/200 frames: 81920
+fps step: 13394 fps step and policy inference: 12626 fps total: 7629 epoch: 7/200 frames: 98304
+fps step: 13023 fps step and policy inference: 12300 fps total: 7494 epoch: 8/200 frames: 114688
+fps step: 12702 fps step and policy inference: 12007 fps total: 7332 epoch: 9/200 frames: 131072
+fps step: 12243 fps step and policy inference: 11542 fps total: 7145 epoch: 10/200 frames: 147456
+fps step: 12435 fps step and policy inference: 11766 fps total: 7300 epoch: 11/200 frames: 163840
+fps step: 13007 fps step and policy inference: 8627 fps total: 5925 epoch: 12/200 frames: 180224
+saving next best rewards:  [144.24]
+=> saving checkpoint 'runs/CapUnscrewDG5FS_Unscrew_20260730_142453__07-30-14-24-56/nn/CapUnscrewDG5FS_Unscrew_20260730_142453.pth'
+fps step: 13633 fps step and policy inference: 12799 fps total: 7594 epoch: 13/200 frames: 196608
+fps step: 13112 fps step and policy inference: 12281 fps total: 7490 epoch: 14/200 frames: 212992
+fps step: 13564 fps step and policy inference: 12697 fps total: 7636 epoch: 15/200 frames: 229376
+fps step: 13272 fps step and policy inference: 12413 fps total: 7502 epoch: 16/200 frames: 245760
+fps step: 13208 fps step and policy inference: 12354 fps total: 7464 epoch: 17/200 frames: 262144
+fps step: 13150 fps step and policy inference: 12299 fps total: 7423 epoch: 18/200 frames: 278528
+fps step: 13101 fps step and policy inference: 12267 fps total: 7411 epoch: 19/200 frames: 294912
+fps step: 13225 fps step and policy inference: 12369 fps total: 7438 epoch: 20/200 frames: 311296
+fps step: 13218 fps step and policy inference: 12357 fps total: 7463 epoch: 21/200 frames: 327680
+fps step: 13121 fps step and policy inference: 12257 fps total: 7434 epoch: 22/200 frames: 344064
+fps step: 12711 fps step and policy inference: 8439 fps total: 5827 epoch: 23/200 frames: 360448
+saving next best rewards:  [244.13]
+=> saving checkpoint 'runs/CapUnscrewDG5FS_Unscrew_20260730_142453__07-30-14-24-56/nn/CapUnscrewDG5FS_Unscrew_20260730_142453.pth'
+fps step: 13438 fps step and policy inference: 12638 fps total: 7578 epoch: 24/200 frames: 376832
+fps step: 13003 fps step and policy inference: 12183 fps total: 7451 epoch: 25/200 frames: 393216
+fps step: 13089 fps step and policy inference: 12245 fps total: 7409 epoch: 26/200 frames: 409600
+fps step: 13271 fps step and policy inference: 12414 fps total: 7486 epoch: 27/200 frames: 425984
+fps step: 13397 fps step and policy inference: 12531 fps total: 7516 epoch: 28/200 frames: 442368
+fps step: 13468 fps step and policy inference: 12598 fps total: 7548 epoch: 29/200 frames: 458752
+fps step: 13473 fps step and policy inference: 12598 fps total: 7537 epoch: 30/200 frames: 475136
+fps step: 13409 fps step and policy inference: 12523 fps total: 7436 epoch: 31/200 frames: 491520
+fps step: 13521 fps step and policy inference: 12627 fps total: 7515 epoch: 32/200 frames: 507904
+fps step: 13638 fps step and policy inference: 12742 fps total: 7622 epoch: 33/200 frames: 524288
+fps step: 12920 fps step and policy inference: 8568 fps total: 5911 epoch: 34/200 frames: 540672
+saving next best rewards:  [310.06]
+=> saving checkpoint 'runs/CapUnscrewDG5FS_Unscrew_20260730_142453__07-30-14-24-56/nn/CapUnscrewDG5FS_Unscrew_20260730_142453.pth'
+fps step: 13679 fps step and policy inference: 12874 fps total: 7656 epoch: 35/200 frames: 557056
+fps step: 12844 fps step and policy inference: 12045 fps total: 7376 epoch: 36/200 frames: 573440
+fps step: 12845 fps step and policy inference: 12053 fps total: 7370 epoch: 37/200 frames: 589824
+[unscrew-diag] 1200 steps  TOTAL=+0.660/step  |  unscrew=+0.000  hold=+0.000  grasp=+0.000  closure=+0.000  grip=+0.012  thumb=+0.010  2tip=+0.005  near=+1.185  -pen=-0.054  -reverse=-0.091  -leash=-0.008  -palm=+0.000
+[unscrew-diag] raw접촉=1.19 밴드내=0.36 인정=0.13 대향=0%  풀림=45.6deg 상승=2.78mm 손목거리=117mm 손끝거리=20.0mm 손바닥각=32deg
+fps step: 12846 fps step and policy inference: 12058 fps total: 7400 epoch: 38/200 frames: 606208
+fps step: 12874 fps step and policy inference: 12069 fps total: 7345 epoch: 39/200 frames: 622592
+fps step: 12993 fps step and policy inference: 12173 fps total: 7403 epoch: 40/200 frames: 638976
+fps step: 13214 fps step and policy inference: 12364 fps total: 7472 epoch: 41/200 frames: 655360
+fps step: 13391 fps step and policy inference: 12512 fps total: 7534 epoch: 42/200 frames: 671744
+fps step: 13495 fps step and policy inference: 12615 fps total: 7580 epoch: 43/200 frames: 688128
+fps step: 13554 fps step and policy inference: 12661 fps total: 7576 epoch: 44/200 frames: 704512
+fps step: 12885 fps step and policy inference: 8554 fps total: 5947 epoch: 45/200 frames: 720896
+saving next best rewards:  [346.5]
+=> saving checkpoint 'runs/CapUnscrewDG5FS_Unscrew_20260730_142453__07-30-14-24-56/nn/CapUnscrewDG5FS_Unscrew_20260730_142453.pth'
+fps step: 14021 fps step and policy inference: 13172 fps total: 7834 epoch: 46/200 frames: 737280
+fps step: 12934 fps step and policy inference: 12136 fps total: 7496 epoch: 47/200 frames: 753664
+fps step: 12602 fps step and policy inference: 11841 fps total: 7328 epoch: 48/200 frames: 770048
+fps step: 12514 fps step and policy inference: 11759 fps total: 7306 epoch: 49/200 frames: 786432
+fps step: 12517 fps step and policy inference: 11754 fps total: 7203 epoch: 50/200 frames: 802816
+=> saving checkpoint 'runs/CapUnscrewDG5FS_Unscrew_20260730_142453__07-30-14-24-56/nn/last_CapUnscrewDG5FS_Unscrew_20260730_142453_ep_50_rew_346.5037_sr_0.0_fr_1.0.pth'
+fps step: 12658 fps step and policy inference: 11942 fps total: 7283 epoch: 51/200 frames: 819200
+fps step: 12768 fps step and policy inference: 11966 fps total: 7296 epoch: 52/200 frames: 835584
+fps step: 13038 fps step and policy inference: 12224 fps total: 7438 epoch: 53/200 frames: 851968
+fps step: 12931 fps step and policy inference: 12110 fps total: 7340 epoch: 54/200 frames: 868352
+fps step: 13045 fps step and policy inference: 12211 fps total: 7365 epoch: 55/200 frames: 884736
+fps step: 13143 fps step and policy inference: 12292 fps total: 7426 epoch: 56/200 frames: 901120
+fps step: 13346 fps step and policy inference: 8726 fps total: 5979 epoch: 57/200 frames: 917504
+saving next best rewards:  [390.82]
+=> saving checkpoint 'runs/CapUnscrewDG5FS_Unscrew_20260730_142453__07-30-14-24-56/nn/CapUnscrewDG5FS_Unscrew_20260730_142453.pth'
+fps step: 12679 fps step and policy inference: 11968 fps total: 7321 epoch: 58/200 frames: 933888
+fps step: 12209 fps step and policy inference: 11487 fps total: 7159 epoch: 59/200 frames: 950272
+fps step: 12203 fps step and policy inference: 11487 fps total: 7189 epoch: 60/200 frames: 966656
+fps step: 12232 fps step and policy inference: 11518 fps total: 7206 epoch: 61/200 frames: 983040
+fps step: 12328 fps step and policy inference: 11606 fps total: 7213 epoch: 62/200 frames: 999424
+fps step: 12428 fps step and policy inference: 11684 fps total: 7213 epoch: 63/200 frames: 1015808
+fps step: 12556 fps step and policy inference: 11803 fps total: 7317 epoch: 64/200 frames: 1032192
+fps step: 12699 fps step and policy inference: 11931 fps total: 7351 epoch: 65/200 frames: 1048576
+fps step: 12512 fps step and policy inference: 11756 fps total: 7241 epoch: 66/200 frames: 1064960
+fps step: 12890 fps step and policy inference: 12097 fps total: 7404 epoch: 67/200 frames: 1081344
+fps step: 13193 fps step and policy inference: 8657 fps total: 5950 epoch: 68/200 frames: 1097728
+saving next best rewards:  [433.95]
+=> saving checkpoint 'runs/CapUnscrewDG5FS_Unscrew_20260730_142453__07-30-14-24-56/nn/CapUnscrewDG5FS_Unscrew_20260730_142453.pth'
+fps step: 13153 fps step and policy inference: 12404 fps total: 7510 epoch: 69/200 frames: 1114112
+fps step: 12247 fps step and policy inference: 11529 fps total: 7162 epoch: 70/200 frames: 1130496
+fps step: 12209 fps step and policy inference: 11488 fps total: 7191 epoch: 71/200 frames: 1146880
+fps step: 12199 fps step and policy inference: 11482 fps total: 7161 epoch: 72/200 frames: 1163264
+fps step: 12191 fps step and policy inference: 11470 fps total: 7141 epoch: 73/200 frames: 1179648
+fps step: 12367 fps step and policy inference: 11628 fps total: 7213 epoch: 74/200 frames: 1196032
+[unscrew-diag] 1200 steps  TOTAL=+1.161/step  |  unscrew=+0.000  hold=+0.000  grasp=+0.000  closure=+0.001  grip=+0.042  thumb=+0.031  2tip=+0.025  near=+1.581  -pen=-0.075  -reverse=-0.083  -leash=-0.001  -palm=+0.000
+[unscrew-diag] raw접촉=2.05 밴드내=0.85 인정=0.41 대향=0%  풀림=51.6deg 상승=3.60mm 손목거리=56mm 손끝거리=8.1mm 손바닥각=27deg
+fps step: 12471 fps step and policy inference: 11719 fps total: 7262 epoch: 75/200 frames: 1212416
+fps step: 12685 fps step and policy inference: 11911 fps total: 7346 epoch: 76/200 frames: 1228800
+fps step: 12818 fps step and policy inference: 12031 fps total: 7408 epoch: 77/200 frames: 1245184
+fps step: 12975 fps step and policy inference: 12169 fps total: 7448 epoch: 78/200 frames: 1261568
+fps step: 12853 fps step and policy inference: 8535 fps total: 5915 epoch: 79/200 frames: 1277952
+saving next best rewards:  [478.28]
+=> saving checkpoint 'runs/CapUnscrewDG5FS_Unscrew_20260730_142453__07-30-14-24-56/nn/CapUnscrewDG5FS_Unscrew_20260730_142453.pth'
+fps step: 13295 fps step and policy inference: 12530 fps total: 7618 epoch: 80/200 frames: 1294336
+fps step: 12111 fps step and policy inference: 11409 fps total: 7143 epoch: 81/200 frames: 1310720
+fps step: 11865 fps step and policy inference: 11183 fps total: 7057 epoch: 82/200 frames: 1327104
+fps step: 11953 fps step and policy inference: 11265 fps total: 7069 epoch: 83/200 frames: 1343488
+fps step: 12085 fps step and policy inference: 11384 fps total: 7122 epoch: 84/200 frames: 1359872
+fps step: 12279 fps step and policy inference: 11559 fps total: 7195 epoch: 85/200 frames: 1376256
+fps step: 12358 fps step and policy inference: 11622 fps total: 7200 epoch: 86/200 frames: 1392640
+fps step: 12601 fps step and policy inference: 11843 fps total: 7307 epoch: 87/200 frames: 1409024
+fps step: 12683 fps step and policy inference: 11913 fps total: 7327 epoch: 88/200 frames: 1425408
+fps step: 12797 fps step and policy inference: 12016 fps total: 7391 epoch: 89/200 frames: 1441792
+fps step: 12538 fps step and policy inference: 8380 fps total: 5832 epoch: 90/200 frames: 1458176
+saving next best rewards:  [521.79]
+=> saving checkpoint 'runs/CapUnscrewDG5FS_Unscrew_20260730_142453__07-30-14-24-56/nn/CapUnscrewDG5FS_Unscrew_20260730_142453.pth'
+fps step: 13392 fps step and policy inference: 12562 fps total: 7577 epoch: 91/200 frames: 1474560
+fps step: 12061 fps step and policy inference: 11366 fps total: 7128 epoch: 92/200 frames: 1490944
+fps step: 11818 fps step and policy inference: 11149 fps total: 7085 epoch: 93/200 frames: 1507328
+fps step: 11790 fps step and policy inference: 11122 fps total: 7043 epoch: 94/200 frames: 1523712
+fps step: 11824 fps step and policy inference: 11153 fps total: 7046 epoch: 95/200 frames: 1540096
+fps step: 11960 fps step and policy inference: 11275 fps total: 7098 epoch: 96/200 frames: 1556480
+fps step: 12089 fps step and policy inference: 11387 fps total: 7162 epoch: 97/200 frames: 1572864
+fps step: 12290 fps step and policy inference: 11567 fps total: 7233 epoch: 98/200 frames: 1589248
+fps step: 12414 fps step and policy inference: 11663 fps total: 7251 epoch: 99/200 frames: 1605632
+fps step: 12640 fps step and policy inference: 11865 fps total: 7347 epoch: 100/200 frames: 1622016
+=> saving checkpoint 'runs/CapUnscrewDG5FS_Unscrew_20260730_142453__07-30-14-24-56/nn/last_CapUnscrewDG5FS_Unscrew_20260730_142453_ep_100_rew_521.7947_sr_0.0_fr_1.0.pth'
+fps step: 12496 fps step and policy inference: 8403 fps total: 5851 epoch: 101/200 frames: 1638400
+saving next best rewards:  [557.1]
+=> saving checkpoint 'runs/CapUnscrewDG5FS_Unscrew_20260730_142453__07-30-14-24-56/nn/CapUnscrewDG5FS_Unscrew_20260730_142453.pth'
+fps step: 13465 fps step and policy inference: 12689 fps total: 7657 epoch: 102/200 frames: 1654784
+fps step: 12127 fps step and policy inference: 11424 fps total: 7175 epoch: 103/200 frames: 1671168
+fps step: 11578 fps step and policy inference: 10938 fps total: 6970 epoch: 104/200 frames: 1687552
+fps step: 11579 fps step and policy inference: 10938 fps total: 6978 epoch: 105/200 frames: 1703936
+fps step: 11621 fps step and policy inference: 10973 fps total: 6988 epoch: 106/200 frames: 1720320
+fps step: 11657 fps step and policy inference: 11004 fps total: 6998 epoch: 107/200 frames: 1736704
+fps step: 11919 fps step and policy inference: 11239 fps total: 7090 epoch: 108/200 frames: 1753088
+fps step: 12038 fps step and policy inference: 11327 fps total: 7120 epoch: 109/200 frames: 1769472
+fps step: 12308 fps step and policy inference: 11584 fps total: 7239 epoch: 110/200 frames: 1785856
+fps step: 12540 fps step and policy inference: 11791 fps total: 7302 epoch: 111/200 frames: 1802240
+fps step: 12617 fps step and policy inference: 11850 fps total: 7284 epoch: 112/200 frames: 1818624
+[unscrew-diag] 1200 steps  TOTAL=+1.542/step  |  unscrew=+0.000  hold=+0.000  grasp=+0.000  closure=+0.005  grip=+0.133  thumb=+0.124  2tip=+0.101  near=+1.626  -pen=-0.071  -reverse=-0.086  -leash=-0.001  -palm=+0.000
+[unscrew-diag] raw접촉=0.44 밴드내=0.00 인정=0.00 대향=0%  풀림=49.2deg 상승=4.26mm 손목거리=36mm 손끝거리=52.6mm 손바닥각=34deg
+fps step: 12750 fps step and policy inference: 8449 fps total: 5812 epoch: 113/200 frames: 1835008
+saving next best rewards:  [607.69]
+=> saving checkpoint 'runs/CapUnscrewDG5FS_Unscrew_20260730_142453__07-30-14-24-56/nn/CapUnscrewDG5FS_Unscrew_20260730_142453.pth'
+fps step: 12106 fps step and policy inference: 11446 fps total: 7100 epoch: 114/200 frames: 1851392
+fps step: 11580 fps step and policy inference: 10921 fps total: 6911 epoch: 115/200 frames: 1867776
+fps step: 11446 fps step and policy inference: 10797 fps total: 6795 epoch: 116/200 frames: 1884160
+fps step: 11499 fps step and policy inference: 10843 fps total: 6868 epoch: 117/200 frames: 1900544
+fps step: 11551 fps step and policy inference: 10891 fps total: 6901 epoch: 118/200 frames: 1916928
+fps step: 11713 fps step and policy inference: 11041 fps total: 6975 epoch: 119/200 frames: 1933312
+fps step: 11865 fps step and policy inference: 11177 fps total: 7080 epoch: 120/200 frames: 1949696
+fps step: 12093 fps step and policy inference: 11395 fps total: 7173 epoch: 121/200 frames: 1966080
+fps step: 12191 fps step and policy inference: 11477 fps total: 7187 epoch: 122/200 frames: 1982464
+fps step: 12355 fps step and policy inference: 11609 fps total: 7191 epoch: 123/200 frames: 1998848
+fps step: 12693 fps step and policy inference: 8454 fps total: 5848 epoch: 124/200 frames: 2015232
+saving next best rewards:  [641.46]
+=> saving checkpoint 'runs/CapUnscrewDG5FS_Unscrew_20260730_142453__07-30-14-24-56/nn/CapUnscrewDG5FS_Unscrew_20260730_142453.pth'
+fps step: 12643 fps step and policy inference: 11934 fps total: 7378 epoch: 125/200 frames: 2031616
+fps step: 11687 fps step and policy inference: 11029 fps total: 6954 epoch: 126/200 frames: 2048000
+fps step: 11427 fps step and policy inference: 10784 fps total: 6847 epoch: 127/200 frames: 2064384
+fps step: 11395 fps step and policy inference: 10744 fps total: 6804 epoch: 128/200 frames: 2080768
+fps step: 11440 fps step and policy inference: 10791 fps total: 6845 epoch: 129/200 frames: 2097152
+fps step: 11524 fps step and policy inference: 10863 fps total: 6840 epoch: 130/200 frames: 2113536
+fps step: 11582 fps step and policy inference: 10916 fps total: 6876 epoch: 131/200 frames: 2129920
+fps step: 11726 fps step and policy inference: 11043 fps total: 6913 epoch: 132/200 frames: 2146304
+fps step: 11912 fps step and policy inference: 11209 fps total: 6984 epoch: 133/200 frames: 2162688
+fps step: 12040 fps step and policy inference: 11318 fps total: 6581 epoch: 134/200 frames: 2179072
+fps step: 12028 fps step and policy inference: 8143 fps total: 5696 epoch: 135/200 frames: 2195456
+saving next best rewards:  [674.59]
+=> saving checkpoint 'runs/CapUnscrewDG5FS_Unscrew_20260730_142453__07-30-14-24-56/nn/CapUnscrewDG5FS_Unscrew_20260730_142453.pth'
+fps step: 13104 fps step and policy inference: 12364 fps total: 7463 epoch: 136/200 frames: 2211840
+fps step: 11728 fps step and policy inference: 11066 fps total: 7014 epoch: 137/200 frames: 2228224
+fps step: 11105 fps step and policy inference: 10456 fps total: 6625 epoch: 138/200 frames: 2244608
+fps step: 11428 fps step and policy inference: 10782 fps total: 6862 epoch: 139/200 frames: 2260992
+fps step: 11505 fps step and policy inference: 10865 fps total: 6906 epoch: 140/200 frames: 2277376
+fps step: 11484 fps step and policy inference: 10837 fps total: 6915 epoch: 141/200 frames: 2293760
+fps step: 11607 fps step and policy inference: 10953 fps total: 6947 epoch: 142/200 frames: 2310144
+fps step: 11621 fps step and policy inference: 10966 fps total: 6960 epoch: 143/200 frames: 2326528
+fps step: 11707 fps step and policy inference: 11041 fps total: 6922 epoch: 144/200 frames: 2342912
+fps step: 11784 fps step and policy inference: 11090 fps total: 6957 epoch: 145/200 frames: 2359296
+fps step: 11703 fps step and policy inference: 7945 fps total: 5569 epoch: 146/200 frames: 2375680
+saving next best rewards:  [710.62]
+=> saving checkpoint 'runs/CapUnscrewDG5FS_Unscrew_20260730_142453__07-30-14-24-56/nn/CapUnscrewDG5FS_Unscrew_20260730_142453.pth'
+fps step: 13306 fps step and policy inference: 12533 fps total: 7567 epoch: 147/200 frames: 2392064
+fps step: 11750 fps step and policy inference: 11091 fps total: 7014 epoch: 148/200 frames: 2408448
+fps step: 11382 fps step and policy inference: 10751 fps total: 6881 epoch: 149/200 frames: 2424832
+[unscrew-diag] 1200 steps  TOTAL=+1.869/step  |  unscrew=+0.000  hold=+0.000  grasp=+0.000  closure=+0.012  grip=+0.252  thumb=+0.257  2tip=+0.212  near=+1.575  -pen=-0.067  -reverse=-0.107  -leash=-0.000  -palm=+0.000
+[unscrew-diag] raw접촉=3.56 밴드내=2.32 인정=1.93 대향=0%  풀림=36.2deg 상승=3.77mm 손목거리=52mm 손끝거리=2.4mm 손바닥각=33deg
+fps step: 11337 fps step and policy inference: 10717 fps total: 6842 epoch: 150/200 frames: 2441216
+=> saving checkpoint 'runs/CapUnscrewDG5FS_Unscrew_20260730_142453__07-30-14-24-56/nn/last_CapUnscrewDG5FS_Unscrew_20260730_142453_ep_150_rew_710.62427_sr_0.0_fr_1.0.pth'
+fps step: 11305 fps step and policy inference: 10733 fps total: 6823 epoch: 151/200 frames: 2457600
+fps step: 11318 fps step and policy inference: 10688 fps total: 6831 epoch: 152/200 frames: 2473984
+fps step: 11464 fps step and policy inference: 10827 fps total: 6917 epoch: 153/200 frames: 2490368
+fps step: 11314 fps step and policy inference: 10673 fps total: 6782 epoch: 154/200 frames: 2506752
+fps step: 11554 fps step and policy inference: 10908 fps total: 6884 epoch: 155/200 frames: 2523136
+fps step: 11666 fps step and policy inference: 11003 fps total: 6990 epoch: 156/200 frames: 2539520
+fps step: 11805 fps step and policy inference: 11136 fps total: 6930 epoch: 157/200 frames: 2555904
+fps step: 13033 fps step and policy inference: 8576 fps total: 5907 epoch: 158/200 frames: 2572288
+saving next best rewards:  [745.96]
+=> saving checkpoint 'runs/CapUnscrewDG5FS_Unscrew_20260730_142453__07-30-14-24-56/nn/CapUnscrewDG5FS_Unscrew_20260730_142453.pth'
+fps step: 11616 fps step and policy inference: 10981 fps total: 6980 epoch: 159/200 frames: 2588672
+fps step: 11290 fps step and policy inference: 10672 fps total: 6819 epoch: 160/200 frames: 2605056
+fps step: 11169 fps step and policy inference: 10560 fps total: 6749 epoch: 161/200 frames: 2621440
+fps step: 11235 fps step and policy inference: 10625 fps total: 6787 epoch: 162/200 frames: 2637824
+fps step: 11340 fps step and policy inference: 10720 fps total: 6859 epoch: 163/200 frames: 2654208
+fps step: 11380 fps step and policy inference: 10759 fps total: 6870 epoch: 164/200 frames: 2670592
+fps step: 11427 fps step and policy inference: 10796 fps total: 6899 epoch: 165/200 frames: 2686976
+fps step: 11368 fps step and policy inference: 10742 fps total: 6878 epoch: 166/200 frames: 2703360
+fps step: 11453 fps step and policy inference: 10818 fps total: 6915 epoch: 167/200 frames: 2719744
+fps step: 11561 fps step and policy inference: 10910 fps total: 6951 epoch: 168/200 frames: 2736128
+fps step: 12727 fps step and policy inference: 8476 fps total: 5887 epoch: 169/200 frames: 2752512
+saving next best rewards:  [761.36]
+=> saving checkpoint 'runs/CapUnscrewDG5FS_Unscrew_20260730_142453__07-30-14-24-56/nn/CapUnscrewDG5FS_Unscrew_20260730_142453.pth'
+fps step: 12203 fps step and policy inference: 11552 fps total: 7198 epoch: 170/200 frames: 2768896
+fps step: 11323 fps step and policy inference: 10702 fps total: 6808 epoch: 171/200 frames: 2785280
+fps step: 11201 fps step and policy inference: 10591 fps total: 6804 epoch: 172/200 frames: 2801664
+fps step: 11183 fps step and policy inference: 10579 fps total: 6804 epoch: 173/200 frames: 2818048
+fps step: 11196 fps step and policy inference: 10587 fps total: 6814 epoch: 174/200 frames: 2834432
+fps step: 11271 fps step and policy inference: 10649 fps total: 6835 epoch: 175/200 frames: 2850816
+fps step: 11339 fps step and policy inference: 10708 fps total: 6862 epoch: 176/200 frames: 2867200
+fps step: 11326 fps step and policy inference: 10699 fps total: 6864 epoch: 177/200 frames: 2883584
+fps step: 11289 fps step and policy inference: 10658 fps total: 6820 epoch: 178/200 frames: 2899968
+fps step: 11418 fps step and policy inference: 10777 fps total: 6824 epoch: 179/200 frames: 2916352
+fps step: 12097 fps step and policy inference: 8132 fps total: 5664 epoch: 180/200 frames: 2932736
+saving next best rewards:  [789.16]
+=> saving checkpoint 'runs/CapUnscrewDG5FS_Unscrew_20260730_142453__07-30-14-24-56/nn/CapUnscrewDG5FS_Unscrew_20260730_142453.pth'
+fps step: 12635 fps step and policy inference: 11920 fps total: 7249 epoch: 181/200 frames: 2949120
+fps step: 11323 fps step and policy inference: 10693 fps total: 6778 epoch: 182/200 frames: 2965504
+fps step: 11075 fps step and policy inference: 10436 fps total: 6503 epoch: 183/200 frames: 2981888
+fps step: 11122 fps step and policy inference: 10520 fps total: 6784 epoch: 184/200 frames: 2998272
+fps step: 11340 fps step and policy inference: 10720 fps total: 6872 epoch: 185/200 frames: 3014656
+fps step: 11423 fps step and policy inference: 10793 fps total: 6888 epoch: 186/200 frames: 3031040
+fps step: 11382 fps step and policy inference: 10755 fps total: 6833 epoch: 187/200 frames: 3047424
+[unscrew-diag] 1200 steps  TOTAL=+2.197/step  |  unscrew=+0.000  hold=+0.000  grasp=+0.000  closure=+0.018  grip=+0.371  thumb=+0.364  2tip=+0.320  near=+1.509  -pen=-0.068  -reverse=-0.098  -leash=-0.000  -palm=+0.000
+[unscrew-diag] raw접촉=3.77 밴드내=3.17 인정=2.69 대향=0%  풀림=-26.2deg 상승=2.73mm 손목거리=50mm 손끝거리=1.1mm 손바닥각=31deg
+Loading extension module gymtorch...
+/home/leegyuwon/Documents/isaacgym/python/isaacgym/torch_utils.py:135: DeprecationWarning: `np.float` is a deprecated alias for the builtin `float`. To silence this warning, use `float` by itself. Doing this will not modify any behavior and is safe. If you specifically wanted the numpy scalar type, use `np.float64` here.
+Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
+  def get_axis_params(value, axis_idx, x_value=0., dtype=np.float, n_dims=3):
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/networkx/classes/graph.py:23: DeprecationWarning: Using or importing the ABCs from 'collections' instead of from 'collections.abc' is deprecated since Python 3.3, and in 3.10 it will stop working
+  from collections import Mapping
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/networkx/classes/reportviews.py:95: DeprecationWarning: Using or importing the ABCs from 'collections' instead of from 'collections.abc' is deprecated since Python 3.3, and in 3.10 it will stop working
+  from collections import Mapping, Set, Iterable
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/networkx/readwrite/graphml.py:346: DeprecationWarning: `np.int` is a deprecated alias for the builtin `int`. To silence this warning, use `int` by itself. Doing this will not modify any behavior and is safe. When replacing `np.int`, you may wish to use e.g. `np.int64` or `np.int32` to specify the precision. If you wish to review your current use, check the release note link for additional information.
+Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
+  (np.int, "int"), (np.int8, "int"),
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/wandb/util.py:116: SentryHubDeprecationWarning: `sentry_sdk.Hub` is deprecated and will be removed in a future major release. Please consult our 1.x to 2.x migration guide for details on how to migrate `Hub` usage to the new API: https://docs.sentry.io/platforms/python/migration/1.x-to-2.x
+  sentry_hub = sentry_sdk.Hub(sentry_client)
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/torch/utils/tensorboard/__init__.py:4: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+  if not hasattr(tensorboard, "__version__") or LooseVersion(
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/gym/spaces/box.py:84: UserWarning: [33mWARN: Box bound precision lowered by casting to float32[0m
+  logger.warn(f"Box bound precision lowered by casting to {self.dtype}")
+/home/leegyuwon/Documents/ManipTrans/maniptrans_envs/lib/envs/tasks/dexhandmanip_sh.py:662: DeprecationWarning: an integer is required (got type isaacgym._bindings.linux-x86_64.gym_38.DofDriveMode).  Implicit conversion to integers using __int__ is deprecated, and may be removed in a future version of Python.
+  asset_options.default_dof_drive_mode = gymapi.DOF_MODE_POS
+/home/leegyuwon/Documents/ManipTrans/maniptrans_envs/lib/envs/tasks/dexhandmanip_sh.py:401: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  self.dexhand_default_dof_pos = torch.tensor(default_pose, device=self.sim_device)
+fps step: 11364 fps step and policy inference: 10735 fps total: 6851 epoch: 188/200 frames: 3063808
+fps step: 11402 fps step and policy inference: 10778 fps total: 6902 epoch: 189/200 frames: 3080192
+fps step: 11373 fps step and policy inference: 10730 fps total: 6865 epoch: 190/200 frames: 3096576
+fps step: 11707 fps step and policy inference: 8019 fps total: 5659 epoch: 191/200 frames: 3112960
+saving next best rewards:  [811.02]
+=> saving checkpoint 'runs/CapUnscrewDG5FS_Unscrew_20260730_142453__07-30-14-24-56/nn/CapUnscrewDG5FS_Unscrew_20260730_142453.pth'
+fps step: 13178 fps step and policy inference: 12426 fps total: 7514 epoch: 192/200 frames: 3129344
+fps step: 11542 fps step and policy inference: 10897 fps total: 6943 epoch: 193/200 frames: 3145728
+fps step: 11305 fps step and policy inference: 10685 fps total: 6835 epoch: 194/200 frames: 3162112
+fps step: 11308 fps step and policy inference: 10690 fps total: 6785 epoch: 195/200 frames: 3178496
+fps step: 11413 fps step and policy inference: 10789 fps total: 6882 epoch: 196/200 frames: 3194880
+fps step: 11468 fps step and policy inference: 10830 fps total: 6897 epoch: 197/200 frames: 3211264
+fps step: 11433 fps step and policy inference: 10793 fps total: 6856 epoch: 198/200 frames: 3227648
+fps step: 11443 fps step and policy inference: 10812 fps total: 6864 epoch: 199/200 frames: 3244032
+fps step: 11427 fps step and policy inference: 10794 fps total: 6883 epoch: 200/200 frames: 3260416
+=> saving checkpoint 'runs/CapUnscrewDG5FS_Unscrew_20260730_142453__07-30-14-24-56/nn/last_CapUnscrewDG5FS_Unscrew_20260730_142453_ep_200_rew_811.024_sr_0.0_fr_1.0.pth'
+=> saving checkpoint 'runs/CapUnscrewDG5FS_Unscrew_20260730_142453__07-30-14-24-56/nn/last_CapUnscrewDG5FS_Unscrew_20260730_142453_ep_200_rew__811.02_.pth'
+MAX EPOCHS NUM!
+Using VHACD cache directory '/home/leegyuwon/.isaacgym/vhacd'
+Found existing convex decomposition for mesh '/home/leegyuwon/Documents/task1/assets/tumbler/meshes/body_collision.obj'
+Found existing convex decomposition for mesh '/home/leegyuwon/Documents/task1/assets/tumbler/meshes/cap_collision.obj'

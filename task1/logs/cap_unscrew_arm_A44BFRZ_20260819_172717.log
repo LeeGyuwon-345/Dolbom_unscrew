@@ -1,0 +1,790 @@
+Importing module 'gym_38' (/home/leegyuwon/Documents/isaacgym/python/isaacgym/_bindings/linux-x86_64/gym_38.so)
+Setting GYM_USD_PLUG_INFO_PATH to /home/leegyuwon/Documents/isaacgym/python/isaacgym/_bindings/linux-x86_64/usd/plugInfo.json
+PyTorch version 1.13.1+cu117
+Device count 1
+/home/leegyuwon/Documents/isaacgym/python/isaacgym/_bindings/src/gymtorch
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/hydra/_internal/hydra.py:119: UserWarning: Future Hydra versions will no longer change working directory at job runtime by default.
+See https://hydra.cc/docs/1.2/upgrades/1.1_to_1.2/changes_to_job_working_dir/ for more information.
+  ret = run_job(
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/torch/utils/cpp_extension.py:25: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+  from pkg_resources import packaging  # type: ignore[attr-defined]
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/pkg_resources/__init__.py:3154: DeprecationWarning: Deprecated call to `pkg_resources.declare_namespace('mpl_toolkits')`.
+Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages
+  declare_namespace(pkg)
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/pkg_resources/__init__.py:3154: DeprecationWarning: Deprecated call to `pkg_resources.declare_namespace('google')`.
+Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages
+  declare_namespace(pkg)
+Using /home/leegyuwon/.cache/torch_extensions/py38_cu117 as PyTorch extensions root...
+Emitting ninja build file /home/leegyuwon/.cache/torch_extensions/py38_cu117/gymtorch/build.ninja...
+Building extension module gymtorch...
+Allowing ninja to set a default number of workers... (overridable by setting the environment variable MAX_JOBS=N)
+ninja: no work to do.
+task: 
+    name: ResDexHandRH
+    physics_engine: physx
+    seed: 42
+    env: 
+        numEnvs: 256
+        dexhand: rb5_allegro
+        episodeLength: 1200
+        training: True
+        usePIDControl: False
+        rolloutStateInit: False
+        randomStateInit: True
+        dataIndices: [7]
+        obsFutureLength: 1
+        rolloutLen: None
+        rolloutBegin: None
+        clipObservations: 5.0
+        clipActions: 1.0
+        furniture: just_one_leg
+        frankaDofNoise: 0.25
+        targetLiftHeight: 0.05
+        distanceReward: 0.1
+        liftReward: 1.0
+        successReward: 1.0
+        aggregateMode: 3
+        tightenMethod: exp_decay
+        tightenFactor: 0.7
+        tightenSteps: 3200
+        actionScale: 1.0
+        useQuatRot: False
+        propDumpInfo: 
+            q_rh: 22
+            q_lh: 22
+            dq_rh: 22
+            dq_lh: 22
+            state_rh: 13
+            state_lh: 13
+            state_manip_obj_rh: 13
+            state_manip_obj_lh: 13
+            joint_state_rh: 377
+            joint_state_lh: 377
+            tip_force_rh: 15
+            tip_force_lh: 15
+            reward: 1
+        actionsMovingAverage: 1.0
+        translationScale: 1.0
+        orientationScale: 0.1
+        bimanual_mode: united
+        trajectory_dropout: 
+            enabled: False
+            mode: full_trajectory_free
+            schedule: linear
+            start_progress: 0.2
+            end_progress: 0.6
+            final_probability: 1.0
+            mask_scope: episode
+            append_availability_flag: False
+            curriculum_total_frames: 0
+            force_probability: -1.0
+            performance_gate: 
+                enabled: False
+                success_threshold: 0.7
+        trajectory_tracking_annealing: 
+            enabled: False
+            schedule: linear
+            start_progress: 0.3
+            end_progress: 0.7
+            final_scale: 0.0
+        observation: 
+            use_normalized_phase: False
+        propObsDim: 79
+        obsKeys: ['q', 'cos_q', 'sin_q', 'base_state']
+        privilegedObsDim: 59
+        privilegedObsKeys: ['dq', 'manip_obj_pos', 'manip_obj_quat', 'manip_obj_vel', 'manip_obj_ang_vel', 'tip_force', 'manip_obj_com', 'manip_obj_weight']
+        enableCameraSensors: False
+    sim: 
+        dt: 0.0166667
+        substeps: 2
+        up_axis: z
+        use_gpu_pipeline: True
+        gravity: [0.0, 0.0, -9.81]
+        physx: 
+            num_threads: 4
+            solver_type: 1
+            use_gpu: True
+            num_position_iterations: 8
+            num_velocity_iterations: 1
+            contact_offset: 0.005
+            rest_offset: 0.0
+            bounce_threshold_velocity: 0.2
+            max_depenetration_velocity: 1.0
+            default_buffer_size_multiplier: 5.0
+            max_gpu_contact_pairs: 1048576
+            num_subscenes: 4
+            contact_collection: 1
+    task: 
+        randomize: False
+        randomization_params: 
+            frequency: 32
+            sim_params: 
+                gravity: 
+                    operation: scaling
+                    schedule: linear_decay
+                    schedule_steps: 1920
+                    external_sample: 
+                        type: const_scale
+                        init_value: 0
+            actor_params: 
+                manip_obj: 
+                    color: True
+                    rigid_shape_properties: 
+                        friction: 
+                            num_buckets: 250
+                            operation: scaling
+                            schedule: linear_decay
+                            schedule_steps: 1920
+                            external_sample: 
+                                type: const_scale
+                                init_value: 3
+                                upper_bound: 6.0
+                                lower_bound: 1.0
+                manip_obj_rh: 
+                    color: True
+                    rigid_shape_properties: 
+                        friction: 
+                            num_buckets: 250
+                            operation: scaling
+                            schedule: linear_decay
+                            schedule_steps: 1920
+                            external_sample: 
+                                type: const_scale
+                                init_value: 3
+                                upper_bound: 6.0
+                                lower_bound: 1.0
+                manip_obj_lh: 
+                    color: True
+                    rigid_shape_properties: 
+                        friction: 
+                            num_buckets: 250
+                            operation: scaling
+                            schedule: linear_decay
+                            schedule_steps: 1920
+                            external_sample: 
+                                type: const_scale
+                                init_value: 3
+                                upper_bound: 6.0
+                                lower_bound: 1.0
+rl_train: 
+    params: 
+        seed: 42
+        algo: 
+            name: ppo
+        model: 
+            name: my_continuous_a2c_logstd
+        network: 
+            name: dict_obs_actor_critic
+            separate: False
+            space: 
+                continuous: 
+                    mu_activation: None
+                    sigma_activation: None
+                    mu_init: 
+                        name: default
+                    sigma_init: 
+                        name: const_initializer
+                        val: 0
+                    fixed_sigma: True
+            dict_feature_encoder: 
+                _target_: lib.nn.features.SimpleFeatureFusion
+                extractors: 
+                    privileged: 
+                        _target_: lib.nn.features.Identity
+                        input_dim: 59
+                    proprioception: 
+                        _target_: lib.nn.features.Identity
+                        input_dim: 79
+                    target: 
+                        _target_: lib.nn.features.Identity
+                        input_dim: 206
+                hidden_depth: 3
+                hidden_dim: 512
+                output_dim: 256
+                activation: swish
+                add_input_activation: False
+                add_output_activation: False
+            mlp: 
+                units: [256, 512, 128, 64]
+                activation: elu
+                d2rl: False
+                initializer: 
+                    name: default
+                regularizer: 
+                    name: None
+        load_checkpoint: True
+        load_path: /home/leegyuwon/Documents/ManipTrans/runs/CapUnscrewArm_A44b_20260819_154049_20260819_154049__08-19-15-40-52/nn/last_CapUnscrewArm_A44b_20260819_154049_20260819_154049_ep_2400_rew_3184.552_sr_2.618872015213918e-29_fr_0.9999988079071045.pth
+        dexhand: rb5_allegro
+        config: 
+            name: CapUnscrewArm_A44BFRZ_20260819_172717
+            full_experiment_name: CapUnscrewArm_A44BFRZ_20260819_172717
+            env_name: rlgpu
+            multi_gpu: False
+            ppo: True
+            mixed_precision: False
+            normalize_input: True
+            normalize_input_excluded_keys: []
+            normalize_value: True
+            use_pid_control: False
+            value_bootstrap: True
+            num_actors: 256
+            reward_shaper: 
+                scale_value: 1.0
+            normalize_advantage: True
+            gamma: 0.99
+            tau: 0.95
+            learning_rate: 1e-12
+            lr_schedule: None
+            schedule_type: standard
+            kl_threshold: 0.008
+            score_to_win: 10000
+            max_epochs: 130
+            early_stop_epochs: 9999999999999
+            save_best_after: 10
+            save_frequency: 100
+            print_stats: True
+            grad_norm: 1.0
+            entropy_coef: 0.0
+            truncate_grads: True
+            e_clip: 0.2
+            horizon_length: 32
+            minibatch_size: 1024
+            mini_epochs: 5
+            critic_coef: 4
+            clip_value: True
+            seq_len: 4
+            bounds_loss_coef: 0.0001
+            use_soft_clamp: True
+task_name: ResDexHandRH
+experiment: CapUnscrewArm_A44BFRZ_20260819_172717
+side: RH
+bimanual_mode: united
+dexhand: rb5_allegro
+rh_base_model_checkpoint: assets/imitator_rh_inspire.pth
+lh_base_model_checkpoint: assets/imitator_lh_inspire.pth
+num_envs: 256
+rolloutStateInit: False
+randomStateInit: True
+rolloutLen: None
+rolloutBegin: None
+learning_rate: 0.0005
+actionsMovingAverage: 1.0
+usePIDControl: False
+dataIndices: [7]
+seed: 42
+torch_deterministic: False
+max_iterations: 130
+early_stop_epochs: 9999999999999
+physics_engine: physx
+pipeline: gpu
+sim_device: cuda:0
+rl_device: cuda:0
+graphics_device_id: 0
+num_threads: 4
+solver_type: 1
+num_subscenes: 4
+test: False
+save_rollouts: False
+save_successful_rollouts_only: True
+num_rollouts_to_save: 20000
+num_rollouts_to_run: 9999999999999
+min_episode_length: 20
+checkpoint: /home/leegyuwon/Documents/ManipTrans/runs/CapUnscrewArm_A44b_20260819_154049_20260819_154049__08-19-15-40-52/nn/last_CapUnscrewArm_A44b_20260819_154049_20260819_154049_ep_2400_rew_3184.552_sr_2.618872015213918e-29_fr_0.9999988079071045.pth
+from_ckpt_epoch: False
+sigma: 
+multi_gpu: False
+wandb_activate: False
+wandb_group: 
+wandb_name: CapUnscrewArm_A44BFRZ_20260819_172717
+wandb_entity: None
+wandb_project: None
+wandb_tags: []
+wandb_logcode_dir: 
+capture_video: False
+n_parallel_recorders: 8
+n_successful_videos_to_record: 50
+display: False
+headless: True
+Setting seed: 42
+Using rl_device: cuda:0
+Using sim_device: cuda:0
+{'name': 'CapUnscrewArm_A44BFRZ_20260819_172717', 'full_experiment_name': None, 'env_name': 'rlgpu', 'multi_gpu': False, 'ppo': True, 'mixed_precision': False, 'normalize_input': True, 'normalize_input_excluded_keys': [], 'normalize_value': True, 'use_pid_control': False, 'value_bootstrap': True, 'num_actors': 256, 'reward_shaper': {'scale_value': 1.0}, 'normalize_advantage': True, 'gamma': 0.99, 'tau': 0.95, 'learning_rate': 1e-12, 'lr_schedule': 'None', 'schedule_type': 'standard', 'kl_threshold': 0.008, 'score_to_win': 10000, 'max_epochs': 130, 'early_stop_epochs': 9999999999999, 'save_best_after': 10, 'save_frequency': 100, 'print_stats': True, 'grad_norm': 1.0, 'entropy_coef': 0.0, 'truncate_grads': True, 'e_clip': 0.2, 'horizon_length': 32, 'minibatch_size': 1024, 'mini_epochs': 5, 'critic_coef': 4, 'clip_value': True, 'seq_len': 4, 'bounds_loss_coef': 0.0001, 'use_soft_clamp': True, 'device': 'cuda:0', 'population_based_training': False, 'pbt_idx': None}
+self.seed = 42
+Started to train
+Exact experiment name requested from command line: CapUnscrewArm_A44BFRZ_20260819_172717__08-19-17-27-20
+[cap_grasp] mode=on | wrist=servo + finger policy | grasp=1.00s settle=0.50s hold=0.30s | wrist_sampler=topdown reach_min_fingers=2 reach_margin=0.020m thumb_required=True thumb_margin=0.025m opposition_min=Nonedeg | zero_triangle_xy=True thumb_mcp_outside_margin=off reject_palm_collision=True:0.002m r=0.045~0.075m z=0.040~0.095m palm_down_max=20.0deg side_contact_margin=0.010m finger_radius=0.012m probe_steps=4 thumb_contact_w=0.50 grip_w=1.00 closure_w=3.00 closure_err_max=0.75 near_w=2.00 require_gravity_for_hold=True hold_decay=3.00 penetration_penalty_w=3.00 penetration_tol=0.002m cap_pre_gravity_lock=True:teleport | pedestal=False lift=0.060m@1.50s/1.00s lift_success=0.016m level_w=1.00 level_cos_min=0.87 | resample_wrist_on_reset=False |
+[Warning] [carb.gym.plugin] useGpu is set, forcing single scene (0 subscenes)
+Not connected to PVD
++++ Using GPU PhysX
+Physics Engine: PhysX
+Physics Device: cuda:0
+GPU Pipeline: enabled
+[friction] hand=4.00 obj=6.00 유효(평균)=5.00  rolling 0.01/0.05 torsion 0.01/0.05
+Num dexhand Bodies: 29
+Num dexhand DOFs: 22
+[dof-drive] 손 관절 22개: stiffness 300 damping 18 effort 150.00Nm (CAP_DOF_EFFORT 오버라이드) velocity 3.14rad/s
+[cap_grasp] cap-only demo override | envs=256 steps=360 cap_z=0.225m urdf=/home/leegyuwon/Documents/task1/assets/cap_only/cap_only.urdf
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[resist-curriculum] 0.20 -> 0.20Nm (step 0.10, sr게이트 0.80, 창 4096ep)
+[cap_unscrew] cap_lift<-cap_spin x3.183099e-03 (pitch 20.0mm/rev)  target=180deg  band=14.3~30.0mm (고정)  lift>=16.0mm
+[cap_unscrew] actions=22 (wrist OFF + fingers 22)
+[cap_unscrew] curriculum reward | kc 1.0->1 (kd=0.997, /32 steps)  objective: unscrew=10.0 hold=4.0 near=2.0 pinch=2.0@8mm quality=2.0(대향 x 접촉/4, stable>=0.125) grip=1.0  constraints(xkc): pen=3.0 reverse=2.0 revang=2.0(ref=0.25) leash=0.3 palm=0.0 tpair=0.0 action=0.01
+[cap_grasp] contact bodies per finger: [('link_15.0', 'link_15.0_tip'), ('link_3.0', 'link_3.0_tip'), ('link_7.0', 'link_7.0_tip'), ('link_11.0', 'link_11.0_tip'), ('link_11.0', 'link_11.0_tip')]
+[grasp-init] arm_grasp_init_closed_vmount.json 로드  비율 1.00  노이즈 0.0도  손목노이즈 0.0mm/0.0도  (팔 통합(vmount 축중심, 팔꿈치-업, 캡 0.4, 닫힌판))
+WARNING: seq_len is deprecated, use seq_length instead
+seq_length: 4
+current training device: cuda:0
+build mlp: 256
+RunningMeanStd:  (1,)
+RunningMeanStd:  (59,)
+RunningMeanStd:  (79,)
+RunningMeanStd:  (206,)
+=> loading checkpoint '/home/leegyuwon/Documents/ManipTrans/runs/CapUnscrewArm_A44b_20260819_154049_20260819_154049__08-19-15-40-52/nn/last_CapUnscrewArm_A44b_20260819_154049_20260819_154049_ep_2400_rew_3184.552_sr_2.618872015213918e-29_fr_0.9999988079071045.pth'
+[action-slew] delta=0.0 accel_hand=50.0rad/s² accel_arm=50.0rad/s² (실행 액션 하드 클립, dt=0.0167)
+[action-slew] 관절별 δ: 팔 [0.278, 0.278, 0.278, 0.278, 0.278, 0.278] 손[0] 0.278
+[obs-partial] 캡 위치 은닉=True 선속도 은닉=True z복원=True (쿼터니언·각속도 유지)
+[traj_dropout] target dim=206, trajectory cols=46, keep(obj/bps)=160, mode=full_trajectory_free
+[thumb-rot] 회전 엄지 접촉 보너스 w=2.0 x (접촉수/4) 등급형 (신기록 전진 게이트)
+[unscrew-cscale] 회전 수입 x (0.5 + 0.5*접촉수/4)
+[energy] 페널티 활성: w_hand=1.0 w_arm=1.667 alpha=0.1 (기계일/정격W + alpha·(τ/정격τ)², 손 0.48Nm/120W, 팔 effort/200W)
+fps step: 3696 fps step and policy inference: 2466 fps total: 1929 epoch: 1/130 frames: 0
+fps step: 4595 fps step and policy inference: 4254 fps total: 2901 epoch: 2/130 frames: 8192
+fps step: 5214 fps step and policy inference: 4299 fps total: 2912 epoch: 3/130 frames: 16384
+fps step: 4776 fps step and policy inference: 3342 fps total: 2442 epoch: 4/130 frames: 24576
+fps step: 4419 fps step and policy inference: 3086 fps total: 2302 epoch: 5/130 frames: 32768
+fps step: 4330 fps step and policy inference: 2802 fps total: 2092 epoch: 6/130 frames: 40960
+fps step: 4142 fps step and policy inference: 3166 fps total: 2322 epoch: 7/130 frames: 49152
+fps step: 4275 fps step and policy inference: 3607 fps total: 2515 epoch: 8/130 frames: 57344
+fps step: 4130 fps step and policy inference: 3632 fps total: 2486 epoch: 9/130 frames: 65536
+fps step: 4385 fps step and policy inference: 4052 fps total: 2768 epoch: 10/130 frames: 73728
+saving next best rewards:  [-1062.18]
+=> saving checkpoint 'runs/CapUnscrewArm_A44BFRZ_20260819_172717__08-19-17-27-20/nn/CapUnscrewArm_A44BFRZ_20260819_172717.pth'
+fps step: 4277 fps step and policy inference: 3747 fps total: 2619 epoch: 11/130 frames: 81920
+saving next best rewards:  [-987.7]
+=> saving checkpoint 'runs/CapUnscrewArm_A44BFRZ_20260819_172717__08-19-17-27-20/nn/CapUnscrewArm_A44BFRZ_20260819_172717.pth'
+fps step: 3832 fps step and policy inference: 3495 fps total: 2540 epoch: 12/130 frames: 90112
+fps step: 3625 fps step and policy inference: 3366 fps total: 2455 epoch: 13/130 frames: 98304
+fps step: 3769 fps step and policy inference: 3348 fps total: 2471 epoch: 14/130 frames: 106496
+fps step: 3540 fps step and policy inference: 2717 fps total: 2099 epoch: 15/130 frames: 114688
+saving next best rewards:  [-954.25]
+=> saving checkpoint 'runs/CapUnscrewArm_A44BFRZ_20260819_172717__08-19-17-27-20/nn/CapUnscrewArm_A44BFRZ_20260819_172717.pth'
+fps step: 3641 fps step and policy inference: 2337 fps total: 1862 epoch: 16/130 frames: 122880
+saving next best rewards:  [227.34]
+=> saving checkpoint 'runs/CapUnscrewArm_A44BFRZ_20260819_172717__08-19-17-27-20/nn/CapUnscrewArm_A44BFRZ_20260819_172717.pth'
+fps step: 3431 fps step and policy inference: 2307 fps total: 1837 epoch: 17/130 frames: 131072
+saving next best rewards:  [1184.16]
+=> saving checkpoint 'runs/CapUnscrewArm_A44BFRZ_20260819_172717__08-19-17-27-20/nn/CapUnscrewArm_A44BFRZ_20260819_172717.pth'
+fps step: 3598 fps step and policy inference: 2370 fps total: 1857 epoch: 18/130 frames: 139264
+saving next best rewards:  [1645.19]
+=> saving checkpoint 'runs/CapUnscrewArm_A44BFRZ_20260819_172717__08-19-17-27-20/nn/CapUnscrewArm_A44BFRZ_20260819_172717.pth'
+fps step: 3516 fps step and policy inference: 2769 fps total: 2085 epoch: 19/130 frames: 147456
+saving next best rewards:  [1794.34]
+=> saving checkpoint 'runs/CapUnscrewArm_A44BFRZ_20260819_172717__08-19-17-27-20/nn/CapUnscrewArm_A44BFRZ_20260819_172717.pth'
+fps step: 3465 fps step and policy inference: 2878 fps total: 2175 epoch: 20/130 frames: 155648
+saving next best rewards:  [1852.81]
+=> saving checkpoint 'runs/CapUnscrewArm_A44BFRZ_20260819_172717__08-19-17-27-20/nn/CapUnscrewArm_A44BFRZ_20260819_172717.pth'
+fps step: 3623 fps step and policy inference: 3317 fps total: 2399 epoch: 21/130 frames: 163840
+saving next best rewards:  [1868.9]
+=> saving checkpoint 'runs/CapUnscrewArm_A44BFRZ_20260819_172717__08-19-17-27-20/nn/CapUnscrewArm_A44BFRZ_20260819_172717.pth'
+fps step: 3572 fps step and policy inference: 3152 fps total: 2332 epoch: 22/130 frames: 172032
+saving next best rewards:  [1881.06]
+=> saving checkpoint 'runs/CapUnscrewArm_A44BFRZ_20260819_172717__08-19-17-27-20/nn/CapUnscrewArm_A44BFRZ_20260819_172717.pth'
+fps step: 3392 fps step and policy inference: 2723 fps total: 2070 epoch: 23/130 frames: 180224
+saving next best rewards:  [3263.95]
+=> saving checkpoint 'runs/CapUnscrewArm_A44BFRZ_20260819_172717__08-19-17-27-20/nn/CapUnscrewArm_A44BFRZ_20260819_172717.pth'
+fps step: 3488 fps step and policy inference: 2904 fps total: 2198 epoch: 24/130 frames: 188416
+fps step: 3611 fps step and policy inference: 3050 fps total: 2258 epoch: 25/130 frames: 196608
+fps step: 3568 fps step and policy inference: 2836 fps total: 2151 epoch: 26/130 frames: 204800
+fps step: 3425 fps step and policy inference: 2312 fps total: 1839 epoch: 27/130 frames: 212992
+fps step: 3433 fps step and policy inference: 2101 fps total: 1706 epoch: 28/130 frames: 221184
+fps step: 3405 fps step and policy inference: 2304 fps total: 1840 epoch: 29/130 frames: 229376
+fps step: 3409 fps step and policy inference: 2258 fps total: 1799 epoch: 30/130 frames: 237568
+fps step: 3599 fps step and policy inference: 2659 fps total: 2042 epoch: 31/130 frames: 245760
+fps step: 3727 fps step and policy inference: 3008 fps total: 2218 epoch: 32/130 frames: 253952
+fps step: 3493 fps step and policy inference: 3164 fps total: 2338 epoch: 33/130 frames: 262144
+fps step: 3523 fps step and policy inference: 2755 fps total: 2100 epoch: 34/130 frames: 270336
+saving next best rewards:  [3354.59]
+=> saving checkpoint 'runs/CapUnscrewArm_A44BFRZ_20260819_172717__08-19-17-27-20/nn/CapUnscrewArm_A44BFRZ_20260819_172717.pth'
+fps step: 3606 fps step and policy inference: 3050 fps total: 2274 epoch: 35/130 frames: 278528
+fps step: 3739 fps step and policy inference: 3212 fps total: 2406 epoch: 36/130 frames: 286720
+fps step: 3564 fps step and policy inference: 3138 fps total: 2310 epoch: 37/130 frames: 294912
+fps step: 3572 fps step and policy inference: 2257 fps total: 1792 epoch: 38/130 frames: 303104
+fps step: 3525 fps step and policy inference: 2207 fps total: 1761 epoch: 39/130 frames: 311296
+fps step: 3403 fps step and policy inference: 2281 fps total: 1832 epoch: 40/130 frames: 319488
+fps step: 3536 fps step and policy inference: 2398 fps total: 1901 epoch: 41/130 frames: 327680
+fps step: 3690 fps step and policy inference: 2747 fps total: 2096 epoch: 42/130 frames: 335872
+fps step: 3542 fps step and policy inference: 2767 fps total: 2093 epoch: 43/130 frames: 344064
+fps step: 3517 fps step and policy inference: 3039 fps total: 2275 epoch: 44/130 frames: 352256
+fps step: 3650 fps step and policy inference: 2936 fps total: 2205 epoch: 45/130 frames: 360448
+saving next best rewards:  [3379.25]
+=> saving checkpoint 'runs/CapUnscrewArm_A44BFRZ_20260819_172717__08-19-17-27-20/nn/CapUnscrewArm_A44BFRZ_20260819_172717.pth'
+fps step: 3645 fps step and policy inference: 2837 fps total: 2150 epoch: 46/130 frames: 368640
+fps step: 3529 fps step and policy inference: 3061 fps total: 2271 epoch: 47/130 frames: 376832
+fps step: 3547 fps step and policy inference: 3055 fps total: 2288 epoch: 48/130 frames: 385024
+fps step: 3531 fps step and policy inference: 2416 fps total: 1893 epoch: 49/130 frames: 393216
+fps step: 3609 fps step and policy inference: 2268 fps total: 1802 epoch: 50/130 frames: 401408
+fps step: 3483 fps step and policy inference: 2122 fps total: 1724 epoch: 51/130 frames: 409600
+fps step: 3534 fps step and policy inference: 2272 fps total: 1773 epoch: 52/130 frames: 417792
+fps step: 3360 fps step and policy inference: 2559 fps total: 1955 epoch: 53/130 frames: 425984
+fps step: 4536 fps step and policy inference: 3938 fps total: 2703 epoch: 54/130 frames: 434176
+fps step: 4442 fps step and policy inference: 3859 fps total: 2694 epoch: 55/130 frames: 442368
+fps step: 4433 fps step and policy inference: 3509 fps total: 2551 epoch: 56/130 frames: 450560
+fps step: 4287 fps step and policy inference: 3531 fps total: 2479 epoch: 57/130 frames: 458752
+fps step: 4550 fps step and policy inference: 3746 fps total: 2684 epoch: 58/130 frames: 466944
+fps step: 4438 fps step and policy inference: 3725 fps total: 2631 epoch: 59/130 frames: 475136
+fps step: 4412 fps step and policy inference: 3351 fps total: 2458 epoch: 60/130 frames: 483328
+fps step: 4476 fps step and policy inference: 2908 fps total: 2213 epoch: 61/130 frames: 491520
+fps step: 4537 fps step and policy inference: 2779 fps total: 2129 epoch: 62/130 frames: 499712
+fps step: 4341 fps step and policy inference: 2967 fps total: 2242 epoch: 63/130 frames: 507904
+Loading extension module gymtorch...
+/home/leegyuwon/Documents/isaacgym/python/isaacgym/torch_utils.py:135: DeprecationWarning: `np.float` is a deprecated alias for the builtin `float`. To silence this warning, use `float` by itself. Doing this will not modify any behavior and is safe. If you specifically wanted the numpy scalar type, use `np.float64` here.
+Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
+  def get_axis_params(value, axis_idx, x_value=0., dtype=np.float, n_dims=3):
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/networkx/classes/graph.py:23: DeprecationWarning: Using or importing the ABCs from 'collections' instead of from 'collections.abc' is deprecated since Python 3.3, and in 3.10 it will stop working
+  from collections import Mapping
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/networkx/classes/reportviews.py:95: DeprecationWarning: Using or importing the ABCs from 'collections' instead of from 'collections.abc' is deprecated since Python 3.3, and in 3.10 it will stop working
+  from collections import Mapping, Set, Iterable
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/networkx/readwrite/graphml.py:346: DeprecationWarning: `np.int` is a deprecated alias for the builtin `int`. To silence this warning, use `int` by itself. Doing this will not modify any behavior and is safe. When replacing `np.int`, you may wish to use e.g. `np.int64` or `np.int32` to specify the precision. If you wish to review your current use, check the release note link for additional information.
+Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
+  (np.int, "int"), (np.int8, "int"),
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/wandb/util.py:116: SentryHubDeprecationWarning: `sentry_sdk.Hub` is deprecated and will be removed in a future major release. Please consult our 1.x to 2.x migration guide for details on how to migrate `Hub` usage to the new API: https://docs.sentry.io/platforms/python/migration/1.x-to-2.x
+  sentry_hub = sentry_sdk.Hub(sentry_client)
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/torch/utils/tensorboard/__init__.py:4: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+  if not hasattr(tensorboard, "__version__") or LooseVersion(
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/gym/spaces/box.py:84: UserWarning: [33mWARN: Box bound precision lowered by casting to float32[0m
+  logger.warn(f"Box bound precision lowered by casting to {self.dtype}")
+/home/leegyuwon/Documents/ManipTrans/maniptrans_envs/lib/envs/tasks/dexhandmanip_sh.py:1004: DeprecationWarning: an integer is required (got type isaacgym._bindings.linux-x86_64.gym_38.DofDriveMode).  Implicit conversion to integers using __int__ is deprecated, and may be removed in a future version of Python.
+  asset_options.default_dof_drive_mode = gymapi.DOF_MODE_POS
+/home/leegyuwon/Documents/ManipTrans/maniptrans_envs/lib/envs/tasks/dexhandmanip_sh.py:562: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  self.dexhand_default_dof_pos = torch.tensor(default_pose, device=self.sim_device)
+fps step: 4627 fps step and policy inference: 3536 fps total: 2554 epoch: 64/130 frames: 516096
+fps step: 4503 fps step and policy inference: 3786 fps total: 2691 epoch: 65/130 frames: 524288
+fps step: 4558 fps step and policy inference: 3830 fps total: 2686 epoch: 66/130 frames: 532480
+fps step: 4360 fps step and policy inference: 3469 fps total: 2531 epoch: 67/130 frames: 540672
+fps step: 4575 fps step and policy inference: 3320 fps total: 2441 epoch: 68/130 frames: 548864
+fps step: 4542 fps step and policy inference: 3648 fps total: 2488 epoch: 69/130 frames: 557056
+fps step: 4177 fps step and policy inference: 3369 fps total: 2442 epoch: 70/130 frames: 565248
+fps step: 4289 fps step and policy inference: 3315 fps total: 2439 epoch: 71/130 frames: 573440
+fps step: 4370 fps step and policy inference: 3002 fps total: 2232 epoch: 72/130 frames: 581632
+fps step: 4336 fps step and policy inference: 3081 fps total: 2310 epoch: 73/130 frames: 589824
+fps step: 4169 fps step and policy inference: 3021 fps total: 2270 epoch: 74/130 frames: 598016
+fps step: 4369 fps step and policy inference: 3313 fps total: 2383 epoch: 75/130 frames: 606208
+fps step: 4489 fps step and policy inference: 3467 fps total: 2520 epoch: 76/130 frames: 614400
+fps step: 4499 fps step and policy inference: 3751 fps total: 2669 epoch: 77/130 frames: 622592
+fps step: 4468 fps step and policy inference: 3569 fps total: 2568 epoch: 78/130 frames: 630784
+fps step: 4321 fps step and policy inference: 3588 fps total: 2588 epoch: 79/130 frames: 638976
+fps step: 4429 fps step and policy inference: 3615 fps total: 2495 epoch: 80/130 frames: 647168
+fps step: 4311 fps step and policy inference: 3484 fps total: 2515 epoch: 81/130 frames: 655360
+fps step: 4528 fps step and policy inference: 3447 fps total: 2517 epoch: 82/130 frames: 663552
+fps step: 4491 fps step and policy inference: 3145 fps total: 2335 epoch: 83/130 frames: 671744
+fps step: 4327 fps step and policy inference: 2939 fps total: 2225 epoch: 84/130 frames: 679936
+fps step: 4461 fps step and policy inference: 3116 fps total: 2339 epoch: 85/130 frames: 688128
+fps step: 4418 fps step and policy inference: 3232 fps total: 2349 epoch: 86/130 frames: 696320
+fps step: 4368 fps step and policy inference: 3352 fps total: 2451 epoch: 87/130 frames: 704512
+fps step: 4249 fps step and policy inference: 3574 fps total: 2530 epoch: 88/130 frames: 712704
+fps step: 4405 fps step and policy inference: 3409 fps total: 2467 epoch: 89/130 frames: 720896
+fps step: 4564 fps step and policy inference: 3525 fps total: 2556 epoch: 90/130 frames: 729088
+fps step: 4435 fps step and policy inference: 3530 fps total: 2555 epoch: 91/130 frames: 737280
+fps step: 4618 fps step and policy inference: 3614 fps total: 2601 epoch: 92/130 frames: 745472
+fps step: 4294 fps step and policy inference: 3298 fps total: 2457 epoch: 93/130 frames: 753664
+fps step: 4315 fps step and policy inference: 2964 fps total: 2238 epoch: 94/130 frames: 761856
+fps step: 4392 fps step and policy inference: 2968 fps total: 2244 epoch: 95/130 frames: 770048
+fps step: 4458 fps step and policy inference: 3054 fps total: 2308 epoch: 96/130 frames: 778240
+fps step: 4362 fps step and policy inference: 3008 fps total: 2270 epoch: 97/130 frames: 786432
+fps step: 4564 fps step and policy inference: 3331 fps total: 2438 epoch: 98/130 frames: 794624
+fps step: 4386 fps step and policy inference: 3868 fps total: 2718 epoch: 99/130 frames: 802816
+fps step: 4593 fps step and policy inference: 3617 fps total: 2612 epoch: 100/130 frames: 811008
+=> saving checkpoint 'runs/CapUnscrewArm_A44BFRZ_20260819_172717__08-19-17-27-20/nn/last_CapUnscrewArm_A44BFRZ_20260819_172717_ep_100_rew_2994.8152_sr_0.0_fr_1.0.pth'
+fps step: 4509 fps step and policy inference: 3361 fps total: 2474 epoch: 101/130 frames: 819200
+fps step: 4407 fps step and policy inference: 3417 fps total: 2496 epoch: 102/130 frames: 827392
+fps step: 4620 fps step and policy inference: 3706 fps total: 2660 epoch: 103/130 frames: 835584
+fps step: 4585 fps step and policy inference: 3571 fps total: 2581 epoch: 104/130 frames: 843776
+fps step: 4575 fps step and policy inference: 3252 fps total: 2397 epoch: 105/130 frames: 851968
+fps step: 4547 fps step and policy inference: 3117 fps total: 2335 epoch: 106/130 frames: 860160
+fps step: 4411 fps step and policy inference: 3112 fps total: 2334 epoch: 107/130 frames: 868352
+fps step: 4849 fps step and policy inference: 3001 fps total: 2276 epoch: 108/130 frames: 876544
+fps step: 4625 fps step and policy inference: 3147 fps total: 2351 epoch: 109/130 frames: 884736
+fps step: 4424 fps step and policy inference: 3620 fps total: 2603 epoch: 110/130 frames: 892928
+fps step: 4561 fps step and policy inference: 3424 fps total: 2516 epoch: 111/130 frames: 901120
+fps step: 4541 fps step and policy inference: 3451 fps total: 2516 epoch: 112/130 frames: 909312
+fps step: 4416 fps step and policy inference: 3246 fps total: 2418 epoch: 113/130 frames: 917504
+fps step: 4586 fps step and policy inference: 3634 fps total: 2602 epoch: 114/130 frames: 925696
+fps step: 4472 fps step and policy inference: 3375 fps total: 2482 epoch: 115/130 frames: 933888
+fps step: 4413 fps step and policy inference: 3457 fps total: 2526 epoch: 116/130 frames: 942080
+fps step: 4534 fps step and policy inference: 3296 fps total: 2428 epoch: 117/130 frames: 950272
+fps step: 4422 fps step and policy inference: 3258 fps total: 2407 epoch: 118/130 frames: 958464
+fps step: 4492 fps step and policy inference: 3063 fps total: 2306 epoch: 119/130 frames: 966656
+fps step: 4673 fps step and policy inference: 3074 fps total: 2318 epoch: 120/130 frames: 974848
+fps step: 4619 fps step and policy inference: 3184 fps total: 2378 epoch: 121/130 frames: 983040
+fps step: 4460 fps step and policy inference: 3667 fps total: 2639 epoch: 122/130 frames: 991232
+fps step: 4456 fps step and policy inference: 3256 fps total: 2404 epoch: 123/130 frames: 999424
+fps step: 4424 fps step and policy inference: 3459 fps total: 2520 epoch: 124/130 frames: 1007616
+fps step: 4453 fps step and policy inference: 3660 fps total: 2589 epoch: 125/130 frames: 1015808
+fps step: 4548 fps step and policy inference: 3091 fps total: 2329 epoch: 126/130 frames: 1024000
+fps step: 4520 fps step and policy inference: 3433 fps total: 2501 epoch: 127/130 frames: 1032192
+fps step: 4535 fps step and policy inference: 3305 fps total: 2435 epoch: 128/130 frames: 1040384
+fps step: 4522 fps step and policy inference: 3406 fps total: 2506 epoch: 129/130 frames: 1048576
+fps step: 4510 fps step and policy inference: 3244 fps total: 2408 epoch: 130/130 frames: 1056768
+=> saving checkpoint 'runs/CapUnscrewArm_A44BFRZ_20260819_172717__08-19-17-27-20/nn/last_CapUnscrewArm_A44BFRZ_20260819_172717_ep_130_rew__3075.42_.pth'
+MAX EPOCHS NUM!
+Using VHACD cache directory '/home/leegyuwon/.isaacgym/vhacd'
+Found existing convex decomposition for mesh '/home/leegyuwon/Documents/task1/assets/tumbler/meshes/tumbler_cyl_fric02_body.obj'
+Found existing convex decomposition for mesh '/home/leegyuwon/Documents/task1/assets/tumbler/meshes/tumbler_cyl_fric02_cap.obj'

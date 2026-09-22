@@ -1,0 +1,1307 @@
+학습 trajectory 수: 464, num_envs=512, experiment=dg5fs_imitator_rh
+Importing module 'gym_38' (/home/leegyuwon/Documents/isaacgym/python/isaacgym/_bindings/linux-x86_64/gym_38.so)
+Setting GYM_USD_PLUG_INFO_PATH to /home/leegyuwon/Documents/isaacgym/python/isaacgym/_bindings/linux-x86_64/usd/plugInfo.json
+PyTorch version 1.13.1+cu117
+Device count 1
+/home/leegyuwon/Documents/isaacgym/python/isaacgym/_bindings/src/gymtorch
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/hydra/_internal/hydra.py:119: UserWarning: Future Hydra versions will no longer change working directory at job runtime by default.
+See https://hydra.cc/docs/1.2/upgrades/1.1_to_1.2/changes_to_job_working_dir/ for more information.
+  ret = run_job(
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/torch/utils/cpp_extension.py:25: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+  from pkg_resources import packaging  # type: ignore[attr-defined]
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/pkg_resources/__init__.py:3154: DeprecationWarning: Deprecated call to `pkg_resources.declare_namespace('mpl_toolkits')`.
+Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages
+  declare_namespace(pkg)
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/pkg_resources/__init__.py:3154: DeprecationWarning: Deprecated call to `pkg_resources.declare_namespace('google')`.
+Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages
+  declare_namespace(pkg)
+Using /home/leegyuwon/.cache/torch_extensions/py38_cu117 as PyTorch extensions root...
+Emitting ninja build file /home/leegyuwon/.cache/torch_extensions/py38_cu117/gymtorch/build.ninja...
+Building extension module gymtorch...
+Allowing ninja to set a default number of workers... (overridable by setting the environment variable MAX_JOBS=N)
+ninja: no work to do.
+task: 
+    name: DexHandImitatorRH
+    physics_engine: physx
+    seed: 42
+    env: 
+        numEnvs: 512
+        dexhand: dg5fs
+        episodeLength: 2000
+        training: True
+        usePIDControl: True
+        rolloutStateInit: False
+        randomStateInit: True
+        dataIndices: ['0b3d1@3', '178ef@1', '235ac@0', '62681@0', '7653f@1', '77583@2', '7b8bf@0', '9588d@0', '9decc@0', '9e461@0', 'ad924@0', 'd2192@0', '05d45@7', '0b3a0@1', '0b3a0@8', '11da4@2', '1a04a@1', '1eccd@5', '22db0@0', '24cff@2', '24cff@3', '24cff@5', '27c72@1', '27c72@5', '31218@7', '35fb7@1', '35fb7@2', '35fb7@3', '380c7@2', '3ae08@1', '3bf15@4', '43dea@0', '49a83@0', '5870f@8', '5a5d6@7', '5a5d6@9', '5da24@0', '5fef0@2', '72bb9@0', '75b94@2', '75b94@7', '7c801@4', '7c801@6', '7c801@9', '7c801@12', '7c801@19', '7c801@23', '7c801@27', '7cc68@3', '7cc68@4', '82d76@0', '83207@2', '86e2a@1', '86e2a@3', '86e2a@4', '86e2a@6', '894b2@0', '8bb23@0', '916da@1', '916da@2', '925aa@5', '925aa@7', '9d4bf@0', '9f436@0', 'a7a1a@2', 'a7a1a@7', 'b1494@1', 'b2063@1', 'b9bb2@7', 'bcb36@0', 'bd3b9@0', 'c1b07@9', 'c1b07@11', 'c4375@0', 'c4375@1', 'c4375@3', 'c992d@3', 'cb8f2@1', 'ce2f0@2', 'ce2f0@10', 'd05b4@18', 'd4ddf@0', 'd4ddf@1', 'd4ddf@2', 'e76b2@4', 'e9343@2', 'ebf46@3', 'edd68@0', 'f014a@2', 'f447c@0', 'fc1e5@1', 'fe346@0', '1469a@0', '29b5a@0', '4102c@0', '4b813@2', '67084@0', '7f874@0', 'c08f9@3', 'c1e36@0', 'c81af@0', 'f4786@2', 'f4786@3', '0ef67@0', '29266@0', '29266@1', '29266@2', '29266@3', '29266@4', '29266@6', '29266@7', '29266@9', '29266@10', '4fd8e@0', '65ef0@0', '65ef0@4', '65ef0@6', '7c014@0', '7ed08@0', '82fc7@0', '86fb0@0', '86fb0@5', '86fb0@7', '86fb0@8', '86fb0@10', '86fb0@12', 'cd0ae@0', 'cd0ae@1', 'cd0ae@2', 'cd0ae@3', 'cd0ae@4', 'cd0ae@6', 'd01e2@0', 'fccd8@0', '085b5@0', '0b666@0', '0b666@3', '0b666@5', '0b666@7', '0b666@9', '0b666@11', '183ce@0', '26fd9@1', '37838@0', '4602f@1', '7055a@0', '90724@0', 'a4e00@0', 'a4e00@2', 'a4e00@3', 'a4e00@5', 'c11fb@0', 'c3f6f@0', 'c8881@0', 'f3c30@0', '07994@0', '1ad2e@0', '40db1@1', '495b6@0', '4aefa@0', '4e902@0', '5a065@0', '5f8e2@0', '6803d@0', '70982@0', 'a3ff7@0', 'ab46c@0', 'af836@0', '1292e@0', '13d53@0', '171c4@0', '1e305@0', '20034@2', '20034@4', '25012@0', '2d90f@0', '468f5@0', '5c913@1', '67132@0', '67132@1', '733f9@0', '8ec65@0', '97fc3@0', '97fc3@1', '97fc3@3', '97fc3@4', '97fc3@6', '97fc3@7', '97fc3@9', '97fc3@10', '97fc3@11', '97fc3@17', 'b9695@0', '16df1@1', '1c29f@0', '1c29f@1', '1c29f@3', '374a7@0', '40952@0', '56210@0', 'a3323@3', 'ac736@0', 'ac736@1', 'b5736@1', 'cebe9@0', 'cebe9@4', 'f0408@1', 'f1029@0', 'f1029@4', 'f1029@7', 'f1114@5', 'fbc74@4', 'fc88d@0', 'fcb20@1', '105a5@0', '20b58@0', '2a44f@0', '2d169@0', '2d169@2', 'ed3a1@0', 'fd02f@0', '17716@1', '17716@2', '1a81a@0', '1b938@9', '352c9@2', '5844a@0', '59a87@3', '59a87@5', '59a87@13', '701e7@3', '7cd8f@0', '817fb@0', '8e463@6', '959a0@10', '9cf44@4', '9d88b@2', '9d88b@4', 'b4b28@1', 'b4b28@9', 'b4b28@13', 'b4b28@15', 'c8fd4@1', 'c8fd4@12', 'ce343@9', 'e7d0d@0', 'f9da9@6', '0464d@0', '0ec0d@0', '39c30@0', '39c30@7', '5e99c@0', '5e99c@6', '76f7d@0', '783a1@0', '78810@0', '78810@6', 'a5d2c@0', 'a5d2c@7', 'a5e8a@0', 'e04db@1', 'efd16@0', 'f0b72@0', 'fb969@3', 'fb969@4', '0308b@4', '0308b@13', '06d2f@0', '0e05b@0', '368db@0', '47e95@9', '4e42c@14', '59796@7', '63ca8@0', '63ca8@13', '63ca8@15', '662b0@7', '662b0@13', '82851@0', '82851@18', '82851@24', '87c3c@0', '87c3c@10', '8e4b0@2', '95c93@5', '95c93@7', '9a028@0', '9a028@14', '9bb17@0', 'ad141@8', 'ad141@9', 'ad141@17', 'eb5f9@0', 'f9b2f@4', '07862@0', '638fe@0', 'd4478@1', 'e9e88@0', '2a060@0', 'eb877@0', 'a8bfc@1', '031b7@0', '0646d@1', '0f900@1', '0f900@5', '0f900@8', '0f900@9', '0f900@11', '0f900@13', '0ffc7@0', '11cb7@0', '11cb7@3', '155cb@3', '3b1e6@1', '3b1e6@3', '3b1e6@4', '3b1e6@8', '3b1e6@11', '3b1e6@13', '3b1e6@15', '419a3@0', '419a3@4', '5fde1@2', '6ca00@4', '6ca00@9', '6ca00@13', '6ca00@14', '6ca00@17', '6ece6@2', '720b2@0', '720b2@3', '79eb5@2', '89667@0', '89667@4', '897a4@1', '8e5df@1', '8e5df@3', '8e5df@4', '8e5df@5', '8e5df@9', '8e5df@12', '94d04@1', '9523f@3', '9523f@9', 'acc89@1', 'b0b13@0', 'b0b13@9', 'b0b13@10', 'b0b13@12', 'b0b13@17', 'b5fa3@0', 'b5fa3@5', 'b5fa3@9', 'b7853@0', 'b7853@3', 'b7853@10', 'beb8f@2', 'c50ce@2', 'c8c4e@0', 'cf9b2@4', 'cf9b2@5', 'db0a0@1', 'dee46@3', 'e177c@5', 'e177c@7', 'e177c@8', 'f25e3@0', 'f2d09@2', 'f7d37@0', 'f7d37@4', 'f7d37@7', 'f7d37@15', 'f7d37@17', 'facbc@3', 'facbc@14', '22c9e@1', '2563d@4', '2563d@8', '9f9ee@0', 'd77d9@1', 'e53a4@0', 'e53a4@1', '15642@0', '1c03f@0', '1c03f@1', '1c03f@2', '1c03f@3', '1c03f@6', '1c03f@17', '1c5d6@2', '211a2@1', '211a2@2', '211a2@3', '211a2@4', '211a2@7', '211a2@20', '233b9@4', '2bae9@2', '2bae9@4', '2bae9@5', '2bae9@17', '2bae9@18', '2bae9@19', '2bae9@23', '2bae9@24', '2bae9@31', '2ddc8@1', '384b1@2', '384b1@3', '38754@0', '38754@1', '38754@2', '38754@4', '38754@16', '39e5e@1', '39e5e@2', '39e5e@3', '39e5e@4', '39e5e@6', '39e5e@16', '39e5e@18', '39e5e@19', '39e5e@20', '41d83@0', '41d83@3', '41d83@8', '43581@1', '494ca@3', '639d4@0', '639d4@5', '7fa33@1', '863d5@1', '904b2@7', 'a3a31@2', 'a78a0@3', 'b4d44@4', 'b4fca@1', 'bbefc@0', 'bbefc@4', 'c5685@0', 'c5685@13', 'c5685@14', 'c5685@15', 'cfcc8@4', 'cffb9@2', 'd4caf@0', 'd4caf@1', 'd4caf@2', 'd4caf@3', 'd4caf@4', 'd4caf@5', 'd6fe3@1', 'd6fe3@6', 'fac91@3', 'fac91@4', 'fac91@6', '122ba@1', '3e29c@0', '5ce69@0', '667a8@11', 'b4a4e@1', 'c2f83@0', 'e626d@0', '5d49e@1']
+        obsFutureLength: 1
+        clipObservations: 5.0
+        clipActions: 1.0
+        furniture: just_one_leg
+        frankaDofNoise: 0.25
+        targetLiftHeight: 0.05
+        distanceReward: 0.1
+        liftReward: 1.0
+        successReward: 1.0
+        aggregateMode: 3
+        tightenMethod: exp_decay
+        tightenFactor: 0.7
+        tightenSteps: 128000
+        actionScale: 1.0
+        useQuatRot: False
+        propDumpInfo: 
+            q: 20
+            dq: 20
+            base_state: 13
+        actionsMovingAverage: 1.0
+        translationScale: 1.0
+        orientationScale: 0.1
+        bimanual_mode: united
+        propObsDim: 73
+        obsKeys: ['q', 'cos_q', 'sin_q', 'base_state']
+        privilegedObsDim: 20
+        privilegedObsKeys: ['dq']
+        enableCameraSensors: False
+    sim: 
+        dt: 0.0166667
+        substeps: 2
+        up_axis: z
+        use_gpu_pipeline: True
+        gravity: [0.0, 0.0, -9.81]
+        physx: 
+            num_threads: 4
+            solver_type: 1
+            use_gpu: True
+            num_position_iterations: 8
+            num_velocity_iterations: 1
+            contact_offset: 0.005
+            rest_offset: 0.0
+            bounce_threshold_velocity: 0.2
+            max_depenetration_velocity: 1000.0
+            default_buffer_size_multiplier: 5.0
+            max_gpu_contact_pairs: 1048576
+            num_subscenes: 4
+            contact_collection: 1
+    task: 
+        randomize: False
+        randomization_params: 
+            frequency: 1
+            sim_params: 
+                gravity: 
+                    range: [0, 0.4]
+                    operation: additive
+                    distribution: uniform
+                    schedule: linear
+                    schedule_steps: 100000000
+            actor_params: 
+                franka: 
+                    color: True
+                    rigid_body_properties: 
+                        mass: 
+                            range: [0.5, 1.5]
+                            operation: scaling
+                            distribution: uniform
+                            setup_only: True
+                            schedule: linear
+                            schedule_steps: 100000000
+                    rigid_shape_properties: 
+                        friction: 
+                            num_buckets: 250
+                            range: [0.7, 1.3]
+                            operation: scaling
+                            distribution: uniform
+                            schedule: linear
+                            schedule_steps: 100000000
+                    dof_properties: 
+                        lower: 
+                            range: [1.0, 1.010050167084168]
+                            operation: scaling
+                            distribution: loguniform
+                            schedule: linear
+                            schedule_steps: 100000000
+                        upper: 
+                            range: [1.0, 1.010050167084168]
+                            operation: scaling
+                            distribution: loguniform
+                            schedule: linear
+                            schedule_steps: 100000000
+                        stiffness: 
+                            range: [1.0, 1.010050167084168]
+                            operation: scaling
+                            distribution: loguniform
+                            schedule: linear
+                            schedule_steps: 100000000
+                        damping: 
+                            range: [1.0, 1.010050167084168]
+                            operation: scaling
+                            distribution: loguniform
+                            schedule: linear
+                            schedule_steps: 100000000
+                table: 
+                    color: True
+                    rigid_shape_properties: 
+                        friction: 
+                            num_buckets: 250
+                            range: [0.5, 1.5]
+                            operation: scaling
+                            distribution: uniform
+                            schedule: linear
+                            schedule_steps: 100000000
+                leg: 
+                    color: True
+                    scale: 
+                        range: [0.9, 1.1]
+                        operation: scaling
+                        distribution: uniform
+                        setup_only: True
+                        schedule: linear
+                        schedule_steps: 100000000
+                    rigid_body_properties: 
+                        mass: 
+                            range: [0.5, 1.5]
+                            operation: scaling
+                            distribution: uniform
+                            setup_only: True
+                            schedule: linear
+                            schedule_steps: 100000000
+                    rigid_shape_properties: 
+                        friction: 
+                            num_buckets: 250
+                            range: [0.5, 1.5]
+                            operation: scaling
+                            distribution: uniform
+                            schedule: linear
+                            schedule_steps: 100000000
+                        rolling_friction: 
+                            num_buckets: 250
+                            range: [0.5, 1.5]
+                            operation: scaling
+                            distribution: uniform
+                            schedule: linear
+                            schedule_steps: 100000000
+                        torsion_friction: 
+                            num_buckets: 250
+                            range: [0.5, 1.5]
+                            operation: scaling
+                            distribution: uniform
+                            schedule: linear
+                            schedule_steps: 100000000
+                        restitution: 
+                            range: [0.0, 1.0]
+                            operation: additive
+                            distribution: uniform
+                            schedule: linear
+                            schedule_steps: 100000000
+                        compliance: 
+                            range: [0.0, 1.0]
+                            operation: additive
+                            distribution: uniform
+                            schedule: linear
+                            schedule_steps: 100000000
+rl_train: 
+    params: 
+        seed: 42
+        algo: 
+            name: ppo
+        model: 
+            name: my_continuous_a2c_logstd
+        network: 
+            name: dict_obs_actor_critic
+            separate: False
+            space: 
+                continuous: 
+                    mu_activation: None
+                    sigma_activation: None
+                    mu_init: 
+                        name: default
+                    sigma_init: 
+                        name: const_initializer
+                        val: 0
+                    fixed_sigma: True
+            dict_feature_encoder: 
+                _target_: lib.nn.features.SimpleFeatureFusion
+                extractors: 
+                    privileged: 
+                        _target_: lib.nn.features.Identity
+                        input_dim: 73
+                    proprioception: 
+                        _target_: lib.nn.features.Identity
+                        input_dim: 20
+                    target: 
+                        _target_: lib.nn.features.Identity
+                        input_dim: 248
+                hidden_depth: 3
+                hidden_dim: 512
+                output_dim: 256
+                activation: swish
+                add_input_activation: False
+                add_output_activation: False
+            mlp: 
+                units: [256, 512, 128, 64]
+                activation: elu
+                d2rl: False
+                initializer: 
+                    name: default
+                regularizer: 
+                    name: None
+        load_checkpoint: False
+        load_path: 
+        dexhand: dg5fs
+        config: 
+            name: dg5fs_imitator_rh
+            full_experiment_name: dg5fs_imitator_rh
+            env_name: rlgpu
+            multi_gpu: False
+            ppo: True
+            mixed_precision: False
+            normalize_input: True
+            normalize_input_excluded_keys: []
+            normalize_value: True
+            use_pid_control: True
+            value_bootstrap: True
+            num_actors: 512
+            reward_shaper: 
+                scale_value: 1.0
+            normalize_advantage: True
+            gamma: 0.99
+            tau: 0.95
+            learning_rate: 0.0005
+            lr_schedule: adaptive
+            schedule_type: standard
+            kl_threshold: 0.008
+            score_to_win: 10000
+            max_epochs: 10000
+            early_stop_epochs: 500
+            save_best_after: 10
+            save_frequency: 1000
+            print_stats: True
+            grad_norm: 1.0
+            entropy_coef: 0.0
+            truncate_grads: True
+            e_clip: 0.2
+            horizon_length: 32
+            minibatch_size: 1024
+            mini_epochs: 5
+            critic_coef: 4
+            clip_value: True
+            seq_len: 4
+            bounds_loss_coef: 0.0001
+            use_soft_clamp: True
+task_name: DexHandImitatorRH
+experiment: dg5fs_imitator_rh
+side: RH
+bimanual_mode: united
+dexhand: dg5fs
+rh_base_model_checkpoint: assets/imitator_rh_inspire.pth
+lh_base_model_checkpoint: assets/imitator_lh_inspire.pth
+num_envs: 512
+rolloutStateInit: False
+randomStateInit: True
+rolloutLen: None
+rolloutBegin: None
+learning_rate: 0.0005
+actionsMovingAverage: 1.0
+usePIDControl: True
+dataIndices: [Warning] [carb.gym.plugin] useGpu is set, forcing single scene (0 subscenes)
+Not connected to PVD
++++ Using GPU PhysX
+Physics Engine: PhysX
+Physics Device: cuda:0
+GPU Pipeline: enabled
+Loading extension module gymtorch...
+/home/leegyuwon/Documents/isaacgym/python/isaacgym/torch_utils.py:135: DeprecationWarning: `np.float` is a deprecated alias for the builtin `float`. To silence this warning, use `float` by itself. Doing this will not modify any behavior and is safe. If you specifically wanted the numpy scalar type, use `np.float64` here.
+Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
+  def get_axis_params(value, axis_idx, x_value=0., dtype=np.float, n_dims=3):
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/networkx/classes/graph.py:23: DeprecationWarning: Using or importing the ABCs from 'collections' instead of from 'collections.abc' is deprecated since Python 3.3, and in 3.10 it will stop working
+  from collections import Mapping
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/networkx/classes/reportviews.py:95: DeprecationWarning: Using or importing the ABCs from 'collections' instead of from 'collections.abc' is deprecated since Python 3.3, and in 3.10 it will stop working
+  from collections import Mapping, Set, Iterable
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/networkx/readwrite/graphml.py:346: DeprecationWarning: `np.int` is a deprecated alias for the builtin `int`. To silence this warning, use `int` by itself. Doing this will not modify any behavior and is safe. When replacing `np.int`, you may wish to use e.g. `np.int64` or `np.int32` to specify the precision. If you wish to review your current use, check the release note link for additional information.
+Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
+  (np.int, "int"), (np.int8, "int"),
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/wandb/util.py:116: SentryHubDeprecationWarning: `sentry_sdk.Hub` is deprecated and will be removed in a future major release. Please consult our 1.x to 2.x migration guide for details on how to migrate `Hub` usage to the new API: https://docs.sentry.io/platforms/python/migration/1.x-to-2.x
+  sentry_hub = sentry_sdk.Hub(sentry_client)
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/torch/utils/tensorboard/__init__.py:4: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+  if not hasattr(tensorboard, "__version__") or LooseVersion(
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/gym/spaces/box.py:84: UserWarning: [33mWARN: Box bound precision lowered by casting to float32[0m
+  logger.warn(f"Box bound precision lowered by casting to {self.dtype}")
+/home/leegyuwon/Documents/ManipTrans/maniptrans_envs/lib/envs/tasks/dexhandimitator.py:251: DeprecationWarning: an integer is required (got type isaacgym._bindings.linux-x86_64.gym_38.DofDriveMode).  Implicit conversion to integers using __int__ is deprecated, and may be removed in a future version of Python.
+  asset_options.default_dof_drive_mode = gymapi.DOF_MODE_POS
+['0b3d1@3', '178ef@1', '235ac@0', '62681@0', '7653f@1', '77583@2', '7b8bf@0', '9588d@0', '9decc@0', '9e461@0', 'ad924@0', 'd2192@0', '05d45@7', '0b3a0@1', '0b3a0@8', '11da4@2', '1a04a@1', '1eccd@5', '22db0@0', '24cff@2', '24cff@3', '24cff@5', '27c72@1', '27c72@5', '31218@7', '35fb7@1', '35fb7@2', '35fb7@3', '380c7@2', '3ae08@1', '3bf15@4', '43dea@0', '49a83@0', '5870f@8', '5a5d6@7', '5a5d6@9', '5da24@0', '5fef0@2', '72bb9@0', '75b94@2', '75b94@7', '7c801@4', '7c801@6', '7c801@9', '7c801@12', '7c801@19', '7c801@23', '7c801@27', '7cc68@3', '7cc68@4', '82d76@0', '83207@2', '86e2a@1', '86e2a@3', '86e2a@4', '86e2a@6', '894b2@0', '8bb23@0', '916da@1', '916da@2', '925aa@5', '925aa@7', '9d4bf@0', '9f436@0', 'a7a1a@2', 'a7a1a@7', 'b1494@1', 'b2063@1', 'b9bb2@7', 'bcb36@0', 'bd3b9@0', 'c1b07@9', 'c1b07@11', 'c4375@0', 'c4375@1', 'c4375@3', 'c992d@3', 'cb8f2@1', 'ce2f0@2', 'ce2f0@10', 'd05b4@18', 'd4ddf@0', 'd4ddf@1', 'd4ddf@2', 'e76b2@4', 'e9343@2', 'ebf46@3', 'edd68@0', 'f014a@2', 'f447c@0', 'fc1e5@1', 'fe346@0', '1469a@0', '29b5a@0', '4102c@0', '4b813@2', '67084@0', '7f874@0', 'c08f9@3', 'c1e36@0', 'c81af@0', 'f4786@2', 'f4786@3', '0ef67@0', '29266@0', '29266@1', '29266@2', '29266@3', '29266@4', '29266@6', '29266@7', '29266@9', '29266@10', '4fd8e@0', '65ef0@0', '65ef0@4', '65ef0@6', '7c014@0', '7ed08@0', '82fc7@0', '86fb0@0', '86fb0@5', '86fb0@7', '86fb0@8', '86fb0@10', '86fb0@12', 'cd0ae@0', 'cd0ae@1', 'cd0ae@2', 'cd0ae@3', 'cd0ae@4', 'cd0ae@6', 'd01e2@0', 'fccd8@0', '085b5@0', '0b666@0', '0b666@3', '0b666@5', '0b666@7', '0b666@9', '0b666@11', '183ce@0', '26fd9@1', '37838@0', '4602f@1', '7055a@0', '90724@0', 'a4e00@0', 'a4e00@2', 'a4e00@3', 'a4e00@5', 'c11fb@0', 'c3f6f@0', 'c8881@0', 'f3c30@0', '07994@0', '1ad2e@0', '40db1@1', '495b6@0', '4aefa@0', '4e902@0', '5a065@0', '5f8e2@0', '6803d@0', '70982@0', 'a3ff7@0', 'ab46c@0', 'af836@0', '1292e@0', '13d53@0', '171c4@0', '1e305@0', '20034@2', '20034@4', '25012@0', '2d90f@0', '468f5@0', '5c913@1', '67132@0', '67132@1', '733f9@0', '8ec65@0', '97fc3@0', '97fc3@1', '97fc3@3', '97fc3@4', '97fc3@6', '97fc3@7', '97fc3@9', '97fc3@10', '97fc3@11', '97fc3@17', 'b9695@0', '16df1@1', '1c29f@0', '1c29f@1', '1c29f@3', '374a7@0', '40952@0', '56210@0', 'a3323@3', 'ac736@0', 'ac736@1', 'b5736@1', 'cebe9@0', 'cebe9@4', 'f0408@1', 'f1029@0', 'f1029@4', 'f1029@7', 'f1114@5', 'fbc74@4', 'fc88d@0', 'fcb20@1', '105a5@0', '20b58@0', '2a44f@0', '2d169@0', '2d169@2', 'ed3a1@0', 'fd02f@0', '17716@1', '17716@2', '1a81a@0', '1b938@9', '352c9@2', '5844a@0', '59a87@3', '59a87@5', '59a87@13', '701e7@3', '7cd8f@0', '817fb@0', '8e463@6', '959a0@10', '9cf44@4', '9d88b@2', '9d88b@4', 'b4b28@1', 'b4b28@9', 'b4b28@13', 'b4b28@15', 'c8fd4@1', 'c8fd4@12', 'ce343@9', 'e7d0d@0', 'f9da9@6', '0464d@0', '0ec0d@0', '39c30@0', '39c30@7', '5e99c@0', '5e99c@6', '76f7d@0', '783a1@0', '78810@0', '78810@6', 'a5d2c@0', 'a5d2c@7', 'a5e8a@0', 'e04db@1', 'efd16@0', 'f0b72@0', 'fb969@3', 'fb969@4', '0308b@4', '0308b@13', '06d2f@0', '0e05b@0', '368db@0', '47e95@9', '4e42c@14', '59796@7', '63ca8@0', '63ca8@13', '63ca8@15', '662b0@7', '662b0@13', '82851@0', '82851@18', '82851@24', '87c3c@0', '87c3c@10', '8e4b0@2', '95c93@5', '95c93@7', '9a028@0', '9a028@14', '9bb17@0', 'ad141@8', 'ad141@9', 'ad141@17', 'eb5f9@0', 'f9b2f@4', '07862@0', '638fe@0', 'd4478@1', 'e9e88@0', '2a060@0', 'eb877@0', 'a8bfc@1', '031b7@0', '0646d@1', '0f900@1', '0f900@5', '0f900@8', '0f900@9', '0f900@11', '0f900@13', '0ffc7@0', '11cb7@0', '11cb7@3', '155cb@3', '3b1e6@1', '3b1e6@3', '3b1e6@4', '3b1e6@8', '3b1e6@11', '3b1e6@13', '3b1e6@15', '419a3@0', '419a3@4', '5fde1@2', '6ca00@4', '6ca00@9', '6ca00@13', '6ca00@14', '6ca00@17', '6ece6@2', '720b2@0', '720b2@3', '79eb5@2', '89667@0', '89667@4', '897a4@1', '8e5df@1', '8e5df@3', '8e5df@4', '8e5df@5', '8e5df@9', '8e5df@12', '94d04@1', '9523f@3', '9523f@9', 'acc89@1', 'b0b13@0', 'b0b13@9', 'b0b13@10', 'b0b13@12', 'b0b13@17', 'b5fa3@0', 'b5fa3@5', 'b5fa3@9', 'b7853@0', 'b7853@3', 'b7853@10', 'beb8f@2', 'c50ce@2', 'c8c4e@0', 'cf9b2@4', 'cf9b2@5', 'db0a0@1', 'dee46@3', 'e177c@5', 'e177c@7', 'e177c@8', 'f25e3@0', 'f2d09@2', 'f7d37@0', 'f7d37@4', 'f7d37@7', 'f7d37@15', 'f7d37@17', 'facbc@3', 'facbc@14', '22c9e@1', '2563d@4', '2563d@8', '9f9ee@0', 'd77d9@1', 'e53a4@0', 'e53a4@1', '15642@0', '1c03f@0', '1c03f@1', '1c03f@2', '1c03f@3', '1c03f@6', '1c03f@17', '1c5d6@2', '211a2@1', '211a2@2', '211a2@3', '211a2@4', '211a2@7', '211a2@20', '233b9@4', '2bae9@2', '2bae9@4', '2bae9@5', '2bae9@17', '2bae9@18', '2bae9@19', '2bae9@23', '2bae9@24', '2bae9@31', '2ddc8@1', '384b1@2', '384b1@3', '38754@0', '38754@1', '38754@2', '38754@4', '38754@16', '39e5e@1', '39e5e@2', '39e5e@3', '39e5e@4', '39e5e@6', '39e5e@16', '39e5e@18', '39e5e@19', '39e5e@20', '41d83@0', '41d83@3', '41d83@8', '43581@1', '494ca@3', '639d4@0', '639d4@5', '7fa33@1', '863d5@1', '904b2@7', 'a3a31@2', 'a78a0@3', 'b4d44@4', 'b4fca@1', 'bbefc@0', 'bbefc@4', 'c5685@0', 'c5685@13', 'c5685@14', 'c5685@15', 'cfcc8@4', 'cffb9@2', 'd4caf@0', 'd4caf@1', 'd4caf@2', 'd4caf@3', 'd4caf@4', 'd4caf@5', 'd6fe3@1', 'd6fe3@6', 'fac91@3', 'fac91@4', 'fac91@6', '122ba@1', '3e29c@0', '5ce69@0', '667a8@11', 'b4a4e@1', 'c2f83@0', 'e626d@0', '5d49e@1']
+seed: 42
+torch_deterministic: False
+max_iterations: 10000
+early_stop_epochs: 500
+physics_engine: physx
+pipeline: gpu
+sim_device: cuda:0
+rl_device: cuda:0
+graphics_device_id: 0
+num_threads: 4
+solver_type: 1
+num_subscenes: 4
+test: False
+save_rollouts: False
+save_successful_rollouts_only: True
+num_rollouts_to_save: 20000
+num_rollouts_to_run: 9999999999999
+min_episode_length: 20
+checkpoint: 
+from_ckpt_epoch: False
+sigma: 
+multi_gpu: False
+wandb_activate: False
+wandb_group: 
+wandb_name: dg5fs_imitator_rh
+wandb_entity: None
+wandb_project: None
+wandb_tags: []
+wandb_logcode_dir: 
+capture_video: False
+n_parallel_recorders: 8
+n_successful_videos_to_record: 50
+display: False
+headless: True
+Setting seed: 42
+Using rl_device: cuda:0
+Using sim_device: cuda:0
+{'name': 'dg5fs_imitator_rh', 'full_experiment_name': None, 'env_name': 'rlgpu', 'multi_gpu': False, 'ppo': True, 'mixed_precision': False, 'normalize_input': True, 'normalize_input_excluded_keys': [], 'normalize_value': True, 'use_pid_control': True, 'value_bootstrap': True, 'num_actors': 512, 'reward_shaper': {'scale_value': 1.0}, 'normalize_advantage': True, 'gamma': 0.99, 'tau': 0.95, 'learning_rate': 0.0005, 'lr_schedule': 'adaptive', 'schedule_type': 'standard', 'kl_threshold': 0.008, 'score_to_win': 10000, 'max_epochs': 10000, 'early_stop_epochs': 500, 'save_best_after': 10, 'save_frequency': 1000, 'print_stats': True, 'grad_norm': 1.0, 'entropy_coef': 0.0, 'truncate_grads': True, 'e_clip': 0.2, 'horizon_length': 32, 'minibatch_size': 1024, 'mini_epochs': 5, 'critic_coef': 4, 'clip_value': True, 'seq_len': 4, 'bounds_loss_coef': 0.0001, 'use_soft_clamp': True, 'device': 'cuda:0', 'population_based_training': False, 'pbt_idx': None}
+self.seed = 42
+Started to train
+Exact experiment name requested from command line: dg5fs_imitator_rh__07-20-13-48-07
+Num dexhand Bodies: 26
+Num dexhand DOFs: 20
+  0%|          | 0/512 [00:00<?, ?it/s]  0%|          | 1/512 [00:06<58:08,  6.83s/it]  0%|          | 2/512 [00:13<59:32,  7.01s/it]  1%|          | 3/512 [00:21<1:01:45,  7.28s/it]  1%|          | 4/512 [00:25<50:49,  6.00s/it]    1%|          | 5/512 [00:32<53:19,  6.31s/it]  1%|          | 6/512 [00:38<53:49,  6.38s/it]  1%|▏         | 7/512 [00:43<49:17,  5.86s/it]  2%|▏         | 8/512 [00:50<52:45,  6.28s/it]  2%|▏         | 9/512 [00:54<44:29,  5.31s/it]  2%|▏         | 10/512 [00:57<38:16,  4.57s/it]  2%|▏         | 11/512 [01:03<43:03,  5.16s/it]  2%|▏         | 12/512 [01:06<36:42,  4.41s/it]  3%|▎         | 13/512 [01:17<54:58,  6.61s/it]  3%|▎         | 14/512 [01:34<1:18:54,  9.51s/it]  3%|▎         | 15/512 [01:50<1:35:09, 11.49s/it]  3%|▎         | 16/512 [02:01<1:34:47, 11.47s/it]  3%|▎         | 17/512 [02:07<1:20:31,  9.76s/it]  4%|▎         | 18/512 [02:23<1:35:04, 11.55s/it]  4%|▎         | 19/512 [02:27<1:17:14,  9.40s/it]  4%|▍         | 20/512 [02:40<1:25:48, 10.46s/it]  4%|▍         | 21/512 [02:52<1:30:45, 11.09s/it]  4%|▍         | 22/512 [03:06<1:35:23, 11.68s/it]  4%|▍         | 23/512 [03:25<1:53:14, 13.89s/it]  5%|▍         | 24/512 [03:44<2:05:44, 15.46s/it]  5%|▍         | 25/512 [04:01<2:10:03, 16.02s/it]  5%|▌         | 26/512 [04:10<1:53:24, 14.00s/it]  5%|▌         | 27/512 [04:20<1:42:26, 12.67s/it]  5%|▌         | 28/512 [04:29<1:34:44, 11.75s/it]  6%|▌         | 29/512 [04:38<1:27:21, 10.85s/it]  6%|▌         | 30/512 [04:55<1:42:04, 12.71s/it]  6%|▌         | 31/512 [05:13<1:54:05, 14.23s/it]  6%|▋         | 32/512 [05:18<1:31:00, 11.38s/it]  6%|▋         | 33/512 [05:21<1:12:08,  9.04s/it]  7%|▋         | 34/512 [05:33<1:18:40,  9.87s/it]  7%|▋         | 35/512 [05:59<1:55:53, 14.58s/it]  7%|▋         | 36/512 [06:25<2:23:14, 18.06s/it]  7%|▋         | 37/512 [06:27<1:45:46, 13.36s/it]  7%|▋         | 38/512 [06:37<1:37:35, 12.35s/it]  8%|▊         | 39/512 [06:45<1:26:34, 10.98s/it]  8%|▊         | 40/512 [07:03<1:43:35, 13.17s/it]  8%|▊         | 41/512 [07:21<1:53:06, 14.41s/it]  8%|▊         | 42/512 [07:58<2:45:47, 21.16s/it]  8%|▊         | 43/512 [08:34<3:21:08, 25.73s/it]  9%|▊         | 44/512 [09:11<3:48:03, 29.24s/it]  9%|▉         | 45/512 [09:50<4:09:05, 32.00s/it]  9%|▉         | 46/512 [10:28<4:21:51, 33.72s/it]  9%|▉         | 47/512 [11:05<4:29:34, 34.78s/it]  9%|▉         | 48/512 [11:41<4:32:29, 35.24s/it] 10%|▉         | 49/512 [11:53<3:37:25, 28.18s/it] 10%|▉         | 50/512 [12:05<2:59:53, 23.36s/it] 10%|▉         | 51/512 [12:11<2:19:15, 18.12s/it] 10%|█         | 52/512 [12:16<1:49:51, 14.33s/it] 10%|█         | 53/512 [12:34<1:57:07, 15.31s/it] 11%|█         | 54/512 [12:52<2:02:41, 16.07s/it] 11%|█         | 55/512 [13:10<2:07:56, 16.80s/it] 11%|█         | 56/512 [13:29<2:12:25, 17.42s/it] 11%|█         | 57/512 [13:32<1:39:38, 13.14s/it] 11%|█▏        | 58/512 [13:37<1:21:05, 10.72s/it] 12%|█▏        | 59/512 [13:48<1:20:57, 10.72s/it] 12%|█▏        | 60/512 [13:55<1:11:52,  9.54s/it] 12%|█▏        | 61/512 [14:12<1:27:53, 11.69s/it] 12%|█▏        | 62/512 [14:30<1:41:47, 13.57s/it] 12%|█▏        | 63/512 [14:34<1:21:14, 10.86s/it] 12%|█▎        | 64/512 [14:55<1:43:07, 13.81s/it] 13%|█▎        | 65/512 [15:17<2:01:14, 16.27s/it] 13%|█▎        | 66/512 [15:37<2:09:42, 17.45s/it] 13%|█▎        | 67/512 [15:47<1:52:08, 15.12s/it] 13%|█▎        | 68/512 [15:56<1:38:17, 13.28s/it] 13%|█▎        | 69/512 [16:05<1:28:09, 11.94s/it] 14%|█▎        | 70/512 [16:09<1:11:33,  9.71s/it] 14%|█▍        | 71/512 [16:15<1:02:53,  8.56s/it] 14%|█▍        | 72/512 [16:31<1:18:51, 10.75s/it] 14%|█▍        | 73/512 [16:46<1:29:00, 12.16s/it] 14%|█▍        | 74/512 [16:54<1:18:26, 10.75s/it] 15%|█▍        | 75/512 [17:01<1:10:39,  9.70s/it] 15%|█▍        | 76/512 [17:08<1:05:24,  9.00s/it] 15%|█▌        | 77/512 [17:16<1:03:08,  8.71s/it] 15%|█▌        | 78/512 [17:26<1:04:41,  8.94s/it] 15%|█▌        | 79/512 [17:42<1:20:00, 11.09s/it] 16%|█▌        | 80/512 [17:58<1:30:54, 12.63s/it] 16%|█▌        | 81/512 [18:27<2:06:15, 17.58s/it] 16%|█▌        | 82/512 [18:33<1:40:28, 14.02s/it] 16%|█▌        | 83/512 [18:39<1:24:06, 11.76s/it] 16%|█▋        | 84/512 [18:46<1:12:05, 10.11s/it] 17%|█▋        | 85/512 [19:07<1:36:00, 13.49s/it] 17%|█▋        | 86/512 [19:13<1:19:58, 11.26s/it] 17%|█▋        | 87/512 [19:22<1:13:52, 10.43s/it] 17%|█▋        | 88/512 [19:25<59:09,  8.37s/it]   17%|█▋        | 89/512 [19:30<52:20,  7.42s/it] 18%|█▊        | 90/512 [19:34<44:57,  6.39s/it] 18%|█▊        | 91/512 [19:42<48:03,  6.85s/it] 18%|█▊        | 92/512 [19:47<43:15,  6.18s/it] 18%|█▊        | 93/512 [19:49<34:23,  4.92s/it] 18%|█▊        | 94/512 [19:52<30:40,  4.40s/it] 19%|█▊        | 95/512 [19:55<27:28,  3.95s/it] 19%|█▉        | 96/512 [20:00<29:11,  4.21s/it] 19%|█▉        | 97/512 [20:03<27:05,  3.92s/it] 19%|█▉        | 98/512 [20:05<22:40,  3.29s/it] 19%|█▉        | 99/512 [20:09<24:41,  3.59s/it] 20%|█▉        | 100/512 [20:12<23:38,  3.44s/it] 20%|█▉        | 101/512 [20:16<23:08,  3.38s/it] 20%|█▉        | 102/512 [20:21<27:42,  4.06s/it] 20%|██        | 103/512 [20:27<30:32,  4.48s/it] 20%|██        | 104/512 [20:29<26:06,  3.84s/it] 21%|██        | 105/512 [20:42<45:28,  6.70s/it] 21%|██        | 106/512 [20:56<59:04,  8.73s/it] 21%|██        | 107/512 [21:09<1:08:18, 10.12s/it] 21%|██        | 108/512 [21:22<1:14:09, 11.01s/it] 21%|██▏       | 109/512 [21:35<1:18:14, 11.65s/it] 21%|██▏       | 110/512 [21:48<1:20:55, 12.08s/it] 22%|██▏       | 111/512 [22:02<1:23:00, 12.42s/it] 22%|██▏       | 112/512 [22:15<1:23:35, 12.54s/it] 22%|██▏       | 113/512 [22:28<1:24:23, 12.69s/it] 22%|██▏       | 114/512 [22:30<1:03:28,  9.57s/it] 22%|██▏       | 115/512 [22:38<1:01:28,  9.29s/it] 23%|██▎       | 116/512 [22:47<59:40,  9.04s/it]   23%|██▎       | 117/512 [22:55<58:23,  8.87s/it] 23%|██▎       | 118/512 [22:57<44:40,  6.80s/it] 23%|██▎       | 119/512 [22:59<34:15,  5.23s/it] 23%|██▎       | 120/512 [23:01<28:37,  4.38s/it] 24%|██▎       | 121/512 [23:23<1:01:38,  9.46s/it] 24%|██▍       | 122/512 [23:44<1:23:50, 12.90s/it] 24%|██▍       | 123/512 [24:05<1:39:57, 15.42s/it] 24%|██▍       | 124/512 [24:25<1:49:46, 16.97s/it] 24%|██▍       | 125/512 [24:47<1:57:39, 18.24s/it] 25%|██▍       | 126/512 [25:08<2:03:07, 19.14s/it] 25%|██▍       | 127/512 [25:16<1:41:40, 15.85s/it] 25%|██▌       | 128/512 [25:24<1:26:54, 13.58s/it] 25%|██▌       | 129/512 [25:33<1:16:32, 11.99s/it] 25%|██▌       | 130/512 [25:41<1:09:09, 10.86s/it] 26%|██▌       | 131/512 [25:49<1:04:16, 10.12s/it] 26%|██▌       | 132/512 [25:58<1:00:41,  9.58s/it] 26%|██▌       | 133/512 [26:00<46:51,  7.42s/it]   26%|██▌       | 134/512 [26:02<36:18,  5.76s/it] 26%|██▋       | 135/512 [26:04<29:11,  4.65s/it] 27%|██▋       | 136/512 [26:23<56:59,  9.09s/it] 27%|██▋       | 137/512 [26:42<1:15:24, 12.07s/it] 27%|██▋       | 138/512 [27:01<1:27:31, 14.04s/it] 27%|██▋       | 139/512 [27:20<1:35:33, 15.37s/it] 27%|██▋       | 140/512 [27:39<1:42:01, 16.46s/it] 28%|██▊       | 141/512 [27:58<1:46:56, 17.29s/it] 28%|██▊       | 142/512 [27:59<1:17:10, 12.52s/it] 28%|██▊       | 143/512 [28:01<57:21,  9.33s/it]   28%|██▊       | 144/512 [28:03<43:00,  7.01s/it] 28%|██▊       | 145/512 [28:05<33:45,  5.52s/it] 29%|██▊       | 146/512 [28:07<27:08,  4.45s/it] 29%|██▊       | 147/512 [28:09<22:49,  3.75s/it] 29%|██▉       | 148/512 [28:22<39:42,  6.55s/it] 29%|██▉       | 149/512 [28:34<50:28,  8.34s/it] 29%|██▉       | 150/512 [28:47<58:44,  9.74s/it] 29%|██▉       | 151/512 [29:00<1:04:17, 10.68s/it] 30%|██▉       | 152/512 [29:02<47:27,  7.91s/it]   30%|██▉       | 153/512 [29:03<35:50,  5.99s/it] 30%|███       | 154/512 [29:05<28:35,  4.79s/it] 30%|███       | 155/512 [29:07<23:31,  3.95s/it] 30%|███       | 156/512 [29:09<20:35,  3.47s/it] 31%|███       | 157/512 [29:14<21:39,  3.66s/it] 31%|███       | 158/512 [29:17<21:03,  3.57s/it] 31%|███       | 159/512 [29:18<16:44,  2.85s/it] 31%|███▏      | 160/512 [29:21<16:53,  2.88s/it] 31%|███▏      | 161/512 [29:24<16:42,  2.85s/it] 32%|███▏      | 162/512 [29:25<14:11,  2.43s/it] 32%|███▏      | 163/512 [29:27<12:29,  2.15s/it] 32%|███▏      | 164/512 [29:29<12:06,  2.09s/it] 32%|███▏      | 165/512 [29:31<11:55,  2.06s/it] 32%|███▏      | 166/512 [29:34<13:49,  2.40s/it] 33%|███▎      | 167/512 [29:35<11:59,  2.09s/it] 33%|███▎      | 168/512 [29:38<13:03,  2.28s/it] 33%|███▎      | 169/512 [29:41<14:54,  2.61s/it] 33%|███▎      | 170/512 [29:44<14:56,  2.62s/it] 33%|███▎      | 171/512 [29:47<15:51,  2.79s/it] 34%|███▎      | 172/512 [29:50<15:58,  2.82s/it] 34%|███▍      | 173/512 [29:55<19:41,  3.49s/it] 34%|███▍      | 174/512 [30:00<22:10,  3.94s/it] 34%|███▍      | 175/512 [30:03<21:07,  3.76s/it] 34%|███▍      | 176/512 [30:06<19:11,  3.43s/it] 35%|███▍      | 177/512 [30:09<18:41,  3.35s/it] 35%|███▍      | 178/512 [30:13<19:10,  3.45s/it] 35%|███▍      | 179/512 [30:16<18:06,  3.26s/it] 35%|███▌      | 180/512 [30:19<17:14,  3.12s/it] 35%|███▌      | 181/512 [30:22<16:53,  3.06s/it] 36%|███▌      | 182/512 [30:24<16:32,  3.01s/it] 36%|███▌      | 183/512 [30:47<47:56,  8.74s/it] 36%|███▌      | 184/512 [31:08<1:08:35, 12.55s/it] 36%|███▌      | 185/512 [31:30<1:23:33, 15.33s/it] 36%|███▋      | 186/512 [31:52<1:33:54, 17.28s/it] 37%|███▋      | 187/512 [32:13<1:40:15, 18.51s/it] 37%|███▋      | 188/512 [32:35<1:45:09, 19.47s/it] 37%|███▋      | 189/512 [32:56<1:48:22, 20.13s/it] 37%|███▋      | 190/512 [33:18<1:50:46, 20.64s/it] 37%|███▋      | 191/512 [33:40<1:51:50, 20.91s/it] 38%|███▊      | 192/512 [34:01<1:52:37, 21.12s/it] 38%|███▊      | 193/512 [34:04<1:22:32, 15.52s/it] 38%|███▊      | 194/512 [34:08<1:04:06, 12.10s/it] 38%|███▊      | 195/512 [34:23<1:08:53, 13.04s/it] 38%|███▊      | 196/512 [34:37<1:10:43, 13.43s/it] 38%|███▊      | 197/512 [34:52<1:12:33, 13.82s/it] 39%|███▊      | 198/512 [34:56<56:08, 10.73s/it]   39%|███▉      | 199/512 [34:59<44:34,  8.54s/it] 39%|███▉      | 200/512 [35:03<37:42,  7.25s/it] 39%|███▉      | 201/512 [35:15<43:44,  8.44s/it] 39%|███▉      | 202/512 [35:29<53:02, 10.27s/it] 40%|███▉      | 203/512 [35:44<59:47, 11.61s/it] 40%|███▉      | 204/512 [35:56<59:48, 11.65s/it] 40%|████      | 205/512 [36:04<54:26, 10.64s/it] 40%|████      | 206/512 [36:12<50:19,  9.87s/it] 40%|████      | 207/512 [36:15<40:19,  7.93s/it] 41%|████      | 208/512 [36:25<42:34,  8.40s/it] 41%|████      | 209/512 [36:35<44:26,  8.80s/it] 41%|████      | 210/512 [36:44<45:18,  9.00s/it] 41%|████      | 211/512 [36:51<42:43,  8.52s/it] 41%|████▏     | 212/512 [37:09<55:57, 11.19s/it] 42%|████▏     | 213/512 [37:14<46:52,  9.41s/it] 42%|████▏     | 214/512 [37:19<40:29,  8.15s/it] 42%|████▏     | 215/512 [37:22<32:09,  6.50s/it] 42%|████▏     | 216/512 [37:26<27:34,  5.59s/it] 42%|████▏     | 217/512 [37:29<24:14,  4.93s/it] 43%|████▎     | 218/512 [37:35<26:10,  5.34s/it] 43%|████▎     | 219/512 [37:41<27:03,  5.54s/it] 43%|████▎     | 220/512 [37:44<23:09,  4.76s/it] 43%|████▎     | 221/512 [37:46<19:23,  4.00s/it] 43%|████▎     | 222/512 [37:49<17:22,  3.59s/it] 44%|████▎     | 223/512 [37:52<15:53,  3.30s/it] 44%|████▍     | 224/512 [37:58<20:32,  4.28s/it] 44%|████▍     | 225/512 [38:06<25:57,  5.43s/it] 44%|████▍     | 226/512 [38:12<25:44,  5.40s/it] 44%|████▍     | 227/512 [38:16<23:44,  5.00s/it] 45%|████▍     | 228/512 [38:33<41:43,  8.81s/it] 45%|████▍     | 229/512 [38:50<53:02, 11.25s/it] 45%|████▍     | 230/512 [39:07<59:50, 12.73s/it] 45%|████▌     | 231/512 [39:10<46:31,  9.93s/it] 45%|████▌     | 232/512 [39:13<36:23,  7.80s/it] 46%|████▌     | 233/512 [39:16<30:18,  6.52s/it] 46%|████▌     | 234/512 [39:24<31:53,  6.88s/it] 46%|████▌     | 235/512 [39:34<36:12,  7.84s/it] 46%|████▌     | 236/512 [39:42<36:00,  7.83s/it] 46%|████▋     | 237/512 [39:53<40:04,  8.74s/it] 46%|████▋     | 238/512 [40:03<42:34,  9.32s/it] 47%|████▋     | 239/512 [40:14<43:36,  9.59s/it] 47%|████▋     | 240/512 [40:24<44:39,  9.85s/it] 47%|████▋     | 241/512 [40:35<45:14, 10.02s/it] 47%|████▋     | 242/512 [40:45<45:40, 10.15s/it] 47%|████▋     | 243/512 [40:57<48:35, 10.84s/it] 48%|████▊     | 244/512 [41:10<50:06, 11.22s/it] 48%|████▊     | 245/512 [41:19<47:17, 10.63s/it] 48%|████▊     | 246/512 [41:21<35:28,  8.00s/it] 48%|████▊     | 247/512 [41:29<36:06,  8.17s/it] 48%|████▊     | 248/512 [41:36<34:24,  7.82s/it] 49%|████▊     | 249/512 [41:39<27:53,  6.36s/it] 49%|████▉     | 250/512 [41:48<30:24,  6.96s/it] 49%|████▉     | 251/512 [41:56<32:08,  7.39s/it] 49%|████▉     | 252/512 [42:02<29:52,  6.89s/it] 49%|████▉     | 253/512 [42:07<27:57,  6.48s/it] 50%|████▉     | 254/512 [42:09<22:23,  5.21s/it] 50%|████▉     | 255/512 [42:13<20:10,  4.71s/it] 50%|█████     | 256/512 [42:21<24:56,  5.85s/it] 50%|█████     | 257/512 [42:29<27:18,  6.42s/it] 50%|█████     | 258/512 [42:38<29:44,  7.02s/it] 51%|█████     | 259/512 [42:46<30:47,  7.30s/it] 51%|█████     | 260/512 [42:50<26:25,  6.29s/it] 51%|█████     | 261/512 [42:59<30:12,  7.22s/it] 51%|█████     | 262/512 [43:01<23:52,  5.73s/it] 51%|█████▏    | 263/512 [43:10<27:08,  6.54s/it] 52%|█████▏    | 264/512 [43:16<26:18,  6.36s/it] 52%|█████▏    | 265/512 [43:22<25:45,  6.26s/it] 52%|█████▏    | 266/512 [43:30<28:49,  7.03s/it] 52%|█████▏    | 267/512 [43:39<31:05,  7.62s/it] 52%|█████▏    | 268/512 [43:48<32:07,  7.90s/it] 53%|█████▎    | 269/512 [43:50<24:39,  6.09s/it] 53%|█████▎    | 270/512 [43:52<19:28,  4.83s/it] 53%|█████▎    | 271/512 [43:58<21:35,  5.38s/it] 53%|█████▎    | 272/512 [44:12<31:03,  7.76s/it] 53%|█████▎    | 273/512 [44:18<29:07,  7.31s/it] 54%|█████▎    | 274/512 [44:27<30:51,  7.78s/it] 54%|█████▎    | 275/512 [44:36<31:59,  8.10s/it] 54%|█████▍    | 276/512 [44:44<32:29,  8.26s/it] 54%|█████▍    | 277/512 [45:05<46:44, 11.93s/it] 54%|█████▍    | 278/512 [45:25<55:47, 14.31s/it] 54%|█████▍    | 279/512 [45:41<58:00, 14.94s/it] 55%|█████▍    | 280/512 [45:58<59:45, 15.45s/it] 55%|█████▍    | 281/512 [46:14<1:00:41, 15.76s/it] 55%|█████▌    | 282/512 [46:22<51:35, 13.46s/it]   55%|█████▌    | 283/512 [46:30<44:52, 11.76s/it] 55%|█████▌    | 284/512 [46:32<33:48,  8.90s/it] 56%|█████▌    | 285/512 [46:38<30:18,  8.01s/it] 56%|█████▌    | 286/512 [46:44<27:40,  7.35s/it] 56%|█████▌    | 287/512 [46:57<33:34,  8.95s/it] 56%|█████▋    | 288/512 [47:09<37:27, 10.03s/it] 56%|█████▋    | 289/512 [47:21<38:39, 10.40s/it] 57%|█████▋    | 290/512 [47:34<41:20, 11.17s/it] 57%|█████▋    | 291/512 [47:46<42:58, 11.67s/it] 57%|█████▋    | 292/512 [47:59<43:44, 11.93s/it] 57%|█████▋    | 293/512 [48:02<33:32,  9.19s/it] 57%|█████▋    | 294/512 [48:15<38:15, 10.53s/it] 58%|█████▊    | 295/512 [48:17<28:34,  7.90s/it] 58%|█████▊    | 296/512 [48:20<23:31,  6.53s/it] 58%|█████▊    | 297/512 [48:25<21:09,  5.90s/it] 58%|█████▊    | 298/512 [48:27<16:43,  4.69s/it] 58%|█████▊    | 299/512 [48:33<18:31,  5.22s/it] 59%|█████▊    | 300/512 [48:39<18:45,  5.31s/it] 59%|█████▉    | 301/512 [48:45<19:51,  5.65s/it] 59%|█████▉    | 302/512 [48:49<18:01,  5.15s/it] 59%|█████▉    | 303/512 [48:56<20:02,  5.75s/it] 59%|█████▉    | 304/512 [49:10<27:42,  7.99s/it] 60%|█████▉    | 305/512 [49:22<32:27,  9.41s/it] 60%|█████▉    | 306/512 [49:35<35:32, 10.35s/it] 60%|█████▉    | 307/512 [49:47<37:43, 11.04s/it] 60%|██████    | 308/512 [50:00<39:16, 11.55s/it] 60%|██████    | 309/512 [50:13<40:06, 11.85s/it] 61%|██████    | 310/512 [50:19<34:07, 10.14s/it] 61%|██████    | 311/512 [50:24<28:54,  8.63s/it] 61%|██████    | 312/512 [50:29<24:58,  7.49s/it] 61%|██████    | 313/512 [50:34<22:25,  6.76s/it] 61%|██████▏   | 314/512 [50:51<32:16,  9.78s/it] 62%|██████▏   | 315/512 [51:08<39:08, 11.92s/it] 62%|██████▏   | 316/512 [51:25<43:54, 13.44s/it] 62%|██████▏   | 317/512 [51:41<46:57, 14.45s/it] 62%|██████▏   | 318/512 [51:58<48:33, 15.02s/it] 62%|██████▏   | 319/512 [52:15<50:01, 15.55s/it] 62%|██████▎   | 320/512 [52:31<51:03, 15.95s/it] 63%|██████▎   | 321/512 [52:37<41:19, 12.98s/it] 63%|██████▎   | 322/512 [52:44<34:44, 10.97s/it] 63%|██████▎   | 323/512 [52:49<29:24,  9.34s/it] 63%|██████▎   | 324/512 [53:00<30:47,  9.83s/it] 63%|██████▎   | 325/512 [53:11<31:25, 10.08s/it] 64%|██████▎   | 326/512 [53:22<31:58, 10.31s/it] 64%|██████▍   | 327/512 [53:33<32:10, 10.43s/it] 64%|██████▍   | 328/512 [53:44<32:38, 10.64s/it] 64%|██████▍   | 329/512 [53:50<28:46,  9.43s/it] 64%|██████▍   | 330/512 [53:56<25:05,  8.27s/it] 65%|██████▍   | 331/512 [54:01<22:12,  7.36s/it] 65%|██████▍   | 332/512 [54:07<20:53,  6.96s/it] 65%|██████▌   | 333/512 [54:13<19:32,  6.55s/it] 65%|██████▌   | 334/512 [54:18<18:21,  6.19s/it] 65%|██████▌   | 335/512 [54:24<17:59,  6.10s/it] 66%|██████▌   | 336/512 [54:35<21:58,  7.49s/it] 66%|██████▌   | 337/512 [54:45<24:38,  8.45s/it] 66%|██████▌   | 338/512 [54:56<26:18,  9.07s/it] 66%|██████▌   | 339/512 [55:07<27:37,  9.58s/it] 66%|██████▋   | 340/512 [55:17<28:09,  9.82s/it] 67%|██████▋   | 341/512 [55:28<28:35, 10.03s/it] 67%|██████▋   | 342/512 [55:32<23:37,  8.34s/it] 67%|██████▋   | 343/512 [55:43<25:54,  9.20s/it] 67%|██████▋   | 344/512 [55:54<27:25,  9.79s/it] 67%|██████▋   | 345/512 [56:00<23:49,  8.56s/it] 68%|██████▊   | 346/512 [56:13<27:04,  9.79s/it] 68%|██████▊   | 347/512 [56:25<28:51, 10.50s/it] 68%|██████▊   | 348/512 [56:37<30:15, 11.07s/it] 68%|██████▊   | 349/512 [56:50<31:14, 11.50s/it] 68%|██████▊   | 350/512 [57:02<31:34, 11.69s/it] 69%|██████▊   | 351/512 [57:13<30:58, 11.54s/it] 69%|██████▉   | 352/512 [57:24<30:19, 11.37s/it] 69%|██████▉   | 353/512 [57:35<29:43, 11.22s/it] 69%|██████▉   | 354/512 [57:45<28:32, 10.84s/it] 69%|██████▉   | 355/512 [57:55<27:34, 10.54s/it] 70%|██████▉   | 356/512 [58:04<26:44, 10.28s/it] 70%|██████▉   | 357/512 [58:10<22:46,  8.81s/it] 70%|██████▉   | 358/512 [58:15<19:43,  7.68s/it] 70%|███████   | 359/512 [58:18<16:13,  6.36s/it] 70%|███████   | 360/512 [58:23<14:57,  5.91s/it] 71%|███████   | 361/512 [58:28<13:58,  5.56s/it] 71%|███████   | 362/512 [58:42<20:33,  8.22s/it] 71%|███████   | 363/512 [58:52<21:36,  8.70s/it] 71%|███████   | 364/512 [58:58<19:26,  7.88s/it] 71%|███████▏  | 365/512 [59:04<18:05,  7.39s/it] 71%|███████▏  | 366/512 [59:10<16:58,  6.97s/it] 72%|███████▏  | 367/512 [59:16<15:55,  6.59s/it] 72%|███████▏  | 368/512 [59:22<15:33,  6.48s/it] 72%|███████▏  | 369/512 [59:34<19:41,  8.27s/it] 72%|███████▏  | 370/512 [59:47<22:34,  9.54s/it] 72%|███████▏  | 371/512 [59:59<24:30, 10.43s/it] 73%|███████▎  | 372/512 [1:00:12<25:33, 10.95s/it] 73%|███████▎  | 373/512 [1:00:24<26:25, 11.40s/it] 73%|███████▎  | 374/512 [1:00:34<25:20, 11.02s/it] 73%|███████▎  | 375/512 [1:00:44<24:28, 10.72s/it] 73%|███████▎  | 376/512 [1:00:48<19:47,  8.73s/it] 74%|███████▎  | 377/512 [1:00:54<17:40,  7.86s/it] 74%|███████▍  | 378/512 [1:01:00<16:25,  7.35s/it] 74%|███████▍  | 379/512 [1:01:04<13:57,  6.30s/it] 74%|███████▍  | 380/512 [1:01:09<13:02,  5.93s/it] 74%|███████▍  | 381/512 [1:01:13<11:41,  5.36s/it] 75%|███████▍  | 382/512 [1:01:17<10:41,  4.93s/it] 75%|███████▍  | 383/512 [1:01:22<10:13,  4.76s/it] 75%|███████▌  | 384/512 [1:01:36<16:25,  7.70s/it] 75%|███████▌  | 385/512 [1:01:51<21:04,  9.96s/it] 75%|███████▌  | 386/512 [1:02:07<24:16, 11.56s/it] 76%|███████▌  | 387/512 [1:02:22<26:28, 12.70s/it] 76%|███████▌  | 388/512 [1:02:37<27:28, 13.30s/it] 76%|███████▌  | 389/512 [1:02:51<28:06, 13.71s/it] 76%|███████▌  | 390/512 [1:02:57<22:47, 11.21s/it] 76%|███████▋  | 391/512 [1:03:13<25:36, 12.70s/it] 77%|███████▋  | 392/512 [1:03:29<27:24, 13.71s/it] 77%|███████▋  | 393/512 [1:03:45<28:18, 14.27s/it] 77%|███████▋  | 394/512 [1:04:01<29:03, 14.78s/it] 77%|███████▋  | 395/512 [1:04:16<29:18, 15.03s/it] 77%|███████▋  | 396/512 [1:04:32<29:36, 15.32s/it] 78%|███████▊  | 397/512 [1:04:36<22:44, 11.86s/it] 78%|███████▊  | 398/512 [1:04:59<28:57, 15.24s/it] 78%|███████▊  | 399/512 [1:05:22<33:08, 17.60s/it] 78%|███████▊  | 400/512 [1:05:45<36:02, 19.31s/it] 78%|███████▊  | 401/512 [1:06:09<37:58, 20.53s/it] 79%|███████▊  | 402/512 [1:06:32<39:06, 21.33s/it] 79%|███████▊  | 403/512 [1:06:55<39:30, 21.74s/it] 79%|███████▉  | 404/512 [1:07:18<39:55, 22.18s/it] 79%|███████▉  | 405/512 [1:07:41<40:01, 22.44s/it] 79%|███████▉  | 406/512 [1:08:04<40:04, 22.68s/it] 79%|███████▉  | 407/512 [1:08:11<31:07, 17.79s/it] 80%|███████▉  | 408/512 [1:08:15<23:38, 13.64s/it] 80%|███████▉  | 409/512 [1:08:19<18:29, 10.77s/it] 80%|████████  | 410/512 [1:08:33<20:09, 11.86s/it] 80%|████████  | 411/512 [1:08:47<21:13, 12.61s/it] 80%|████████  | 412/512 [1:09:02<21:49, 13.09s/it] 81%|████████  | 413/512 [1:09:16<22:17, 13.51s/it] 81%|████████  | 414/512 [1:09:31<22:31, 13.79s/it] 81%|████████  | 415/512 [1:09:50<25:10, 15.57s/it] 81%|████████▏ | 416/512 [1:10:10<26:46, 16.73s/it] 81%|████████▏ | 417/512 [1:10:29<27:50, 17.58s/it] 82%|████████▏ | 418/512 [1:10:49<28:22, 18.11s/it] 82%|████████▏ | 419/512 [1:11:08<28:46, 18.56s/it] 82%|████████▏ | 420/512 [1:11:28<28:51, 18.82s/it] 82%|████████▏ | 421/512 [1:11:47<28:46, 18.97s/it] 82%|████████▏ | 422/512 [1:12:07<28:44, 19.16s/it] 83%|████████▎ | 423/512 [1:12:26<28:40, 19.34s/it] 83%|████████▎ | 424/512 [1:12:34<23:12, 15.82s/it] 83%|████████▎ | 425/512 [1:12:42<19:24, 13.39s/it] 83%|████████▎ | 426/512 [1:12:50<16:54, 11.79s/it] 83%|████████▎ | 427/512 [1:12:54<13:37,  9.62s/it] 84%|████████▎ | 428/512 [1:13:02<12:36,  9.00s/it] 84%|████████▍ | 429/512 [1:13:09<11:40,  8.43s/it] 84%|████████▍ | 430/512 [1:13:16<10:53,  7.97s/it] 84%|████████▍ | 431/512 [1:13:19<08:56,  6.62s/it] 84%|████████▍ | 432/512 [1:13:23<07:34,  5.68s/it] 85%|████████▍ | 433/512 [1:13:28<07:26,  5.65s/it] 85%|████████▍ | 434/512 [1:13:33<06:51,  5.28s/it] 85%|████████▍ | 435/512 [1:13:38<06:55,  5.40s/it] 85%|████████▌ | 436/512 [1:13:43<06:25,  5.07s/it] 85%|████████▌ | 437/512 [1:13:48<06:16,  5.02s/it] 86%|████████▌ | 438/512 [1:13:55<06:51,  5.57s/it] 86%|████████▌ | 439/512 [1:14:01<07:10,  5.90s/it] 86%|████████▌ | 440/512 [1:14:17<10:37,  8.85s/it] 86%|████████▌ | 441/512 [1:14:33<12:53, 10.89s/it] 86%|████████▋ | 442/512 [1:14:48<14:20, 12.30s/it] 87%|████████▋ | 443/512 [1:15:04<15:19, 13.32s/it] 87%|████████▋ | 444/512 [1:15:07<11:44, 10.36s/it] 87%|████████▋ | 445/512 [1:15:13<10:07,  9.07s/it] 87%|████████▋ | 446/512 [1:15:29<11:59, 10.91s/it] 87%|████████▋ | 447/512 [1:15:43<13:03, 12.06s/it] 88%|████████▊ | 448/512 [1:15:59<13:53, 13.03s/it] 88%|████████▊ | 449/512 [1:16:13<14:15, 13.58s/it] 88%|████████▊ | 450/512 [1:16:28<14:28, 14.01s/it] 88%|████████▊ | 451/512 [1:16:44<14:36, 14.36s/it] 88%|████████▊ | 452/512 [1:16:50<12:04, 12.08s/it] 88%|████████▊ | 453/512 [1:16:57<10:20, 10.51s/it] 89%|████████▊ | 454/512 [1:17:01<08:15,  8.55s/it] 89%|████████▉ | 455/512 [1:17:05<06:50,  7.20s/it] 89%|████████▉ | 456/512 [1:17:09<05:47,  6.21s/it] 89%|████████▉ | 457/512 [1:17:13<04:57,  5.41s/it] 89%|████████▉ | 458/512 [1:17:16<04:16,  4.75s/it] 90%|████████▉ | 459/512 [1:17:19<03:37,  4.11s/it] 90%|████████▉ | 460/512 [1:17:36<06:58,  8.05s/it] 90%|█████████ | 461/512 [1:17:40<05:51,  6.90s/it] 90%|█████████ | 462/512 [1:17:43<04:44,  5.68s/it] 90%|█████████ | 463/512 [1:17:47<04:12,  5.16s/it] 91%|█████████ | 464/512 [1:17:52<04:00,  5.02s/it]100%|██████████| 512/512 [1:17:52<00:00,  9.13s/it]WARN: data/OakInk-v2/anno_preview/scene_02__A001++seq__ac736a20fe59cf0a1df3__2023-04-15-19-49-11.pkl is too long : 2130, cut to 2000
+WARN: data/OakInk-v2/anno_preview/scene_02__A005++seq__0464d8feaa9838cb010d__2023-04-20-09-31-17.pkl is too long : 2096, cut to 2000
+WARNING: seq_len is deprecated, use seq_length instead
+seq_length: 4
+current training device: cuda:0
+build mlp: 256
+RunningMeanStd:  (1,)
+RunningMeanStd:  (20,)
+RunningMeanStd:  (73,)
+RunningMeanStd:  (248,)
+fps step: 5202 fps step and policy inference: 4785 fps total: 3758 epoch: 1/10000 frames: 0
+fps step: 15714 fps step and policy inference: 12596 fps total: 7582 epoch: 2/10000 frames: 16384
+fps step: 15601 fps step and policy inference: 12460 fps total: 7435 epoch: 3/10000 frames: 32768
+fps step: 15628 fps step and policy inference: 12510 fps total: 7474 epoch: 4/10000 frames: 49152
+fps step: 15428 fps step and policy inference: 12424 fps total: 7474 epoch: 5/10000 frames: 65536
+fps step: 15366 fps step and policy inference: 12312 fps total: 7406 epoch: 6/10000 frames: 81920
+fps step: 15496 fps step and policy inference: 12424 fps total: 7442 epoch: 7/10000 frames: 98304
+fps step: 15356 fps step and policy inference: 12370 fps total: 7438 epoch: 8/10000 frames: 114688
+fps step: 15482 fps step and policy inference: 12457 fps total: 7492 epoch: 9/10000 frames: 131072
+fps step: 15341 fps step and policy inference: 12351 fps total: 7448 epoch: 10/10000 frames: 147456
+saving next best rewards:  [3.68]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 15318 fps step and policy inference: 12337 fps total: 7392 epoch: 11/10000 frames: 163840
+fps step: 15234 fps step and policy inference: 12279 fps total: 7433 epoch: 12/10000 frames: 180224
+saving next best rewards:  [3.82]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 15375 fps step and policy inference: 12185 fps total: 7382 epoch: 13/10000 frames: 196608
+saving next best rewards:  [3.85]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 15150 fps step and policy inference: 12254 fps total: 7404 epoch: 14/10000 frames: 212992
+saving next best rewards:  [3.98]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 15388 fps step and policy inference: 12411 fps total: 7467 epoch: 15/10000 frames: 229376
+saving next best rewards:  [4.11]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 15194 fps step and policy inference: 12286 fps total: 7380 epoch: 16/10000 frames: 245760
+saving next best rewards:  [4.11]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 15286 fps step and policy inference: 12333 fps total: 7441 epoch: 17/10000 frames: 262144
+saving next best rewards:  [4.19]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 15154 fps step and policy inference: 12269 fps total: 7411 epoch: 18/10000 frames: 278528
+saving next best rewards:  [4.31]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 15212 fps step and policy inference: 12317 fps total: 7385 epoch: 19/10000 frames: 294912
+fps step: 15054 fps step and policy inference: 12120 fps total: 7356 epoch: 20/10000 frames: 311296
+saving next best rewards:  [4.47]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 15071 fps step and policy inference: 12200 fps total: 7396 epoch: 21/10000 frames: 327680
+saving next best rewards:  [4.81]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 15049 fps step and policy inference: 11969 fps total: 7311 epoch: 22/10000 frames: 344064
+fps step: 15244 fps step and policy inference: 12297 fps total: 7456 epoch: 23/10000 frames: 360448
+fps step: 15132 fps step and policy inference: 12205 fps total: 7401 epoch: 24/10000 frames: 376832
+fps step: 15109 fps step and policy inference: 12196 fps total: 7418 epoch: 25/10000 frames: 393216
+saving next best rewards:  [4.96]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 15067 fps step and policy inference: 12119 fps total: 7375 epoch: 26/10000 frames: 409600
+saving next best rewards:  [5.01]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 15101 fps step and policy inference: 12057 fps total: 7358 epoch: 27/10000 frames: 425984
+saving next best rewards:  [5.07]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 15056 fps step and policy inference: 12205 fps total: 7424 epoch: 28/10000 frames: 442368
+saving next best rewards:  [5.15]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 15029 fps step and policy inference: 12192 fps total: 7412 epoch: 29/10000 frames: 458752
+saving next best rewards:  [5.48]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 15018 fps step and policy inference: 12153 fps total: 7371 epoch: 30/10000 frames: 475136
+fps step: 15056 fps step and policy inference: 12168 fps total: 7404 epoch: 31/10000 frames: 491520
+saving next best rewards:  [5.52]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14965 fps step and policy inference: 12072 fps total: 7343 epoch: 32/10000 frames: 507904
+saving next best rewards:  [5.54]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 15051 fps step and policy inference: 12198 fps total: 7422 epoch: 33/10000 frames: 524288
+saving next best rewards:  [5.72]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 15024 fps step and policy inference: 12125 fps total: 7386 epoch: 34/10000 frames: 540672
+saving next best rewards:  [5.87]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 15089 fps step and policy inference: 12218 fps total: 7423 epoch: 35/10000 frames: 557056
+saving next best rewards:  [5.94]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 15053 fps step and policy inference: 12047 fps total: 7325 epoch: 36/10000 frames: 573440
+fps step: 14922 fps step and policy inference: 12076 fps total: 7317 epoch: 37/10000 frames: 589824
+saving next best rewards:  [6.15]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 15090 fps step and policy inference: 12209 fps total: 7410 epoch: 38/10000 frames: 606208
+fps step: 15145 fps step and policy inference: 12216 fps total: 7387 epoch: 39/10000 frames: 622592
+saving next best rewards:  [6.29]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 15066 fps step and policy inference: 12178 fps total: 7392 epoch: 40/10000 frames: 638976
+fps step: 15062 fps step and policy inference: 12162 fps total: 7372 epoch: 41/10000 frames: 655360
+saving next best rewards:  [6.3]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 15056 fps step and policy inference: 12135 fps total: 7297 epoch: 42/10000 frames: 671744
+saving next best rewards:  [6.37]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 15010 fps step and policy inference: 12112 fps total: 7305 epoch: 43/10000 frames: 688128
+saving next best rewards:  [6.48]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 15055 fps step and policy inference: 12136 fps total: 7361 epoch: 44/10000 frames: 704512
+saving next best rewards:  [6.56]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 15063 fps step and policy inference: 12034 fps total: 7337 epoch: 45/10000 frames: 720896
+fps step: 14891 fps step and policy inference: 11942 fps total: 7230 epoch: 46/10000 frames: 737280
+saving next best rewards:  [6.88]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 15041 fps step and policy inference: 12181 fps total: 7248 epoch: 47/10000 frames: 753664
+fps step: 14972 fps step and policy inference: 12094 fps total: 7280 epoch: 48/10000 frames: 770048
+saving next best rewards:  [7.08]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14843 fps step and policy inference: 11973 fps total: 7300 epoch: 49/10000 frames: 786432
+saving next best rewards:  [7.1]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14753 fps step and policy inference: 11726 fps total: 7121 epoch: 50/10000 frames: 802816
+saving next best rewards:  [7.18]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 15027 fps step and policy inference: 12159 fps total: 7306 epoch: 51/10000 frames: 819200
+saving next best rewards:  [7.29]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14827 fps step and policy inference: 11994 fps total: 7256 epoch: 52/10000 frames: 835584
+fps step: 14948 fps step and policy inference: 12078 fps total: 7284 epoch: 53/10000 frames: 851968
+fps step: 14626 fps step and policy inference: 11853 fps total: 7212 epoch: 54/10000 frames: 868352
+saving next best rewards:  [7.47]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14792 fps step and policy inference: 11953 fps total: 7115 epoch: 55/10000 frames: 884736
+fps step: 14677 fps step and policy inference: 11808 fps total: 7145 epoch: 56/10000 frames: 901120
+saving next best rewards:  [7.57]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14774 fps step and policy inference: 11878 fps total: 7157 epoch: 57/10000 frames: 917504
+fps step: 14782 fps step and policy inference: 11893 fps total: 7177 epoch: 58/10000 frames: 933888
+saving next best rewards:  [7.61]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14932 fps step and policy inference: 12039 fps total: 7272 epoch: 59/10000 frames: 950272
+saving next best rewards:  [7.86]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14795 fps step and policy inference: 11911 fps total: 7176 epoch: 60/10000 frames: 966656
+fps step: 14914 fps step and policy inference: 11991 fps total: 7240 epoch: 61/10000 frames: 983040
+fps step: 14910 fps step and policy inference: 11991 fps total: 7255 epoch: 62/10000 frames: 999424
+saving next best rewards:  [7.99]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14927 fps step and policy inference: 12022 fps total: 7256 epoch: 63/10000 frames: 1015808
+fps step: 14926 fps step and policy inference: 12012 fps total: 7251 epoch: 64/10000 frames: 1032192
+saving next best rewards:  [8.18]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14985 fps step and policy inference: 12068 fps total: 7269 epoch: 65/10000 frames: 1048576
+fps step: 14926 fps step and policy inference: 11990 fps total: 7242 epoch: 66/10000 frames: 1064960
+fps step: 14933 fps step and policy inference: 12011 fps total: 7246 epoch: 67/10000 frames: 1081344
+fps step: 14888 fps step and policy inference: 11975 fps total: 7229 epoch: 68/10000 frames: 1097728
+saving next best rewards:  [8.23]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 15012 fps step and policy inference: 12168 fps total: 7395 epoch: 69/10000 frames: 1114112
+saving next best rewards:  [8.38]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14766 fps step and policy inference: 11829 fps total: 7188 epoch: 70/10000 frames: 1130496
+fps step: 14898 fps step and policy inference: 11992 fps total: 7251 epoch: 71/10000 frames: 1146880
+saving next best rewards:  [8.91]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14875 fps step and policy inference: 12036 fps total: 7249 epoch: 72/10000 frames: 1163264
+fps step: 14864 fps step and policy inference: 11974 fps total: 7275 epoch: 73/10000 frames: 1179648
+fps step: 14897 fps step and policy inference: 12014 fps total: 7372 epoch: 74/10000 frames: 1196032
+fps step: 14989 fps step and policy inference: 12120 fps total: 7411 epoch: 75/10000 frames: 1212416
+fps step: 14874 fps step and policy inference: 11995 fps total: 7211 epoch: 76/10000 frames: 1228800
+fps step: 14902 fps step and policy inference: 12022 fps total: 7302 epoch: 77/10000 frames: 1245184
+fps step: 14920 fps step and policy inference: 12015 fps total: 7289 epoch: 78/10000 frames: 1261568
+fps step: 14861 fps step and policy inference: 11988 fps total: 7249 epoch: 79/10000 frames: 1277952
+fps step: 14932 fps step and policy inference: 12079 fps total: 7349 epoch: 80/10000 frames: 1294336
+saving next best rewards:  [8.95]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14934 fps step and policy inference: 12113 fps total: 7376 epoch: 81/10000 frames: 1310720
+fps step: 14919 fps step and policy inference: 12071 fps total: 7344 epoch: 82/10000 frames: 1327104
+fps step: 14859 fps step and policy inference: 12027 fps total: 7351 epoch: 83/10000 frames: 1343488
+fps step: 14813 fps step and policy inference: 11953 fps total: 7271 epoch: 84/10000 frames: 1359872
+saving next best rewards:  [9.24]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14809 fps step and policy inference: 11976 fps total: 7272 epoch: 85/10000 frames: 1376256
+fps step: 14834 fps step and policy inference: 11963 fps total: 7301 epoch: 86/10000 frames: 1392640
+fps step: 14983 fps step and policy inference: 12134 fps total: 7390 epoch: 87/10000 frames: 1409024
+fps step: 14880 fps step and policy inference: 12034 fps total: 7339 epoch: 88/10000 frames: 1425408
+saving next best rewards:  [9.37]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14806 fps step and policy inference: 12011 fps total: 7298 epoch: 89/10000 frames: 1441792
+fps step: 14816 fps step and policy inference: 12001 fps total: 7329 epoch: 90/10000 frames: 1458176
+fps step: 14863 fps step and policy inference: 12048 fps total: 7350 epoch: 91/10000 frames: 1474560
+fps step: 14719 fps step and policy inference: 11886 fps total: 7230 epoch: 92/10000 frames: 1490944
+fps step: 14707 fps step and policy inference: 11940 fps total: 7247 epoch: 93/10000 frames: 1507328
+fps step: 14791 fps step and policy inference: 11986 fps total: 7334 epoch: 94/10000 frames: 1523712
+fps step: 14786 fps step and policy inference: 11999 fps total: 7317 epoch: 95/10000 frames: 1540096
+fps step: 14717 fps step and policy inference: 11935 fps total: 7314 epoch: 96/10000 frames: 1556480
+fps step: 14757 fps step and policy inference: 11979 fps total: 7331 epoch: 97/10000 frames: 1572864
+fps step: 14625 fps step and policy inference: 11831 fps total: 7176 epoch: 98/10000 frames: 1589248
+fps step: 14707 fps step and policy inference: 11898 fps total: 7244 epoch: 99/10000 frames: 1605632
+fps step: 14733 fps step and policy inference: 11946 fps total: 7304 epoch: 100/10000 frames: 1622016
+fps step: 14670 fps step and policy inference: 11864 fps total: 7194 epoch: 101/10000 frames: 1638400
+fps step: 14720 fps step and policy inference: 11944 fps total: 7273 epoch: 102/10000 frames: 1654784
+fps step: 14706 fps step and policy inference: 11931 fps total: 7308 epoch: 103/10000 frames: 1671168
+fps step: 14604 fps step and policy inference: 11860 fps total: 7286 epoch: 104/10000 frames: 1687552
+saving next best rewards:  [9.39]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14672 fps step and policy inference: 11944 fps total: 7280 epoch: 105/10000 frames: 1703936
+fps step: 14567 fps step and policy inference: 11830 fps total: 7179 epoch: 106/10000 frames: 1720320
+saving next best rewards:  [9.5]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14620 fps step and policy inference: 11887 fps total: 7279 epoch: 107/10000 frames: 1736704
+fps step: 14633 fps step and policy inference: 11885 fps total: 7276 epoch: 108/10000 frames: 1753088
+fps step: 14620 fps step and policy inference: 11882 fps total: 7257 epoch: 109/10000 frames: 1769472
+fps step: 14608 fps step and policy inference: 11868 fps total: 7273 epoch: 110/10000 frames: 1785856
+fps step: 14508 fps step and policy inference: 11789 fps total: 7188 epoch: 111/10000 frames: 1802240
+fps step: 14564 fps step and policy inference: 11764 fps total: 7245 epoch: 112/10000 frames: 1818624
+saving next best rewards:  [9.6]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14455 fps step and policy inference: 11726 fps total: 7140 epoch: 113/10000 frames: 1835008
+fps step: 14503 fps step and policy inference: 11709 fps total: 7125 epoch: 114/10000 frames: 1851392
+fps step: 14507 fps step and policy inference: 11792 fps total: 7179 epoch: 115/10000 frames: 1867776
+fps step: 14477 fps step and policy inference: 11730 fps total: 7126 epoch: 116/10000 frames: 1884160
+fps step: 14459 fps step and policy inference: 11722 fps total: 7157 epoch: 117/10000 frames: 1900544
+fps step: 14438 fps step and policy inference: 11698 fps total: 7153 epoch: 118/10000 frames: 1916928
+fps step: 14435 fps step and policy inference: 11722 fps total: 7177 epoch: 119/10000 frames: 1933312
+fps step: 14450 fps step and policy inference: 11721 fps total: 7151 epoch: 120/10000 frames: 1949696
+fps step: 14403 fps step and policy inference: 11691 fps total: 7152 epoch: 121/10000 frames: 1966080
+fps step: 14446 fps step and policy inference: 11714 fps total: 7154 epoch: 122/10000 frames: 1982464
+fps step: 14433 fps step and policy inference: 11723 fps total: 7165 epoch: 123/10000 frames: 1998848
+fps step: 14385 fps step and policy inference: 11670 fps total: 7142 epoch: 124/10000 frames: 2015232
+fps step: 14331 fps step and policy inference: 11626 fps total: 7147 epoch: 125/10000 frames: 2031616
+fps step: 14354 fps step and policy inference: 11649 fps total: 7141 epoch: 126/10000 frames: 2048000
+fps step: 14452 fps step and policy inference: 11725 fps total: 7176 epoch: 127/10000 frames: 2064384
+fps step: 14430 fps step and policy inference: 11706 fps total: 7151 epoch: 128/10000 frames: 2080768
+saving next best rewards:  [9.6]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14366 fps step and policy inference: 11694 fps total: 7156 epoch: 129/10000 frames: 2097152
+saving next best rewards:  [9.63]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14383 fps step and policy inference: 11703 fps total: 7145 epoch: 130/10000 frames: 2113536
+fps step: 14481 fps step and policy inference: 11751 fps total: 7215 epoch: 131/10000 frames: 2129920
+saving next best rewards:  [9.68]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14431 fps step and policy inference: 11726 fps total: 7182 epoch: 132/10000 frames: 2146304
+saving next best rewards:  [9.84]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14429 fps step and policy inference: 11732 fps total: 7171 epoch: 133/10000 frames: 2162688
+fps step: 14440 fps step and policy inference: 11707 fps total: 7163 epoch: 134/10000 frames: 2179072
+fps step: 14442 fps step and policy inference: 11707 fps total: 7181 epoch: 135/10000 frames: 2195456
+fps step: 14423 fps step and policy inference: 11703 fps total: 7165 epoch: 136/10000 frames: 2211840
+saving next best rewards:  [10.01]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14483 fps step and policy inference: 11777 fps total: 7190 epoch: 137/10000 frames: 2228224
+fps step: 14427 fps step and policy inference: 11663 fps total: 7111 epoch: 138/10000 frames: 2244608
+fps step: 14495 fps step and policy inference: 11724 fps total: 7177 epoch: 139/10000 frames: 2260992
+fps step: 14464 fps step and policy inference: 11729 fps total: 7180 epoch: 140/10000 frames: 2277376
+saving next best rewards:  [10.09]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14489 fps step and policy inference: 11776 fps total: 7196 epoch: 141/10000 frames: 2293760
+fps step: 14485 fps step and policy inference: 11743 fps total: 7186 epoch: 142/10000 frames: 2310144
+fps step: 14478 fps step and policy inference: 11745 fps total: 7186 epoch: 143/10000 frames: 2326528
+fps step: 14474 fps step and policy inference: 11740 fps total: 7159 epoch: 144/10000 frames: 2342912
+fps step: 14527 fps step and policy inference: 11757 fps total: 7199 epoch: 145/10000 frames: 2359296
+fps step: 14447 fps step and policy inference: 11704 fps total: 7176 epoch: 146/10000 frames: 2375680
+fps step: 14477 fps step and policy inference: 11747 fps total: 7191 epoch: 147/10000 frames: 2392064
+fps step: 14402 fps step and policy inference: 11673 fps total: 7154 epoch: 148/10000 frames: 2408448
+fps step: 14446 fps step and policy inference: 11710 fps total: 7130 epoch: 149/10000 frames: 2424832
+fps step: 14510 fps step and policy inference: 11756 fps total: 7138 epoch: 150/10000 frames: 2441216
+fps step: 14431 fps step and policy inference: 11688 fps total: 7121 epoch: 151/10000 frames: 2457600
+fps step: 14485 fps step and policy inference: 11746 fps total: 7188 epoch: 152/10000 frames: 2473984
+fps step: 14465 fps step and policy inference: 11732 fps total: 7152 epoch: 153/10000 frames: 2490368
+fps step: 14424 fps step and policy inference: 11676 fps total: 7116 epoch: 154/10000 frames: 2506752
+fps step: 14491 fps step and policy inference: 11758 fps total: 7198 epoch: 155/10000 frames: 2523136
+fps step: 14485 fps step and policy inference: 11740 fps total: 7182 epoch: 156/10000 frames: 2539520
+fps step: 14440 fps step and policy inference: 11709 fps total: 7173 epoch: 157/10000 frames: 2555904
+fps step: 14497 fps step and policy inference: 11742 fps total: 7175 epoch: 158/10000 frames: 2572288
+fps step: 14448 fps step and policy inference: 11682 fps total: 7127 epoch: 159/10000 frames: 2588672
+fps step: 14486 fps step and policy inference: 11737 fps total: 7150 epoch: 160/10000 frames: 2605056
+fps step: 14522 fps step and policy inference: 11772 fps total: 7203 epoch: 161/10000 frames: 2621440
+fps step: 14507 fps step and policy inference: 11749 fps total: 7185 epoch: 162/10000 frames: 2637824
+fps step: 14492 fps step and policy inference: 11750 fps total: 7198 epoch: 163/10000 frames: 2654208
+fps step: 14416 fps step and policy inference: 11671 fps total: 7136 epoch: 164/10000 frames: 2670592
+fps step: 14512 fps step and policy inference: 11748 fps total: 7167 epoch: 165/10000 frames: 2686976
+fps step: 14490 fps step and policy inference: 11722 fps total: 7148 epoch: 166/10000 frames: 2703360
+fps step: 14606 fps step and policy inference: 11826 fps total: 7180 epoch: 167/10000 frames: 2719744
+fps step: 14546 fps step and policy inference: 11758 fps total: 7160 epoch: 168/10000 frames: 2736128
+fps step: 14556 fps step and policy inference: 11783 fps total: 7182 epoch: 169/10000 frames: 2752512
+saving next best rewards:  [10.1]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14528 fps step and policy inference: 11775 fps total: 7169 epoch: 170/10000 frames: 2768896
+fps step: 14511 fps step and policy inference: 11763 fps total: 7183 epoch: 171/10000 frames: 2785280
+fps step: 14438 fps step and policy inference: 11694 fps total: 7106 epoch: 172/10000 frames: 2801664
+fps step: 14569 fps step and policy inference: 11812 fps total: 7215 epoch: 173/10000 frames: 2818048
+fps step: 14442 fps step and policy inference: 11695 fps total: 7144 epoch: 174/10000 frames: 2834432
+saving next best rewards:  [10.33]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14534 fps step and policy inference: 11780 fps total: 7169 epoch: 175/10000 frames: 2850816
+fps step: 14461 fps step and policy inference: 11684 fps total: 7088 epoch: 176/10000 frames: 2867200
+fps step: 14473 fps step and policy inference: 11715 fps total: 7151 epoch: 177/10000 frames: 2883584
+fps step: 14435 fps step and policy inference: 11682 fps total: 7131 epoch: 178/10000 frames: 2899968
+fps step: 14461 fps step and policy inference: 11707 fps total: 7137 epoch: 179/10000 frames: 2916352
+fps step: 14457 fps step and policy inference: 11668 fps total: 7114 epoch: 180/10000 frames: 2932736
+saving next best rewards:  [10.33]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14620 fps step and policy inference: 11868 fps total: 7245 epoch: 181/10000 frames: 2949120
+fps step: 14513 fps step and policy inference: 11720 fps total: 7144 epoch: 182/10000 frames: 2965504
+fps step: 14506 fps step and policy inference: 11729 fps total: 7132 epoch: 183/10000 frames: 2981888
+fps step: 14504 fps step and policy inference: 11715 fps total: 7142 epoch: 184/10000 frames: 2998272
+fps step: 14504 fps step and policy inference: 11723 fps total: 7144 epoch: 185/10000 frames: 3014656
+fps step: 14438 fps step and policy inference: 11659 fps total: 7103 epoch: 186/10000 frames: 3031040
+fps step: 14513 fps step and policy inference: 11735 fps total: 7150 epoch: 187/10000 frames: 3047424
+fps step: 14481 fps step and policy inference: 11703 fps total: 7131 epoch: 188/10000 frames: 3063808
+fps step: 14513 fps step and policy inference: 11724 fps total: 7147 epoch: 189/10000 frames: 3080192
+fps step: 14438 fps step and policy inference: 11677 fps total: 7107 epoch: 190/10000 frames: 3096576
+fps step: 14539 fps step and policy inference: 11757 fps total: 7161 epoch: 191/10000 frames: 3112960
+saving next best rewards:  [10.45]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14481 fps step and policy inference: 11736 fps total: 7177 epoch: 192/10000 frames: 3129344
+fps step: 14528 fps step and policy inference: 11747 fps total: 7166 epoch: 193/10000 frames: 3145728
+fps step: 14528 fps step and policy inference: 11736 fps total: 7162 epoch: 194/10000 frames: 3162112
+fps step: 14504 fps step and policy inference: 11760 fps total: 7196 epoch: 195/10000 frames: 3178496
+fps step: 14523 fps step and policy inference: 11755 fps total: 7159 epoch: 196/10000 frames: 3194880
+fps step: 14641 fps step and policy inference: 11841 fps total: 7246 epoch: 197/10000 frames: 3211264
+fps step: 14533 fps step and policy inference: 11759 fps total: 7170 epoch: 198/10000 frames: 3227648
+fps step: 14558 fps step and policy inference: 11793 fps total: 7213 epoch: 199/10000 frames: 3244032
+fps step: 14562 fps step and policy inference: 11801 fps total: 7183 epoch: 200/10000 frames: 3260416
+fps step: 14487 fps step and policy inference: 11739 fps total: 7159 epoch: 201/10000 frames: 3276800
+saving next best rewards:  [10.51]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14570 fps step and policy inference: 11803 fps total: 7223 epoch: 202/10000 frames: 3293184
+fps step: 14611 fps step and policy inference: 11870 fps total: 7274 epoch: 203/10000 frames: 3309568
+fps step: 14658 fps step and policy inference: 11916 fps total: 7287 epoch: 204/10000 frames: 3325952
+saving next best rewards:  [10.58]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14655 fps step and policy inference: 11947 fps total: 7301 epoch: 205/10000 frames: 3342336
+fps step: 14659 fps step and policy inference: 11901 fps total: 7286 epoch: 206/10000 frames: 3358720
+fps step: 14633 fps step and policy inference: 11895 fps total: 7297 epoch: 207/10000 frames: 3375104
+fps step: 14581 fps step and policy inference: 11859 fps total: 7282 epoch: 208/10000 frames: 3391488
+fps step: 14678 fps step and policy inference: 11870 fps total: 7232 epoch: 209/10000 frames: 3407872
+fps step: 14594 fps step and policy inference: 11860 fps total: 7258 epoch: 210/10000 frames: 3424256
+fps step: 14580 fps step and policy inference: 11809 fps total: 7168 epoch: 211/10000 frames: 3440640
+fps step: 14537 fps step and policy inference: 11739 fps total: 7157 epoch: 212/10000 frames: 3457024
+fps step: 14561 fps step and policy inference: 11764 fps total: 7173 epoch: 213/10000 frames: 3473408
+fps step: 14587 fps step and policy inference: 11779 fps total: 7150 epoch: 214/10000 frames: 3489792
+fps step: 14624 fps step and policy inference: 11793 fps total: 7171 epoch: 215/10000 frames: 3506176
+fps step: 14549 fps step and policy inference: 11746 fps total: 7145 epoch: 216/10000 frames: 3522560
+fps step: 14569 fps step and policy inference: 11779 fps total: 7155 epoch: 217/10000 frames: 3538944
+fps step: 14581 fps step and policy inference: 11766 fps total: 7146 epoch: 218/10000 frames: 3555328
+fps step: 14575 fps step and policy inference: 11783 fps total: 7152 epoch: 219/10000 frames: 3571712
+fps step: 14562 fps step and policy inference: 11763 fps total: 7160 epoch: 220/10000 frames: 3588096
+fps step: 14569 fps step and policy inference: 11798 fps total: 7176 epoch: 221/10000 frames: 3604480
+fps step: 14575 fps step and policy inference: 11777 fps total: 7180 epoch: 222/10000 frames: 3620864
+fps step: 14597 fps step and policy inference: 11782 fps total: 7137 epoch: 223/10000 frames: 3637248
+fps step: 14567 fps step and policy inference: 11767 fps total: 7170 epoch: 224/10000 frames: 3653632
+fps step: 14554 fps step and policy inference: 11793 fps total: 7269 epoch: 225/10000 frames: 3670016
+fps step: 14620 fps step and policy inference: 11858 fps total: 7271 epoch: 226/10000 frames: 3686400
+fps step: 14660 fps step and policy inference: 11906 fps total: 7221 epoch: 227/10000 frames: 3702784
+saving next best rewards:  [10.6]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14599 fps step and policy inference: 11884 fps total: 7242 epoch: 228/10000 frames: 3719168
+fps step: 14657 fps step and policy inference: 11906 fps total: 7300 epoch: 229/10000 frames: 3735552
+fps step: 14662 fps step and policy inference: 11915 fps total: 7302 epoch: 230/10000 frames: 3751936
+fps step: 14711 fps step and policy inference: 11951 fps total: 7308 epoch: 231/10000 frames: 3768320
+fps step: 14674 fps step and policy inference: 11911 fps total: 7295 epoch: 232/10000 frames: 3784704
+saving next best rewards:  [10.64]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14592 fps step and policy inference: 11798 fps total: 7178 epoch: 233/10000 frames: 3801088
+fps step: 14453 fps step and policy inference: 11687 fps total: 7119 epoch: 234/10000 frames: 3817472
+fps step: 14563 fps step and policy inference: 11766 fps total: 7168 epoch: 235/10000 frames: 3833856
+fps step: 14561 fps step and policy inference: 11759 fps total: 7166 epoch: 236/10000 frames: 3850240
+fps step: 14523 fps step and policy inference: 11785 fps total: 7168 epoch: 237/10000 frames: 3866624
+fps step: 14524 fps step and policy inference: 11733 fps total: 7148 epoch: 238/10000 frames: 3883008
+fps step: 14554 fps step and policy inference: 11772 fps total: 7174 epoch: 239/10000 frames: 3899392
+fps step: 14534 fps step and policy inference: 11739 fps total: 7151 epoch: 240/10000 frames: 3915776
+fps step: 14634 fps step and policy inference: 11817 fps total: 7177 epoch: 241/10000 frames: 3932160
+fps step: 14547 fps step and policy inference: 11749 fps total: 7154 epoch: 242/10000 frames: 3948544
+fps step: 14542 fps step and policy inference: 11755 fps total: 7162 epoch: 243/10000 frames: 3964928
+fps step: 14594 fps step and policy inference: 11778 fps total: 7166 epoch: 244/10000 frames: 3981312
+fps step: 14561 fps step and policy inference: 11770 fps total: 7171 epoch: 245/10000 frames: 3997696
+fps step: 14517 fps step and policy inference: 11723 fps total: 7146 epoch: 246/10000 frames: 4014080
+fps step: 14583 fps step and policy inference: 11776 fps total: 7170 epoch: 247/10000 frames: 4030464
+fps step: 14602 fps step and policy inference: 11790 fps total: 7176 epoch: 248/10000 frames: 4046848
+fps step: 14549 fps step and policy inference: 11737 fps total: 7153 epoch: 249/10000 frames: 4063232
+fps step: 14636 fps step and policy inference: 11803 fps total: 7157 epoch: 250/10000 frames: 4079616
+fps step: 14598 fps step and policy inference: 11787 fps total: 7126 epoch: 251/10000 frames: 4096000
+saving next best rewards:  [10.73]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14552 fps step and policy inference: 11767 fps total: 7118 epoch: 252/10000 frames: 4112384
+fps step: 14549 fps step and policy inference: 11757 fps total: 7122 epoch: 253/10000 frames: 4128768
+fps step: 14497 fps step and policy inference: 11726 fps total: 7165 epoch: 254/10000 frames: 4145152
+fps step: 14547 fps step and policy inference: 11734 fps total: 7116 epoch: 255/10000 frames: 4161536
+fps step: 14583 fps step and policy inference: 11781 fps total: 7185 epoch: 256/10000 frames: 4177920
+fps step: 14554 fps step and policy inference: 11750 fps total: 7117 epoch: 257/10000 frames: 4194304
+fps step: 14574 fps step and policy inference: 11752 fps total: 7112 epoch: 258/10000 frames: 4210688
+fps step: 14559 fps step and policy inference: 11755 fps total: 7164 epoch: 259/10000 frames: 4227072
+fps step: 14526 fps step and policy inference: 11734 fps total: 7159 epoch: 260/10000 frames: 4243456
+fps step: 14582 fps step and policy inference: 11777 fps total: 7161 epoch: 261/10000 frames: 4259840
+fps step: 14560 fps step and policy inference: 11753 fps total: 7157 epoch: 262/10000 frames: 4276224
+fps step: 14583 fps step and policy inference: 11805 fps total: 7212 epoch: 263/10000 frames: 4292608
+fps step: 14590 fps step and policy inference: 11839 fps total: 7242 epoch: 264/10000 frames: 4308992
+fps step: 14581 fps step and policy inference: 11865 fps total: 7257 epoch: 265/10000 frames: 4325376
+fps step: 14531 fps step and policy inference: 11821 fps total: 7256 epoch: 266/10000 frames: 4341760
+saving next best rewards:  [10.73]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14550 fps step and policy inference: 11843 fps total: 7280 epoch: 267/10000 frames: 4358144
+fps step: 14465 fps step and policy inference: 11772 fps total: 7263 epoch: 268/10000 frames: 4374528
+fps step: 14513 fps step and policy inference: 11828 fps total: 7278 epoch: 269/10000 frames: 4390912
+fps step: 14556 fps step and policy inference: 11823 fps total: 7260 epoch: 270/10000 frames: 4407296
+fps step: 14552 fps step and policy inference: 11823 fps total: 7270 epoch: 271/10000 frames: 4423680
+fps step: 14627 fps step and policy inference: 11882 fps total: 7285 epoch: 272/10000 frames: 4440064
+fps step: 14585 fps step and policy inference: 11857 fps total: 7286 epoch: 273/10000 frames: 4456448
+saving next best rewards:  [10.77]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14516 fps step and policy inference: 11835 fps total: 7256 epoch: 274/10000 frames: 4472832
+fps step: 14658 fps step and policy inference: 11892 fps total: 7242 epoch: 275/10000 frames: 4489216
+saving next best rewards:  [10.97]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14632 fps step and policy inference: 11909 fps total: 7269 epoch: 276/10000 frames: 4505600
+fps step: 14679 fps step and policy inference: 11918 fps total: 7265 epoch: 277/10000 frames: 4521984
+fps step: 14612 fps step and policy inference: 11861 fps total: 7280 epoch: 278/10000 frames: 4538368
+fps step: 14622 fps step and policy inference: 11878 fps total: 7276 epoch: 279/10000 frames: 4554752
+fps step: 14600 fps step and policy inference: 11854 fps total: 7277 epoch: 280/10000 frames: 4571136
+fps step: 14597 fps step and policy inference: 11843 fps total: 7221 epoch: 281/10000 frames: 4587520
+fps step: 14584 fps step and policy inference: 11846 fps total: 7265 epoch: 282/10000 frames: 4603904
+fps step: 14594 fps step and policy inference: 11843 fps total: 7267 epoch: 283/10000 frames: 4620288
+fps step: 14610 fps step and policy inference: 11858 fps total: 7270 epoch: 284/10000 frames: 4636672
+fps step: 14546 fps step and policy inference: 11757 fps total: 7181 epoch: 285/10000 frames: 4653056
+fps step: 14544 fps step and policy inference: 11772 fps total: 7179 epoch: 286/10000 frames: 4669440
+fps step: 14551 fps step and policy inference: 11824 fps total: 7254 epoch: 287/10000 frames: 4685824
+fps step: 14568 fps step and policy inference: 11827 fps total: 7222 epoch: 288/10000 frames: 4702208
+fps step: 14638 fps step and policy inference: 11875 fps total: 7232 epoch: 289/10000 frames: 4718592
+fps step: 14581 fps step and policy inference: 11819 fps total: 7207 epoch: 290/10000 frames: 4734976
+fps step: 14560 fps step and policy inference: 11823 fps total: 7228 epoch: 291/10000 frames: 4751360
+fps step: 14605 fps step and policy inference: 11865 fps total: 7277 epoch: 292/10000 frames: 4767744
+fps step: 14689 fps step and policy inference: 11910 fps total: 7341 epoch: 293/10000 frames: 4784128
+fps step: 14574 fps step and policy inference: 11838 fps total: 7307 epoch: 294/10000 frames: 4800512
+fps step: 14608 fps step and policy inference: 11878 fps total: 7331 epoch: 295/10000 frames: 4816896
+fps step: 14670 fps step and policy inference: 11904 fps total: 7328 epoch: 296/10000 frames: 4833280
+fps step: 14642 fps step and policy inference: 11883 fps total: 7318 epoch: 297/10000 frames: 4849664
+fps step: 14657 fps step and policy inference: 11901 fps total: 7320 epoch: 298/10000 frames: 4866048
+fps step: 14648 fps step and policy inference: 11877 fps total: 7313 epoch: 299/10000 frames: 4882432
+fps step: 14715 fps step and policy inference: 11943 fps total: 7318 epoch: 300/10000 frames: 4898816
+fps step: 14629 fps step and policy inference: 11878 fps total: 7318 epoch: 301/10000 frames: 4915200
+fps step: 14709 fps step and policy inference: 11915 fps total: 7330 epoch: 302/10000 frames: 4931584
+fps step: 14590 fps step and policy inference: 11864 fps total: 7316 epoch: 303/10000 frames: 4947968
+fps step: 14644 fps step and policy inference: 11881 fps total: 7315 epoch: 304/10000 frames: 4964352
+fps step: 14581 fps step and policy inference: 11866 fps total: 7309 epoch: 305/10000 frames: 4980736
+fps step: 14624 fps step and policy inference: 11873 fps total: 7326 epoch: 306/10000 frames: 4997120
+fps step: 14660 fps step and policy inference: 11898 fps total: 7272 epoch: 307/10000 frames: 5013504
+fps step: 14540 fps step and policy inference: 11793 fps total: 7137 epoch: 308/10000 frames: 5029888
+fps step: 14440 fps step and policy inference: 11670 fps total: 7113 epoch: 309/10000 frames: 5046272
+fps step: 14546 fps step and policy inference: 11740 fps total: 7148 epoch: 310/10000 frames: 5062656
+fps step: 14458 fps step and policy inference: 11691 fps total: 7109 epoch: 311/10000 frames: 5079040
+fps step: 14509 fps step and policy inference: 11732 fps total: 7258 epoch: 312/10000 frames: 5095424
+fps step: 14523 fps step and policy inference: 11823 fps total: 7288 epoch: 313/10000 frames: 5111808
+fps step: 14461 fps step and policy inference: 11697 fps total: 7137 epoch: 314/10000 frames: 5128192
+fps step: 14556 fps step and policy inference: 11803 fps total: 7288 epoch: 315/10000 frames: 5144576
+fps step: 14533 fps step and policy inference: 11814 fps total: 7285 epoch: 316/10000 frames: 5160960
+fps step: 14577 fps step and policy inference: 11848 fps total: 7313 epoch: 317/10000 frames: 5177344
+fps step: 14613 fps step and policy inference: 11871 fps total: 7311 epoch: 318/10000 frames: 5193728
+fps step: 14551 fps step and policy inference: 11847 fps total: 7314 epoch: 319/10000 frames: 5210112
+fps step: 14515 fps step and policy inference: 11808 fps total: 7232 epoch: 320/10000 frames: 5226496
+fps step: 14421 fps step and policy inference: 11675 fps total: 7129 epoch: 321/10000 frames: 5242880
+fps step: 14382 fps step and policy inference: 11649 fps total: 7125 epoch: 322/10000 frames: 5259264
+fps step: 14595 fps step and policy inference: 11860 fps total: 7320 epoch: 323/10000 frames: 5275648
+fps step: 14543 fps step and policy inference: 11825 fps total: 7303 epoch: 324/10000 frames: 5292032
+fps step: 14455 fps step and policy inference: 11741 fps total: 7277 epoch: 325/10000 frames: 5308416
+fps step: 14500 fps step and policy inference: 11804 fps total: 7299 epoch: 326/10000 frames: 5324800
+fps step: 14518 fps step and policy inference: 11807 fps total: 7287 epoch: 327/10000 frames: 5341184
+fps step: 14544 fps step and policy inference: 11744 fps total: 7158 epoch: 328/10000 frames: 5357568
+fps step: 14557 fps step and policy inference: 11758 fps total: 7177 epoch: 329/10000 frames: 5373952
+fps step: 14495 fps step and policy inference: 11710 fps total: 7151 epoch: 330/10000 frames: 5390336
+saving next best rewards:  [11.03]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14510 fps step and policy inference: 11748 fps total: 7156 epoch: 331/10000 frames: 5406720
+fps step: 14433 fps step and policy inference: 11669 fps total: 7127 epoch: 332/10000 frames: 5423104
+fps step: 14522 fps step and policy inference: 11729 fps total: 7155 epoch: 333/10000 frames: 5439488
+fps step: 14488 fps step and policy inference: 11736 fps total: 7186 epoch: 334/10000 frames: 5455872
+fps step: 14592 fps step and policy inference: 11845 fps total: 7314 epoch: 335/10000 frames: 5472256
+fps step: 14592 fps step and policy inference: 11860 fps total: 7252 epoch: 336/10000 frames: 5488640
+fps step: 14458 fps step and policy inference: 11676 fps total: 7096 epoch: 337/10000 frames: 5505024
+fps step: 14461 fps step and policy inference: 11673 fps total: 7072 epoch: 338/10000 frames: 5521408
+fps step: 14500 fps step and policy inference: 11726 fps total: 7111 epoch: 339/10000 frames: 5537792
+fps step: 14461 fps step and policy inference: 11684 fps total: 7055 epoch: 340/10000 frames: 5554176
+fps step: 14516 fps step and policy inference: 11718 fps total: 7076 epoch: 341/10000 frames: 5570560
+fps step: 14571 fps step and policy inference: 11756 fps total: 7117 epoch: 342/10000 frames: 5586944
+fps step: 14533 fps step and policy inference: 11740 fps total: 7110 epoch: 343/10000 frames: 5603328
+fps step: 14453 fps step and policy inference: 11668 fps total: 7077 epoch: 344/10000 frames: 5619712
+fps step: 14451 fps step and policy inference: 11695 fps total: 7097 epoch: 345/10000 frames: 5636096
+fps step: 14437 fps step and policy inference: 11651 fps total: 7072 epoch: 346/10000 frames: 5652480
+fps step: 14512 fps step and policy inference: 11716 fps total: 7102 epoch: 347/10000 frames: 5668864
+fps step: 14528 fps step and policy inference: 11730 fps total: 7091 epoch: 348/10000 frames: 5685248
+fps step: 14568 fps step and policy inference: 11747 fps total: 7109 epoch: 349/10000 frames: 5701632
+fps step: 14523 fps step and policy inference: 11711 fps total: 7101 epoch: 350/10000 frames: 5718016
+fps step: 14480 fps step and policy inference: 11710 fps total: 7132 epoch: 351/10000 frames: 5734400
+fps step: 14451 fps step and policy inference: 11685 fps total: 7108 epoch: 352/10000 frames: 5750784
+fps step: 14500 fps step and policy inference: 11726 fps total: 7165 epoch: 353/10000 frames: 5767168
+fps step: 14534 fps step and policy inference: 11757 fps total: 7146 epoch: 354/10000 frames: 5783552
+fps step: 14566 fps step and policy inference: 11805 fps total: 7163 epoch: 355/10000 frames: 5799936
+fps step: 14519 fps step and policy inference: 11759 fps total: 7166 epoch: 356/10000 frames: 5816320
+fps step: 14473 fps step and policy inference: 11733 fps total: 7159 epoch: 357/10000 frames: 5832704
+fps step: 14522 fps step and policy inference: 11759 fps total: 7135 epoch: 358/10000 frames: 5849088
+fps step: 14598 fps step and policy inference: 11796 fps total: 7152 epoch: 359/10000 frames: 5865472
+fps step: 14498 fps step and policy inference: 11756 fps total: 7167 epoch: 360/10000 frames: 5881856
+fps step: 14616 fps step and policy inference: 11808 fps total: 7160 epoch: 361/10000 frames: 5898240
+fps step: 14506 fps step and policy inference: 11734 fps total: 7127 epoch: 362/10000 frames: 5914624
+fps step: 14486 fps step and policy inference: 11725 fps total: 7122 epoch: 363/10000 frames: 5931008
+fps step: 14535 fps step and policy inference: 11781 fps total: 7202 epoch: 364/10000 frames: 5947392
+fps step: 14629 fps step and policy inference: 11846 fps total: 7254 epoch: 365/10000 frames: 5963776
+fps step: 14552 fps step and policy inference: 11787 fps total: 7228 epoch: 366/10000 frames: 5980160
+fps step: 14591 fps step and policy inference: 11830 fps total: 7251 epoch: 367/10000 frames: 5996544
+fps step: 14538 fps step and policy inference: 11771 fps total: 7191 epoch: 368/10000 frames: 6012928
+fps step: 14629 fps step and policy inference: 11867 fps total: 7198 epoch: 369/10000 frames: 6029312
+fps step: 14449 fps step and policy inference: 11691 fps total: 7102 epoch: 370/10000 frames: 6045696
+fps step: 14576 fps step and policy inference: 11776 fps total: 7136 epoch: 371/10000 frames: 6062080
+fps step: 14605 fps step and policy inference: 11788 fps total: 7152 epoch: 372/10000 frames: 6078464
+fps step: 14628 fps step and policy inference: 11805 fps total: 7161 epoch: 373/10000 frames: 6094848
+fps step: 14508 fps step and policy inference: 11721 fps total: 7111 epoch: 374/10000 frames: 6111232
+fps step: 14493 fps step and policy inference: 11723 fps total: 7136 epoch: 375/10000 frames: 6127616
+fps step: 14494 fps step and policy inference: 11710 fps total: 7134 epoch: 376/10000 frames: 6144000
+fps step: 14448 fps step and policy inference: 11695 fps total: 7133 epoch: 377/10000 frames: 6160384
+fps step: 14562 fps step and policy inference: 11756 fps total: 7156 epoch: 378/10000 frames: 6176768
+fps step: 14508 fps step and policy inference: 11725 fps total: 7157 epoch: 379/10000 frames: 6193152
+fps step: 14561 fps step and policy inference: 11749 fps total: 7158 epoch: 380/10000 frames: 6209536
+fps step: 14516 fps step and policy inference: 11734 fps total: 7161 epoch: 381/10000 frames: 6225920
+fps step: 14384 fps step and policy inference: 11641 fps total: 7130 epoch: 382/10000 frames: 6242304
+fps step: 14489 fps step and policy inference: 11714 fps total: 7137 epoch: 383/10000 frames: 6258688
+fps step: 14505 fps step and policy inference: 11728 fps total: 7160 epoch: 384/10000 frames: 6275072
+fps step: 14545 fps step and policy inference: 11753 fps total: 7173 epoch: 385/10000 frames: 6291456
+fps step: 14385 fps step and policy inference: 11654 fps total: 7141 epoch: 386/10000 frames: 6307840
+fps step: 14504 fps step and policy inference: 11727 fps total: 7153 epoch: 387/10000 frames: 6324224
+fps step: 14462 fps step and policy inference: 11694 fps total: 7145 epoch: 388/10000 frames: 6340608
+fps step: 14489 fps step and policy inference: 11751 fps total: 7196 epoch: 389/10000 frames: 6356992
+fps step: 14383 fps step and policy inference: 11636 fps total: 7115 epoch: 390/10000 frames: 6373376
+fps step: 14399 fps step and policy inference: 11657 fps total: 7131 epoch: 391/10000 frames: 6389760
+fps step: 14462 fps step and policy inference: 11724 fps total: 7148 epoch: 392/10000 frames: 6406144
+fps step: 14465 fps step and policy inference: 11703 fps total: 7160 epoch: 393/10000 frames: 6422528
+fps step: 14459 fps step and policy inference: 11689 fps total: 7136 epoch: 394/10000 frames: 6438912
+fps step: 14505 fps step and policy inference: 11760 fps total: 7197 epoch: 395/10000 frames: 6455296
+fps step: 14499 fps step and policy inference: 11758 fps total: 7203 epoch: 396/10000 frames: 6471680
+fps step: 14595 fps step and policy inference: 11827 fps total: 7196 epoch: 397/10000 frames: 6488064
+fps step: 14469 fps step and policy inference: 11740 fps total: 7190 epoch: 398/10000 frames: 6504448
+fps step: 14528 fps step and policy inference: 11762 fps total: 7214 epoch: 399/10000 frames: 6520832
+fps step: 14466 fps step and policy inference: 11733 fps total: 7208 epoch: 400/10000 frames: 6537216
+fps step: 14504 fps step and policy inference: 11744 fps total: 7158 epoch: 401/10000 frames: 6553600
+fps step: 14524 fps step and policy inference: 11748 fps total: 7134 epoch: 402/10000 frames: 6569984
+fps step: 14428 fps step and policy inference: 11670 fps total: 7119 epoch: 403/10000 frames: 6586368
+fps step: 14525 fps step and policy inference: 11737 fps total: 7141 epoch: 404/10000 frames: 6602752
+fps step: 14469 fps step and policy inference: 11710 fps total: 7143 epoch: 405/10000 frames: 6619136
+fps step: 14446 fps step and policy inference: 11697 fps total: 7152 epoch: 406/10000 frames: 6635520
+fps step: 14476 fps step and policy inference: 11709 fps total: 7152 epoch: 407/10000 frames: 6651904
+fps step: 14541 fps step and policy inference: 11782 fps total: 7206 epoch: 408/10000 frames: 6668288
+fps step: 14484 fps step and policy inference: 11756 fps total: 7203 epoch: 409/10000 frames: 6684672
+fps step: 14412 fps step and policy inference: 11703 fps total: 7168 epoch: 410/10000 frames: 6701056
+fps step: 14463 fps step and policy inference: 11744 fps total: 7177 epoch: 411/10000 frames: 6717440
+saving next best rewards:  [11.09]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14429 fps step and policy inference: 11733 fps total: 7191 epoch: 412/10000 frames: 6733824
+fps step: 14615 fps step and policy inference: 11828 fps total: 7217 epoch: 413/10000 frames: 6750208
+fps step: 14425 fps step and policy inference: 11720 fps total: 7176 epoch: 414/10000 frames: 6766592
+fps step: 14481 fps step and policy inference: 11742 fps total: 7194 epoch: 415/10000 frames: 6782976
+fps step: 14514 fps step and policy inference: 11760 fps total: 7199 epoch: 416/10000 frames: 6799360
+fps step: 14510 fps step and policy inference: 11768 fps total: 7209 epoch: 417/10000 frames: 6815744
+fps step: 14450 fps step and policy inference: 11713 fps total: 7188 epoch: 418/10000 frames: 6832128
+fps step: 14465 fps step and policy inference: 11731 fps total: 7185 epoch: 419/10000 frames: 6848512
+fps step: 14455 fps step and policy inference: 11713 fps total: 7145 epoch: 420/10000 frames: 6864896
+fps step: 14439 fps step and policy inference: 11687 fps total: 7136 epoch: 421/10000 frames: 6881280
+fps step: 14481 fps step and policy inference: 11699 fps total: 7146 epoch: 422/10000 frames: 6897664
+fps step: 14470 fps step and policy inference: 11728 fps total: 7191 epoch: 423/10000 frames: 6914048
+fps step: 14460 fps step and policy inference: 11737 fps total: 7188 epoch: 424/10000 frames: 6930432
+fps step: 14586 fps step and policy inference: 11816 fps total: 7214 epoch: 425/10000 frames: 6946816
+fps step: 14382 fps step and policy inference: 11652 fps total: 7169 epoch: 426/10000 frames: 6963200
+fps step: 14524 fps step and policy inference: 11771 fps total: 7227 epoch: 427/10000 frames: 6979584
+fps step: 14510 fps step and policy inference: 11767 fps total: 7215 epoch: 428/10000 frames: 6995968
+fps step: 14450 fps step and policy inference: 11732 fps total: 7209 epoch: 429/10000 frames: 7012352
+fps step: 14442 fps step and policy inference: 11722 fps total: 7192 epoch: 430/10000 frames: 7028736
+fps step: 14490 fps step and policy inference: 11764 fps total: 7229 epoch: 431/10000 frames: 7045120
+fps step: 14421 fps step and policy inference: 11675 fps total: 7128 epoch: 432/10000 frames: 7061504
+fps step: 14418 fps step and policy inference: 11679 fps total: 7140 epoch: 433/10000 frames: 7077888
+fps step: 14436 fps step and policy inference: 11719 fps total: 7184 epoch: 434/10000 frames: 7094272
+fps step: 14513 fps step and policy inference: 11761 fps total: 7207 epoch: 435/10000 frames: 7110656
+fps step: 14374 fps step and policy inference: 11685 fps total: 7171 epoch: 436/10000 frames: 7127040
+fps step: 14474 fps step and policy inference: 11714 fps total: 7148 epoch: 437/10000 frames: 7143424
+saving next best rewards:  [11.13]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14327 fps step and policy inference: 11648 fps total: 7171 epoch: 438/10000 frames: 7159808
+fps step: 14434 fps step and policy inference: 11722 fps total: 7147 epoch: 439/10000 frames: 7176192
+fps step: 14336 fps step and policy inference: 11621 fps total: 7101 epoch: 440/10000 frames: 7192576
+saving next best rewards:  [11.13]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14381 fps step and policy inference: 11667 fps total: 7114 epoch: 441/10000 frames: 7208960
+saving next best rewards:  [11.39]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14385 fps step and policy inference: 11666 fps total: 7111 epoch: 442/10000 frames: 7225344
+fps step: 14416 fps step and policy inference: 11662 fps total: 7119 epoch: 443/10000 frames: 7241728
+fps step: 14378 fps step and policy inference: 11649 fps total: 7109 epoch: 444/10000 frames: 7258112
+fps step: 14366 fps step and policy inference: 11639 fps total: 7125 epoch: 445/10000 frames: 7274496
+saving next best rewards:  [11.5]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14445 fps step and policy inference: 11753 fps total: 7208 epoch: 446/10000 frames: 7290880
+fps step: 14434 fps step and policy inference: 11728 fps total: 7202 epoch: 447/10000 frames: 7307264
+fps step: 14446 fps step and policy inference: 11761 fps total: 7214 epoch: 448/10000 frames: 7323648
+fps step: 14383 fps step and policy inference: 11731 fps total: 7233 epoch: 449/10000 frames: 7340032
+fps step: 14473 fps step and policy inference: 11784 fps total: 7255 epoch: 450/10000 frames: 7356416
+fps step: 14483 fps step and policy inference: 11783 fps total: 7258 epoch: 451/10000 frames: 7372800
+fps step: 14419 fps step and policy inference: 11728 fps total: 7224 epoch: 452/10000 frames: 7389184
+fps step: 14477 fps step and policy inference: 11773 fps total: 7218 epoch: 453/10000 frames: 7405568
+fps step: 14459 fps step and policy inference: 11770 fps total: 7231 epoch: 454/10000 frames: 7421952
+fps step: 14449 fps step and policy inference: 11736 fps total: 7208 epoch: 455/10000 frames: 7438336
+fps step: 14402 fps step and policy inference: 11720 fps total: 7204 epoch: 456/10000 frames: 7454720
+fps step: 14450 fps step and policy inference: 11752 fps total: 7220 epoch: 457/10000 frames: 7471104
+fps step: 14416 fps step and policy inference: 11702 fps total: 7194 epoch: 458/10000 frames: 7487488
+fps step: 14442 fps step and policy inference: 11766 fps total: 7235 epoch: 459/10000 frames: 7503872
+fps step: 14448 fps step and policy inference: 11757 fps total: 7219 epoch: 460/10000 frames: 7520256
+fps step: 14402 fps step and policy inference: 11737 fps total: 7225 epoch: 461/10000 frames: 7536640
+saving next best rewards:  [11.58]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14416 fps step and policy inference: 11758 fps total: 7216 epoch: 462/10000 frames: 7553024
+fps step: 14416 fps step and policy inference: 11742 fps total: 7236 epoch: 463/10000 frames: 7569408
+fps step: 14434 fps step and policy inference: 11726 fps total: 7214 epoch: 464/10000 frames: 7585792
+fps step: 14453 fps step and policy inference: 11759 fps total: 7242 epoch: 465/10000 frames: 7602176
+fps step: 14448 fps step and policy inference: 11750 fps total: 7241 epoch: 466/10000 frames: 7618560
+fps step: 14456 fps step and policy inference: 11760 fps total: 7240 epoch: 467/10000 frames: 7634944
+fps step: 14395 fps step and policy inference: 11711 fps total: 7227 epoch: 468/10000 frames: 7651328
+fps step: 14528 fps step and policy inference: 11823 fps total: 7285 epoch: 469/10000 frames: 7667712
+fps step: 14443 fps step and policy inference: 11759 fps total: 7245 epoch: 470/10000 frames: 7684096
+fps step: 14503 fps step and policy inference: 11803 fps total: 7272 epoch: 471/10000 frames: 7700480
+fps step: 14439 fps step and policy inference: 11757 fps total: 7221 epoch: 472/10000 frames: 7716864
+fps step: 14484 fps step and policy inference: 11787 fps total: 7248 epoch: 473/10000 frames: 7733248
+fps step: 14435 fps step and policy inference: 11735 fps total: 7187 epoch: 474/10000 frames: 7749632
+fps step: 14467 fps step and policy inference: 11783 fps total: 7239 epoch: 475/10000 frames: 7766016
+fps step: 14400 fps step and policy inference: 11725 fps total: 7214 epoch: 476/10000 frames: 7782400
+fps step: 14405 fps step and policy inference: 11711 fps total: 7165 epoch: 477/10000 frames: 7798784
+fps step: 14359 fps step and policy inference: 11662 fps total: 7146 epoch: 478/10000 frames: 7815168
+saving next best rewards:  [11.66]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14327 fps step and policy inference: 11652 fps total: 7139 epoch: 479/10000 frames: 7831552
+fps step: 14421 fps step and policy inference: 11697 fps total: 7160 epoch: 480/10000 frames: 7847936
+saving next best rewards:  [12.05]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14452 fps step and policy inference: 11748 fps total: 7178 epoch: 481/10000 frames: 7864320
+fps step: 14363 fps step and policy inference: 11624 fps total: 7079 epoch: 482/10000 frames: 7880704
+fps step: 14436 fps step and policy inference: 11689 fps total: 7144 epoch: 483/10000 frames: 7897088
+fps step: 14394 fps step and policy inference: 11657 fps total: 7130 epoch: 484/10000 frames: 7913472
+fps step: 14398 fps step and policy inference: 11660 fps total: 7140 epoch: 485/10000 frames: 7929856
+fps step: 14471 fps step and policy inference: 11687 fps total: 7139 epoch: 486/10000 frames: 7946240
+fps step: 14418 fps step and policy inference: 11678 fps total: 7143 epoch: 487/10000 frames: 7962624
+fps step: 14460 fps step and policy inference: 11731 fps total: 7173 epoch: 488/10000 frames: 7979008
+saving next best rewards:  [12.65]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14423 fps step and policy inference: 11716 fps total: 7131 epoch: 489/10000 frames: 7995392
+fps step: 14406 fps step and policy inference: 11682 fps total: 7148 epoch: 490/10000 frames: 8011776
+fps step: 14532 fps step and policy inference: 11774 fps total: 7190 epoch: 491/10000 frames: 8028160
+saving next best rewards:  [12.66]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14375 fps step and policy inference: 11656 fps total: 7109 epoch: 492/10000 frames: 8044544
+fps step: 14445 fps step and policy inference: 11699 fps total: 7154 epoch: 493/10000 frames: 8060928
+fps step: 14488 fps step and policy inference: 11747 fps total: 7178 epoch: 494/10000 frames: 8077312
+fps step: 14476 fps step and policy inference: 11748 fps total: 7189 epoch: 495/10000 frames: 8093696
+fps step: 14396 fps step and policy inference: 11675 fps total: 7127 epoch: 496/10000 frames: 8110080
+fps step: 14467 fps step and policy inference: 11712 fps total: 7170 epoch: 497/10000 frames: 8126464
+saving next best rewards:  [12.75]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14453 fps step and policy inference: 11747 fps total: 7189 epoch: 498/10000 frames: 8142848
+saving next best rewards:  [12.96]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14471 fps step and policy inference: 11772 fps total: 7194 epoch: 499/10000 frames: 8159232
+saving next best rewards:  [13.18]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14310 fps step and policy inference: 11643 fps total: 7150 epoch: 500/10000 frames: 8175616
+fps step: 14389 fps step and policy inference: 11697 fps total: 7118 epoch: 501/10000 frames: 8192000
+fps step: 14434 fps step and policy inference: 11656 fps total: 7124 epoch: 502/10000 frames: 8208384
+saving next best rewards:  [13.85]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14443 fps step and policy inference: 11691 fps total: 7135 epoch: 503/10000 frames: 8224768
+fps step: 14463 fps step and policy inference: 11685 fps total: 7145 epoch: 504/10000 frames: 8241152
+saving next best rewards:  [14.04]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14449 fps step and policy inference: 11732 fps total: 7141 epoch: 505/10000 frames: 8257536
+fps step: 14500 fps step and policy inference: 11721 fps total: 7143 epoch: 506/10000 frames: 8273920
+fps step: 14534 fps step and policy inference: 11745 fps total: 7156 epoch: 507/10000 frames: 8290304
+fps step: 14453 fps step and policy inference: 11688 fps total: 7127 epoch: 508/10000 frames: 8306688
+fps step: 14431 fps step and policy inference: 11683 fps total: 7122 epoch: 509/10000 frames: 8323072
+saving next best rewards:  [14.35]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14382 fps step and policy inference: 11668 fps total: 7116 epoch: 510/10000 frames: 8339456
+saving next best rewards:  [14.47]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14407 fps step and policy inference: 11668 fps total: 7138 epoch: 511/10000 frames: 8355840
+fps step: 14394 fps step and policy inference: 11658 fps total: 7115 epoch: 512/10000 frames: 8372224
+fps step: 14365 fps step and policy inference: 11642 fps total: 7126 epoch: 513/10000 frames: 8388608
+saving next best rewards:  [14.74]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14445 fps step and policy inference: 11704 fps total: 7129 epoch: 514/10000 frames: 8404992
+saving next best rewards:  [15.41]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14459 fps step and policy inference: 11718 fps total: 7147 epoch: 515/10000 frames: 8421376
+fps step: 14468 fps step and policy inference: 11698 fps total: 7142 epoch: 516/10000 frames: 8437760
+saving next best rewards:  [15.75]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14495 fps step and policy inference: 11754 fps total: 7171 epoch: 517/10000 frames: 8454144
+fps step: 14495 fps step and policy inference: 11746 fps total: 7180 epoch: 518/10000 frames: 8470528
+fps step: 14468 fps step and policy inference: 11713 fps total: 7234 epoch: 519/10000 frames: 8486912
+fps step: 14520 fps step and policy inference: 11824 fps total: 7263 epoch: 520/10000 frames: 8503296
+saving next best rewards:  [15.91]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14543 fps step and policy inference: 11857 fps total: 7275 epoch: 521/10000 frames: 8519680
+saving next best rewards:  [16.12]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14471 fps step and policy inference: 11800 fps total: 7256 epoch: 522/10000 frames: 8536064
+fps step: 14592 fps step and policy inference: 11854 fps total: 7267 epoch: 523/10000 frames: 8552448
+fps step: 14438 fps step and policy inference: 11699 fps total: 7205 epoch: 524/10000 frames: 8568832
+fps step: 14520 fps step and policy inference: 11823 fps total: 7254 epoch: 525/10000 frames: 8585216
+saving next best rewards:  [17.21]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14521 fps step and policy inference: 11840 fps total: 7242 epoch: 526/10000 frames: 8601600
+saving next best rewards:  [17.53]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14572 fps step and policy inference: 11882 fps total: 7255 epoch: 527/10000 frames: 8617984
+fps step: 14540 fps step and policy inference: 11785 fps total: 7226 epoch: 528/10000 frames: 8634368
+fps step: 14469 fps step and policy inference: 11731 fps total: 7148 epoch: 529/10000 frames: 8650752
+saving next best rewards:  [17.73]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14507 fps step and policy inference: 11806 fps total: 7236 epoch: 530/10000 frames: 8667136
+fps step: 14596 fps step and policy inference: 11866 fps total: 7271 epoch: 531/10000 frames: 8683520
+fps step: 14581 fps step and policy inference: 11856 fps total: 7263 epoch: 532/10000 frames: 8699904
+fps step: 14545 fps step and policy inference: 11849 fps total: 7268 epoch: 533/10000 frames: 8716288
+fps step: 14561 fps step and policy inference: 11853 fps total: 7265 epoch: 534/10000 frames: 8732672
+fps step: 14532 fps step and policy inference: 11835 fps total: 7253 epoch: 535/10000 frames: 8749056
+saving next best rewards:  [18.42]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14526 fps step and policy inference: 11651 fps total: 7188 epoch: 536/10000 frames: 8765440
+fps step: 14554 fps step and policy inference: 11844 fps total: 7248 epoch: 537/10000 frames: 8781824
+fps step: 14543 fps step and policy inference: 11837 fps total: 7318 epoch: 538/10000 frames: 8798208
+saving next best rewards:  [18.64]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14466 fps step and policy inference: 11802 fps total: 7259 epoch: 539/10000 frames: 8814592
+fps step: 14550 fps step and policy inference: 11844 fps total: 7269 epoch: 540/10000 frames: 8830976
+fps step: 14523 fps step and policy inference: 11825 fps total: 7272 epoch: 541/10000 frames: 8847360
+fps step: 14401 fps step and policy inference: 11683 fps total: 7138 epoch: 542/10000 frames: 8863744
+saving next best rewards:  [19.55]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14475 fps step and policy inference: 11768 fps total: 7166 epoch: 543/10000 frames: 8880128
+fps step: 14449 fps step and policy inference: 11706 fps total: 7157 epoch: 544/10000 frames: 8896512
+fps step: 14434 fps step and policy inference: 11699 fps total: 7155 epoch: 545/10000 frames: 8912896
+saving next best rewards:  [19.68]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14408 fps step and policy inference: 11685 fps total: 7142 epoch: 546/10000 frames: 8929280
+fps step: 14381 fps step and policy inference: 11668 fps total: 7130 epoch: 547/10000 frames: 8945664
+fps step: 14376 fps step and policy inference: 11653 fps total: 7134 epoch: 548/10000 frames: 8962048
+saving next best rewards:  [21.04]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14433 fps step and policy inference: 11714 fps total: 7156 epoch: 549/10000 frames: 8978432
+fps step: 14419 fps step and policy inference: 11674 fps total: 7142 epoch: 550/10000 frames: 8994816
+fps step: 14435 fps step and policy inference: 11689 fps total: 7118 epoch: 551/10000 frames: 9011200
+fps step: 14497 fps step and policy inference: 11742 fps total: 7188 epoch: 552/10000 frames: 9027584
+fps step: 14415 fps step and policy inference: 11729 fps total: 7227 epoch: 553/10000 frames: 9043968
+fps step: 14366 fps step and policy inference: 11651 fps total: 7161 epoch: 554/10000 frames: 9060352
+fps step: 14350 fps step and policy inference: 11654 fps total: 7162 epoch: 555/10000 frames: 9076736
+fps step: 14384 fps step and policy inference: 11676 fps total: 7163 epoch: 556/10000 frames: 9093120
+fps step: 14350 fps step and policy inference: 11696 fps total: 7182 epoch: 557/10000 frames: 9109504
+fps step: 14351 fps step and policy inference: 11650 fps total: 7154 epoch: 558/10000 frames: 9125888
+fps step: 14391 fps step and policy inference: 11723 fps total: 7210 epoch: 559/10000 frames: 9142272
+fps step: 14469 fps step and policy inference: 11776 fps total: 7218 epoch: 560/10000 frames: 9158656
+fps step: 14343 fps step and policy inference: 11644 fps total: 7104 epoch: 561/10000 frames: 9175040
+fps step: 14301 fps step and policy inference: 11607 fps total: 7105 epoch: 562/10000 frames: 9191424
+fps step: 14368 fps step and policy inference: 11642 fps total: 7125 epoch: 563/10000 frames: 9207808
+fps step: 14376 fps step and policy inference: 11666 fps total: 7164 epoch: 564/10000 frames: 9224192
+fps step: 14373 fps step and policy inference: 11714 fps total: 7168 epoch: 565/10000 frames: 9240576
+fps step: 14254 fps step and policy inference: 11598 fps total: 7115 epoch: 566/10000 frames: 9256960
+saving next best rewards:  [22.73]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14329 fps step and policy inference: 11634 fps total: 7146 epoch: 567/10000 frames: 9273344
+fps step: 14348 fps step and policy inference: 11650 fps total: 7156 epoch: 568/10000 frames: 9289728
+fps step: 14351 fps step and policy inference: 11664 fps total: 7163 epoch: 569/10000 frames: 9306112
+fps step: 14275 fps step and policy inference: 11615 fps total: 7117 epoch: 570/10000 frames: 9322496
+fps step: 14349 fps step and policy inference: 11639 fps total: 7117 epoch: 571/10000 frames: 9338880
+fps step: 14310 fps step and policy inference: 11607 fps total: 7110 epoch: 572/10000 frames: 9355264
+fps step: 14300 fps step and policy inference: 11629 fps total: 7150 epoch: 573/10000 frames: 9371648
+fps step: 14347 fps step and policy inference: 11677 fps total: 7162 epoch: 574/10000 frames: 9388032
+fps step: 14241 fps step and policy inference: 11606 fps total: 7137 epoch: 575/10000 frames: 9404416
+fps step: 14230 fps step and policy inference: 11556 fps total: 7110 epoch: 576/10000 frames: 9420800
+fps step: 14295 fps step and policy inference: 11615 fps total: 7185 epoch: 577/10000 frames: 9437184
+fps step: 14381 fps step and policy inference: 11723 fps total: 7199 epoch: 578/10000 frames: 9453568
+fps step: 14396 fps step and policy inference: 11744 fps total: 7197 epoch: 579/10000 frames: 9469952
+fps step: 14410 fps step and policy inference: 11727 fps total: 7220 epoch: 580/10000 frames: 9486336
+fps step: 14302 fps step and policy inference: 11680 fps total: 7213 epoch: 581/10000 frames: 9502720
+fps step: 14308 fps step and policy inference: 11693 fps total: 7223 epoch: 582/10000 frames: 9519104
+fps step: 14269 fps step and policy inference: 11605 fps total: 7103 epoch: 583/10000 frames: 9535488
+saving next best rewards:  [23.79]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14376 fps step and policy inference: 11737 fps total: 7237 epoch: 584/10000 frames: 9551872
+fps step: 14363 fps step and policy inference: 11732 fps total: 7237 epoch: 585/10000 frames: 9568256
+fps step: 14362 fps step and policy inference: 11718 fps total: 7233 epoch: 586/10000 frames: 9584640
+fps step: 14406 fps step and policy inference: 11753 fps total: 7257 epoch: 587/10000 frames: 9601024
+saving next best rewards:  [24.85]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14315 fps step and policy inference: 11540 fps total: 7165 epoch: 588/10000 frames: 9617408
+fps step: 14348 fps step and policy inference: 11730 fps total: 7241 epoch: 589/10000 frames: 9633792
+fps step: 14349 fps step and policy inference: 11708 fps total: 7215 epoch: 590/10000 frames: 9650176
+fps step: 14329 fps step and policy inference: 11700 fps total: 7210 epoch: 591/10000 frames: 9666560
+fps step: 14396 fps step and policy inference: 11724 fps total: 7213 epoch: 592/10000 frames: 9682944
+fps step: 14373 fps step and policy inference: 11711 fps total: 7204 epoch: 593/10000 frames: 9699328
+fps step: 14313 fps step and policy inference: 11677 fps total: 7211 epoch: 594/10000 frames: 9715712
+fps step: 14394 fps step and policy inference: 11763 fps total: 7237 epoch: 595/10000 frames: 9732096
+fps step: 14375 fps step and policy inference: 11709 fps total: 7213 epoch: 596/10000 frames: 9748480
+fps step: 14357 fps step and policy inference: 11722 fps total: 7241 epoch: 597/10000 frames: 9764864
+saving next best rewards:  [25.1]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14352 fps step and policy inference: 11719 fps total: 7199 epoch: 598/10000 frames: 9781248
+fps step: 14397 fps step and policy inference: 11770 fps total: 7226 epoch: 599/10000 frames: 9797632
+fps step: 14425 fps step and policy inference: 11754 fps total: 7225 epoch: 600/10000 frames: 9814016
+fps step: 14392 fps step and policy inference: 11765 fps total: 7232 epoch: 601/10000 frames: 9830400
+fps step: 14394 fps step and policy inference: 11760 fps total: 7221 epoch: 602/10000 frames: 9846784
+fps step: 14367 fps step and policy inference: 11702 fps total: 7156 epoch: 603/10000 frames: 9863168
+fps step: 14332 fps step and policy inference: 11645 fps total: 7126 epoch: 604/10000 frames: 9879552
+fps step: 14341 fps step and policy inference: 11661 fps total: 7143 epoch: 605/10000 frames: 9895936
+saving next best rewards:  [26.69]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14308 fps step and policy inference: 11638 fps total: 7114 epoch: 606/10000 frames: 9912320
+fps step: 14331 fps step and policy inference: 11664 fps total: 7120 epoch: 607/10000 frames: 9928704
+fps step: 14284 fps step and policy inference: 11604 fps total: 7091 epoch: 608/10000 frames: 9945088
+fps step: 14327 fps step and policy inference: 11644 fps total: 7134 epoch: 609/10000 frames: 9961472
+fps step: 14302 fps step and policy inference: 11604 fps total: 7056 epoch: 610/10000 frames: 9977856
+fps step: 14261 fps step and policy inference: 11587 fps total: 7074 epoch: 611/10000 frames: 9994240
+fps step: 14307 fps step and policy inference: 11615 fps total: 7073 epoch: 612/10000 frames: 10010624
+fps step: 14365 fps step and policy inference: 11647 fps total: 7117 epoch: 613/10000 frames: 10027008
+fps step: 14305 fps step and policy inference: 11611 fps total: 7081 epoch: 614/10000 frames: 10043392
+fps step: 14359 fps step and policy inference: 11680 fps total: 7145 epoch: 615/10000 frames: 10059776
+fps step: 14226 fps step and policy inference: 11559 fps total: 7055 epoch: 616/10000 frames: 10076160
+fps step: 14344 fps step and policy inference: 11642 fps total: 7094 epoch: 617/10000 frames: 10092544
+fps step: 14401 fps step and policy inference: 11679 fps total: 7103 epoch: 618/10000 frames: 10108928
+fps step: 14315 fps step and policy inference: 11606 fps total: 7064 epoch: 619/10000 frames: 10125312
+fps step: 14299 fps step and policy inference: 11610 fps total: 7110 epoch: 620/10000 frames: 10141696
+fps step: 14367 fps step and policy inference: 11659 fps total: 7114 epoch: 621/10000 frames: 10158080
+fps step: 14328 fps step and policy inference: 11691 fps total: 7195 epoch: 622/10000 frames: 10174464
+fps step: 14385 fps step and policy inference: 11702 fps total: 7158 epoch: 623/10000 frames: 10190848
+fps step: 14301 fps step and policy inference: 11677 fps total: 7192 epoch: 624/10000 frames: 10207232
+fps step: 14430 fps step and policy inference: 11775 fps total: 7190 epoch: 625/10000 frames: 10223616
+fps step: 14362 fps step and policy inference: 11677 fps total: 7144 epoch: 626/10000 frames: 10240000
+fps step: 14397 fps step and policy inference: 11762 fps total: 7241 epoch: 627/10000 frames: 10256384
+saving next best rewards:  [26.78]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14357 fps step and policy inference: 11711 fps total: 7156 epoch: 628/10000 frames: 10272768
+fps step: 14462 fps step and policy inference: 11779 fps total: 7242 epoch: 629/10000 frames: 10289152
+fps step: 14391 fps step and policy inference: 11748 fps total: 7217 epoch: 630/10000 frames: 10305536
+fps step: 14417 fps step and policy inference: 11780 fps total: 7243 epoch: 631/10000 frames: 10321920
+fps step: 14395 fps step and policy inference: 11726 fps total: 7204 epoch: 632/10000 frames: 10338304
+fps step: 14441 fps step and policy inference: 11769 fps total: 7227 epoch: 633/10000 frames: 10354688
+fps step: 14452 fps step and policy inference: 11770 fps total: 7181 epoch: 634/10000 frames: 10371072
+fps step: 14445 fps step and policy inference: 11782 fps total: 7204 epoch: 635/10000 frames: 10387456
+fps step: 14467 fps step and policy inference: 11770 fps total: 7199 epoch: 636/10000 frames: 10403840
+fps step: 14391 fps step and policy inference: 11718 fps total: 7215 epoch: 637/10000 frames: 10420224
+fps step: 14482 fps step and policy inference: 11778 fps total: 7230 epoch: 638/10000 frames: 10436608
+fps step: 14376 fps step and policy inference: 11699 fps total: 7186 epoch: 639/10000 frames: 10452992
+fps step: 14426 fps step and policy inference: 11749 fps total: 7216 epoch: 640/10000 frames: 10469376
+fps step: 14402 fps step and policy inference: 11731 fps total: 7194 epoch: 641/10000 frames: 10485760
+fps step: 14450 fps step and policy inference: 11760 fps total: 7188 epoch: 642/10000 frames: 10502144
+fps step: 14395 fps step and policy inference: 11660 fps total: 7103 epoch: 643/10000 frames: 10518528
+saving next best rewards:  [27.44]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14389 fps step and policy inference: 11657 fps total: 7100 epoch: 644/10000 frames: 10534912
+fps step: 14304 fps step and policy inference: 11584 fps total: 7062 epoch: 645/10000 frames: 10551296
+fps step: 14287 fps step and policy inference: 11571 fps total: 7071 epoch: 646/10000 frames: 10567680
+fps step: 14351 fps step and policy inference: 11624 fps total: 7096 epoch: 647/10000 frames: 10584064
+fps step: 14353 fps step and policy inference: 11631 fps total: 7159 epoch: 648/10000 frames: 10600448
+fps step: 14385 fps step and policy inference: 11696 fps total: 7104 epoch: 649/10000 frames: 10616832
+fps step: 14349 fps step and policy inference: 11616 fps total: 7089 epoch: 650/10000 frames: 10633216
+fps step: 14400 fps step and policy inference: 11678 fps total: 7108 epoch: 651/10000 frames: 10649600
+fps step: 14293 fps step and policy inference: 11592 fps total: 7077 epoch: 652/10000 frames: 10665984
+fps step: 14331 fps step and policy inference: 11638 fps total: 7098 epoch: 653/10000 frames: 10682368
+saving next best rewards:  [27.71]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14313 fps step and policy inference: 11513 fps total: 7044 epoch: 654/10000 frames: 10698752
+fps step: 14383 fps step and policy inference: 11650 fps total: 7111 epoch: 655/10000 frames: 10715136
+saving next best rewards:  [32.29]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14391 fps step and policy inference: 11674 fps total: 7117 epoch: 656/10000 frames: 10731520
+fps step: 14426 fps step and policy inference: 11687 fps total: 7126 epoch: 657/10000 frames: 10747904
+fps step: 14377 fps step and policy inference: 11711 fps total: 7204 epoch: 658/10000 frames: 10764288
+fps step: 14413 fps step and policy inference: 11706 fps total: 7127 epoch: 659/10000 frames: 10780672
+fps step: 14421 fps step and policy inference: 11723 fps total: 7120 epoch: 660/10000 frames: 10797056
+fps step: 14403 fps step and policy inference: 11681 fps total: 7121 epoch: 661/10000 frames: 10813440
+fps step: 14339 fps step and policy inference: 11648 fps total: 7094 epoch: 662/10000 frames: 10829824
+fps step: 14416 fps step and policy inference: 11680 fps total: 7111 epoch: 663/10000 frames: 10846208
+fps step: 14322 fps step and policy inference: 11629 fps total: 7158 epoch: 664/10000 frames: 10862592
+fps step: 14324 fps step and policy inference: 11613 fps total: 7093 epoch: 665/10000 frames: 10878976
+fps step: 14350 fps step and policy inference: 11652 fps total: 7119 epoch: 666/10000 frames: 10895360
+fps step: 14278 fps step and policy inference: 11585 fps total: 7082 epoch: 667/10000 frames: 10911744
+fps step: 14304 fps step and policy inference: 11560 fps total: 7059 epoch: 668/10000 frames: 10928128
+fps step: 14423 fps step and policy inference: 11704 fps total: 7193 epoch: 669/10000 frames: 10944512
+fps step: 14396 fps step and policy inference: 11682 fps total: 7186 epoch: 670/10000 frames: 10960896
+
+/home/leegyuwon/Documents/ManipTrans/maniptrans_envs/lib/envs/tasks/dexhandimitator.py:158: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  self.dexhand_default_dof_pos = torch.tensor(default_pose, device=self.sim_device)
+fps step: 14337 fps step and policy inference: 11659 fps total: 7184 epoch: 671/10000 frames: 10977280
+fps step: 14362 fps step and policy inference: 11650 fps total: 7107 epoch: 672/10000 frames: 10993664
+fps step: 14339 fps step and policy inference: 11632 fps total: 7108 epoch: 673/10000 frames: 11010048
+fps step: 14269 fps step and policy inference: 11586 fps total: 7061 epoch: 674/10000 frames: 11026432
+fps step: 14360 fps step and policy inference: 11629 fps total: 7079 epoch: 675/10000 frames: 11042816
+fps step: 14321 fps step and policy inference: 11608 fps total: 7073 epoch: 676/10000 frames: 11059200
+fps step: 14289 fps step and policy inference: 11583 fps total: 7075 epoch: 677/10000 frames: 11075584
+fps step: 14306 fps step and policy inference: 11617 fps total: 7082 epoch: 678/10000 frames: 11091968
+fps step: 14325 fps step and policy inference: 11609 fps total: 7076 epoch: 679/10000 frames: 11108352
+fps step: 14335 fps step and policy inference: 11635 fps total: 7085 epoch: 680/10000 frames: 11124736
+fps step: 14282 fps step and policy inference: 11578 fps total: 7061 epoch: 681/10000 frames: 11141120
+fps step: 14273 fps step and policy inference: 11596 fps total: 7075 epoch: 682/10000 frames: 11157504
+fps step: 14345 fps step and policy inference: 11627 fps total: 7091 epoch: 683/10000 frames: 11173888
+fps step: 14245 fps step and policy inference: 11570 fps total: 7064 epoch: 684/10000 frames: 11190272
+fps step: 14357 fps step and policy inference: 11643 fps total: 7098 epoch: 685/10000 frames: 11206656
+fps step: 14289 fps step and policy inference: 11583 fps total: 7074 epoch: 686/10000 frames: 11223040
+fps step: 14376 fps step and policy inference: 11661 fps total: 7108 epoch: 687/10000 frames: 11239424
+fps step: 14363 fps step and policy inference: 11630 fps total: 7078 epoch: 688/10000 frames: 11255808
+fps step: 14392 fps step and policy inference: 11683 fps total: 7111 epoch: 689/10000 frames: 11272192
+fps step: 14307 fps step and policy inference: 11586 fps total: 7075 epoch: 690/10000 frames: 11288576
+fps step: 14254 fps step and policy inference: 11566 fps total: 7062 epoch: 691/10000 frames: 11304960
+fps step: 14296 fps step and policy inference: 11621 fps total: 7089 epoch: 692/10000 frames: 11321344
+fps step: 14290 fps step and policy inference: 11602 fps total: 7075 epoch: 693/10000 frames: 11337728
+saving next best rewards:  [34.95]
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/dg5fs_imitator_rh.pth'
+fps step: 14323 fps step and policy inference: 11423 fps total: 7001 epoch: 694/10000 frames: 11354112
+fps step: 14327 fps step and policy inference: 11632 fps total: 7089 epoch: 695/10000 frames: 11370496
+fps step: 14283 fps step and policy inference: 11587 fps total: 7072 epoch: 696/10000 frames: 11386880
+fps step: 14250 fps step and policy inference: 11583 fps total: 7055 epoch: 697/10000 frames: 11403264
+fps step: 14325 fps step and policy inference: 11652 fps total: 7177 epoch: 698/10000 frames: 11419648
+fps step: 14313 fps step and policy inference: 11692 fps total: 7202 epoch: 699/10000 frames: 11436032
+fps step: 14319 fps step and policy inference: 11692 fps total: 7199 epoch: 700/10000 frames: 11452416
+fps step: 14431 fps step and policy inference: 11754 fps total: 7214 epoch: 701/10000 frames: 11468800
+fps step: 14380 fps step and policy inference: 11731 fps total: 7220 epoch: 702/10000 frames: 11485184
+fps step: 14430 fps step and policy inference: 11775 fps total: 7222 epoch: 703/10000 frames: 11501568
+fps step: 14386 fps step and policy inference: 11705 fps total: 7161 epoch: 704/10000 frames: 11517952
+fps step: 14416 fps step and policy inference: 11759 fps total: 7225 epoch: 705/10000 frames: 11534336
+fps step: 14456 fps step and policy inference: 11782 fps total: 7224 epoch: 706/10000 frames: 11550720
+fps step: 14429 fps step and policy inference: 11780 fps total: 7214 epoch: 707/10000 frames: 11567104
+=> saving checkpoint 'runs/dg5fs_imitator_rh__07-20-13-48-07/nn/last_dg5fs_imitator_rh_ep_707_rew__21.5__sr_0.24062278866767883_fr_0.7593770623207092.pth'
+EARLY STOP!

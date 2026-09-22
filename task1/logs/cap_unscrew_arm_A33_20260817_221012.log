@@ -1,0 +1,2319 @@
+Importing module 'gym_38' (/home/leegyuwon/Documents/isaacgym/python/isaacgym/_bindings/linux-x86_64/gym_38.so)
+Setting GYM_USD_PLUG_INFO_PATH to /home/leegyuwon/Documents/isaacgym/python/isaacgym/_bindings/linux-x86_64/usd/plugInfo.json
+PyTorch version 1.13.1+cu117
+Device count 1
+/home/leegyuwon/Documents/isaacgym/python/isaacgym/_bindings/src/gymtorch
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/hydra/_internal/hydra.py:119: UserWarning: Future Hydra versions will no longer change working directory at job runtime by default.
+See https://hydra.cc/docs/1.2/upgrades/1.1_to_1.2/changes_to_job_working_dir/ for more information.
+  ret = run_job(
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/torch/utils/cpp_extension.py:25: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+  from pkg_resources import packaging  # type: ignore[attr-defined]
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/pkg_resources/__init__.py:3154: DeprecationWarning: Deprecated call to `pkg_resources.declare_namespace('mpl_toolkits')`.
+Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages
+  declare_namespace(pkg)
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/pkg_resources/__init__.py:3154: DeprecationWarning: Deprecated call to `pkg_resources.declare_namespace('google')`.
+Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages
+  declare_namespace(pkg)
+Using /home/leegyuwon/.cache/torch_extensions/py38_cu117 as PyTorch extensions root...
+Emitting ninja build file /home/leegyuwon/.cache/torch_extensions/py38_cu117/gymtorch/build.ninja...
+Building extension module gymtorch...
+Allowing ninja to set a default number of workers... (overridable by setting the environment variable MAX_JOBS=N)
+ninja: no work to do.
+task: 
+    name: ResDexHandRH
+    physics_engine: physx
+    seed: 42
+    env: 
+        numEnvs: 512
+        dexhand: rb5_allegro
+        episodeLength: 1200
+        training: True
+        usePIDControl: False
+        rolloutStateInit: False
+        randomStateInit: True
+        dataIndices: [7]
+        obsFutureLength: 1
+        rolloutLen: None
+        rolloutBegin: None
+        clipObservations: 5.0
+        clipActions: 1.0
+        furniture: just_one_leg
+        frankaDofNoise: 0.25
+        targetLiftHeight: 0.05
+        distanceReward: 0.1
+        liftReward: 1.0
+        successReward: 1.0
+        aggregateMode: 3
+        tightenMethod: exp_decay
+        tightenFactor: 0.7
+        tightenSteps: 3200
+        actionScale: 1.0
+        useQuatRot: False
+        propDumpInfo: 
+            q_rh: 22
+            q_lh: 22
+            dq_rh: 22
+            dq_lh: 22
+            state_rh: 13
+            state_lh: 13
+            state_manip_obj_rh: 13
+            state_manip_obj_lh: 13
+            joint_state_rh: 377
+            joint_state_lh: 377
+            tip_force_rh: 15
+            tip_force_lh: 15
+            reward: 1
+        actionsMovingAverage: 1.0
+        translationScale: 1.0
+        orientationScale: 0.1
+        bimanual_mode: united
+        trajectory_dropout: 
+            enabled: False
+            mode: full_trajectory_free
+            schedule: linear
+            start_progress: 0.2
+            end_progress: 0.6
+            final_probability: 1.0
+            mask_scope: episode
+            append_availability_flag: False
+            curriculum_total_frames: 0
+            force_probability: -1.0
+            performance_gate: 
+                enabled: False
+                success_threshold: 0.7
+        trajectory_tracking_annealing: 
+            enabled: False
+            schedule: linear
+            start_progress: 0.3
+            end_progress: 0.7
+            final_scale: 0.0
+        observation: 
+            use_normalized_phase: False
+        propObsDim: 79
+        obsKeys: ['q', 'cos_q', 'sin_q', 'base_state']
+        privilegedObsDim: 59
+        privilegedObsKeys: ['dq', 'manip_obj_pos', 'manip_obj_quat', 'manip_obj_vel', 'manip_obj_ang_vel', 'tip_force', 'manip_obj_com', 'manip_obj_weight']
+        enableCameraSensors: False
+    sim: 
+        dt: 0.0166667
+        substeps: 2
+        up_axis: z
+        use_gpu_pipeline: True
+        gravity: [0.0, 0.0, -9.81]
+        physx: 
+            num_threads: 4
+            solver_type: 1
+            use_gpu: True
+            num_position_iterations: 8
+            num_velocity_iterations: 1
+            contact_offset: 0.005
+            rest_offset: 0.0
+            bounce_threshold_velocity: 0.2
+            max_depenetration_velocity: 1.0
+            default_buffer_size_multiplier: 5.0
+            max_gpu_contact_pairs: 1048576
+            num_subscenes: 4
+            contact_collection: 1
+    task: 
+        randomize: True
+        randomization_params: 
+            frequency: 32
+            sim_params: 
+                gravity: 
+                    operation: scaling
+                    schedule: linear_decay
+                    schedule_steps: 1920
+                    external_sample: 
+                        type: const_scale
+                        init_value: 0
+            actor_params: 
+                manip_obj: 
+                    color: True
+                    rigid_shape_properties: 
+                        friction: 
+                            num_buckets: 250
+                            operation: scaling
+                            schedule: linear_decay
+                            schedule_steps: 1920
+                            external_sample: 
+                                type: const_scale
+                                init_value: 3
+                                upper_bound: 6.0
+                                lower_bound: 1.0
+                manip_obj_rh: 
+                    color: True
+                    rigid_shape_properties: 
+                        friction: 
+                            num_buckets: 250
+                            operation: scaling
+                            schedule: linear_decay
+                            schedule_steps: 1920
+                            external_sample: 
+                                type: const_scale
+                                init_value: 3
+                                upper_bound: 6.0
+                                lower_bound: 1.0
+                manip_obj_lh: 
+                    color: True
+                    rigid_shape_properties: 
+                        friction: 
+                            num_buckets: 250
+                            operation: scaling
+                            schedule: linear_decay
+                            schedule_steps: 1920
+                            external_sample: 
+                                type: const_scale
+                                init_value: 3
+                                upper_bound: 6.0
+                                lower_bound: 1.0
+rl_train: 
+    params: 
+        seed: 42
+        algo: 
+            name: ppo
+        model: 
+            name: my_continuous_a2c_logstd
+        network: 
+            name: dict_obs_actor_critic
+            separate: False
+            space: 
+                continuous: 
+                    mu_activation: None
+                    sigma_activation: None
+                    mu_init: 
+                        name: default
+                    sigma_init: 
+                        name: const_initializer
+                        val: 0
+                    fixed_sigma: True
+            dict_feature_encoder: 
+                _target_: lib.nn.features.SimpleFeatureFusion
+                extractors: 
+                    privileged: 
+                        _target_: lib.nn.features.Identity
+                        input_dim: 59
+                    proprioception: 
+                        _target_: lib.nn.features.Identity
+                        input_dim: 79
+                    target: 
+                        _target_: lib.nn.features.Identity
+                        input_dim: 206
+                hidden_depth: 3
+                hidden_dim: 512
+                output_dim: 256
+                activation: swish
+                add_input_activation: False
+                add_output_activation: False
+            mlp: 
+                units: [256, 512, 128, 64]
+                activation: elu
+                d2rl: False
+                initializer: 
+                    name: default
+                regularizer: 
+                    name: None
+        load_checkpoint: False
+        load_path: 
+        dexhand: rb5_allegro
+        config: 
+            name: CapUnscrewArm_A33_20260817_221012
+            full_experiment_name: CapUnscrewArm_A33_20260817_221012
+            env_name: rlgpu
+            multi_gpu: False
+            ppo: True
+            mixed_precision: False
+            normalize_input: True
+            normalize_input_excluded_keys: []
+            normalize_value: True
+            use_pid_control: False
+            value_bootstrap: True
+            num_actors: 512
+            reward_shaper: 
+                scale_value: 1.0
+            normalize_advantage: True
+            gamma: 0.99
+            tau: 0.95
+            learning_rate: 0.0005
+            lr_schedule: adaptive
+            schedule_type: standard
+            kl_threshold: 0.008
+            score_to_win: 10000
+            max_epochs: 15000
+            early_stop_epochs: 9999999999999
+            save_best_after: 10
+            save_frequency: 100
+            print_stats: True
+            grad_norm: 1.0
+            entropy_coef: 0.0
+            truncate_grads: True
+            e_clip: 0.2
+            horizon_length: 32
+            minibatch_size: 1024
+            mini_epochs: 5
+            critic_coef: 4
+            clip_value: True
+            seq_len: 4
+            bounds_loss_coef: 0.0001
+            use_soft_clamp: True
+task_name: ResDexHandRH
+experiment: CapUnscrewArm_A33_20260817_221012
+side: RH
+bimanual_mode: united
+dexhand: rb5_allegro
+rh_base_model_checkpoint: assets/imitator_rh_inspire.pth
+lh_base_model_checkpoint: assets/imitator_lh_inspire.pth
+num_envs: 512
+rolloutStateInit: False
+randomStateInit: True
+rolloutLen: None
+rolloutBegin: None
+learning_rate: 0.0005
+actionsMovingAverage: 1.0
+usePIDControl: False
+dataIndices: [7]
+seed: 42
+torch_deterministic: False
+max_iterations: 15000
+early_stop_epochs: 9999999999999
+physics_engine: physx
+pipeline: gpu
+sim_device: cuda:0
+rl_device: cuda:0
+graphics_device_id: 0
+num_threads: 4
+solver_type: 1
+num_subscenes: 4
+test: False
+save_rollouts: False
+save_successful_rollouts_only: True
+num_rollouts_to_save: 20000
+num_rollouts_to_run: 9999999999999
+min_episode_length: 20
+checkpoint: 
+from_ckpt_epoch: False
+sigma: 
+multi_gpu: False
+wandb_activate: False
+wandb_group: 
+wandb_name: CapUnscrewArm_A33_20260817_221012
+wandb_entity: None
+wandb_project: None
+wandb_tags: []
+wandb_logcode_dir: 
+capture_video: False
+n_parallel_recorders: 8
+n_successful_videos_to_record: 50
+display: False
+headless: True
+Setting seed: 42
+Using rl_device: cuda:0
+Using sim_device: cuda:0
+{'name': 'CapUnscrewArm_A33_20260817_221012', 'full_experiment_name': None, 'env_name': 'rlgpu', 'multi_gpu': False, 'ppo': True, 'mixed_precision': False, 'normalize_input': True, 'normalize_input_excluded_keys': [], 'normalize_value': True, 'use_pid_control': False, 'value_bootstrap': True, 'num_actors': 512, 'reward_shaper': {'scale_value': 1.0}, 'normalize_advantage': True, 'gamma': 0.99, 'tau': 0.95, 'learning_rate': 0.0005, 'lr_schedule': 'adaptive', 'schedule_type': 'standard', 'kl_threshold': 0.008, 'score_to_win': 10000, 'max_epochs': 15000, 'early_stop_epochs': 9999999999999, 'save_best_after': 10, 'save_frequency': 100, 'print_stats': True, 'grad_norm': 1.0, 'entropy_coef': 0.0, 'truncate_grads': True, 'e_clip': 0.2, 'horizon_length': 32, 'minibatch_size': 1024, 'mini_epochs': 5, 'critic_coef': 4, 'clip_value': True, 'seq_len': 4, 'bounds_loss_coef': 0.0001, 'use_soft_clamp': True, 'device': 'cuda:0', 'population_based_training': False, 'pbt_idx': None}
+self.seed = 42
+Started to train
+Exact experiment name requested from command line: CapUnscrewArm_A33_20260817_221012__08-17-22-10-15
+[cap_grasp] mode=on | wrist=servo + finger policy | grasp=1.00s settle=0.50s hold=0.30s | wrist_sampler=topdown reach_min_fingers=2 reach_margin=0.020m thumb_required=True thumb_margin=0.025m opposition_min=Nonedeg | zero_triangle_xy=True thumb_mcp_outside_margin=off reject_palm_collision=True:0.002m r=0.045~0.075m z=0.040~0.095m palm_down_max=20.0deg side_contact_margin=0.010m finger_radius=0.012m probe_steps=4 thumb_contact_w=0.50 grip_w=1.00 closure_w=3.00 closure_err_max=0.75 near_w=2.00 require_gravity_for_hold=True hold_decay=3.00 penetration_penalty_w=3.00 penetration_tol=0.002m cap_pre_gravity_lock=True:teleport | pedestal=False lift=0.060m@1.50s/1.00s lift_success=0.016m level_w=1.00 level_cos_min=0.87 | resample_wrist_on_reset=False |
+[Warning] [carb.gym.plugin] useGpu is set, forcing single scene (0 subscenes)
+Not connected to PVD
++++ Using GPU PhysX
+Physics Engine: PhysX
+Physics Device: cuda:0
+GPU Pipeline: enabled
+[friction] hand=4.00 obj=2.00 유효(평균)=3.00  rolling 0.01/0.05 torsion 0.01/0.05
+Num dexhand Bodies: 29
+Num dexhand DOFs: 22
+[dof-drive] 손 관절 22개: stiffness 300 damping 18 effort 150.00Nm (CAP_DOF_EFFORT 오버라이드) velocity 3.14rad/s
+[cap_grasp] cap-only demo override | envs=512 steps=360 cap_z=0.225m urdf=/home/leegyuwon/Documents/task1/assets/cap_only/cap_only.urdf
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[screw] cap_spin 나사 저항 0.20 Nm (effort 제한 속도 드라이브)
+[resist-curriculum] 0.40 -> 1.20Nm (step 0.10, sr게이트 0.80, 창 4096ep)
+[cap_unscrew] cap_lift<-cap_spin x3.183099e-03 (pitch 20.0mm/rev)  target=180deg  band=14.3~30.0mm (고정)  lift>=16.0mm
+[cap_unscrew] actions=22 (wrist OFF + fingers 22)
+[cap_unscrew] curriculum reward | kc 0.4->1 (kd=0.997, /32 steps)  objective: unscrew=10.0 hold=4.0 near=2.0 pinch=2.0@8mm quality=2.0(대향 x 접촉/4, stable>=0.125) grip=1.0  constraints(xkc): pen=3.0 reverse=2.0 revang=2.0(ref=0.25) leash=0.3 palm=0.0 tpair=0.0 action=0.01
+[cap_grasp] contact bodies per finger: [('link_15.0', 'link_15.0_tip'), ('link_3.0', 'link_3.0_tip'), ('link_7.0', 'link_7.0_tip'), ('link_11.0', 'link_11.0_tip'), ('link_11.0', 'link_11.0_tip')]
+[grasp-init] arm_grasp_init_closed_vmount.json 로드  비율 1.00  노이즈 0.0도  손목노이즈 0.0mm/0.0도  (팔 통합(vmount 축중심, 팔꿈치-업, 캡 0.4, 닫힌판))
+WARNING: seq_len is deprecated, use seq_length instead
+seq_length: 4
+current training device: cuda:0
+build mlp: 256
+RunningMeanStd:  (1,)
+RunningMeanStd:  (59,)
+RunningMeanStd:  (79,)
+RunningMeanStd:  (206,)
+[action-slew] delta=0.0 accel_hand=10.0rad/s² accel_arm=10.0rad/s² (실행 액션 하드 클립, dt=0.0167)
+[action-slew] 관절별 δ: 팔 [0.139, 0.139, 0.139, 0.139, 0.139, 0.139] 손[0] 0.056
+[j6-assist] 상시 잔차 어시스트 0.9rad/s (스텝당 0.0150rad, 시작 90스텝 후 램프인, 해제 시 램프오프)
+[obs-angle-only] actor 캡 관측 전부 상수화, 풀림각/π 만 주입
+[obs-angle-direct] actor 관측: quat 간접경로 제거, 풀림각/π 직접 주입
+[traj_dropout] target dim=206, trajectory cols=46, keep(obj/bps)=160, mode=full_trajectory_free
+[thumb-rot] 회전 엄지 접촉 보너스 w=2.0 x (접촉수/4) 등급형 (신기록 전진 게이트)
+[energy] 페널티 활성: w_hand=1.0 w_arm=1.667 alpha=0.1 (기계일/정격W + alpha·(τ/정격τ)², 손 0.48Nm/120W, 팔 effort/200W)
+fps step: 6496 fps step and policy inference: 4290 fps total: 3462 epoch: 1/15000 frames: 0
+fps step: 7201 fps step and policy inference: 6665 fps total: 4846 epoch: 2/15000 frames: 16384
+fps step: 7177 fps step and policy inference: 6709 fps total: 4924 epoch: 3/15000 frames: 32768
+fps step: 7112 fps step and policy inference: 6650 fps total: 4837 epoch: 4/15000 frames: 49152
+fps step: 7019 fps step and policy inference: 6542 fps total: 4761 epoch: 5/15000 frames: 65536
+fps step: 7021 fps step and policy inference: 6571 fps total: 4851 epoch: 6/15000 frames: 81920
+fps step: 7321 fps step and policy inference: 6831 fps total: 4944 epoch: 7/15000 frames: 98304
+fps step: 7106 fps step and policy inference: 6642 fps total: 4875 epoch: 8/15000 frames: 114688
+fps step: 7038 fps step and policy inference: 6554 fps total: 4806 epoch: 9/15000 frames: 131072
+fps step: 7108 fps step and policy inference: 6598 fps total: 4795 epoch: 10/15000 frames: 147456
+fps step: 7204 fps step and policy inference: 6678 fps total: 4818 epoch: 11/15000 frames: 163840
+fps step: 7667 fps step and policy inference: 6191 fps total: 4596 epoch: 12/15000 frames: 180224
+saving next best rewards:  [-651.81]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 7418 fps step and policy inference: 6910 fps total: 4834 epoch: 13/15000 frames: 196608
+fps step: 7352 fps step and policy inference: 6830 fps total: 4903 epoch: 14/15000 frames: 212992
+fps step: 7382 fps step and policy inference: 6897 fps total: 4952 epoch: 15/15000 frames: 229376
+fps step: 9815 fps step and policy inference: 9137 fps total: 6070 epoch: 16/15000 frames: 245760
+fps step: 9779 fps step and policy inference: 9079 fps total: 6066 epoch: 17/15000 frames: 262144
+fps step: 9920 fps step and policy inference: 9238 fps total: 6166 epoch: 18/15000 frames: 278528
+fps step: 9737 fps step and policy inference: 9101 fps total: 6078 epoch: 19/15000 frames: 294912
+fps step: 10055 fps step and policy inference: 9356 fps total: 6121 epoch: 20/15000 frames: 311296
+fps step: 9902 fps step and policy inference: 9229 fps total: 6082 epoch: 21/15000 frames: 327680
+fps step: 10114 fps step and policy inference: 8739 fps total: 5880 epoch: 22/15000 frames: 344064
+fps step: 10431 fps step and policy inference: 7981 fps total: 5274 epoch: 23/15000 frames: 360448
+fps step: 11427 fps step and policy inference: 10490 fps total: 6618 epoch: 24/15000 frames: 376832
+fps step: 11042 fps step and policy inference: 10203 fps total: 6654 epoch: 25/15000 frames: 393216
+fps step: 10385 fps step and policy inference: 9630 fps total: 6247 epoch: 26/15000 frames: 409600
+fps step: 10066 fps step and policy inference: 9382 fps total: 6198 epoch: 27/15000 frames: 425984
+fps step: 9711 fps step and policy inference: 9031 fps total: 5937 epoch: 28/15000 frames: 442368
+fps step: 9810 fps step and policy inference: 9151 fps total: 6138 epoch: 29/15000 frames: 458752
+fps step: 9664 fps step and policy inference: 9019 fps total: 6005 epoch: 30/15000 frames: 475136
+fps step: 9857 fps step and policy inference: 9189 fps total: 6110 epoch: 31/15000 frames: 491520
+fps step: 9603 fps step and policy inference: 8908 fps total: 5927 epoch: 32/15000 frames: 507904
+fps step: 9702 fps step and policy inference: 8925 fps total: 5781 epoch: 33/15000 frames: 524288
+fps step: 9987 fps step and policy inference: 8024 fps total: 5414 epoch: 34/15000 frames: 540672
+fps step: 10599 fps step and policy inference: 9818 fps total: 6368 epoch: 35/15000 frames: 557056
+fps step: 10312 fps step and policy inference: 9517 fps total: 6253 epoch: 36/15000 frames: 573440
+fps step: 9879 fps step and policy inference: 9159 fps total: 6031 epoch: 37/15000 frames: 589824
+fps step: 9382 fps step and policy inference: 8676 fps total: 5826 epoch: 38/15000 frames: 606208
+fps step: 9735 fps step and policy inference: 9088 fps total: 6099 epoch: 39/15000 frames: 622592
+fps step: 10032 fps step and policy inference: 9366 fps total: 6147 epoch: 40/15000 frames: 638976
+fps step: 10004 fps step and policy inference: 9337 fps total: 6184 epoch: 41/15000 frames: 655360
+fps step: 10220 fps step and policy inference: 9527 fps total: 6338 epoch: 42/15000 frames: 671744
+fps step: 10267 fps step and policy inference: 9538 fps total: 6296 epoch: 43/15000 frames: 688128
+fps step: 10038 fps step and policy inference: 9228 fps total: 6185 epoch: 44/15000 frames: 704512
+fps step: 10397 fps step and policy inference: 8307 fps total: 5718 epoch: 45/15000 frames: 720896
+fps step: 11209 fps step and policy inference: 10221 fps total: 6621 epoch: 46/15000 frames: 737280
+fps step: 10982 fps step and policy inference: 10059 fps total: 6513 epoch: 47/15000 frames: 753664
+fps step: 11045 fps step and policy inference: 10219 fps total: 6572 epoch: 48/15000 frames: 770048
+fps step: 10312 fps step and policy inference: 9520 fps total: 6101 epoch: 49/15000 frames: 786432
+fps step: 9646 fps step and policy inference: 8956 fps total: 6015 epoch: 50/15000 frames: 802816
+fps step: 9889 fps step and policy inference: 9176 fps total: 6117 epoch: 51/15000 frames: 819200
+fps step: 9946 fps step and policy inference: 9051 fps total: 6044 epoch: 52/15000 frames: 835584
+fps step: 9716 fps step and policy inference: 9056 fps total: 6043 epoch: 53/15000 frames: 851968
+fps step: 9887 fps step and policy inference: 9239 fps total: 6177 epoch: 54/15000 frames: 868352
+fps step: 10013 fps step and policy inference: 9359 fps total: 6137 epoch: 55/15000 frames: 884736
+fps step: 10092 fps step and policy inference: 9254 fps total: 6037 epoch: 56/15000 frames: 901120
+fps step: 11046 fps step and policy inference: 8725 fps total: 5970 epoch: 57/15000 frames: 917504
+fps step: 10752 fps step and policy inference: 9967 fps total: 6496 epoch: 58/15000 frames: 933888
+fps step: 9899 fps step and policy inference: 9079 fps total: 6090 epoch: 59/15000 frames: 950272
+fps step: 10284 fps step and policy inference: 9544 fps total: 6337 epoch: 60/15000 frames: 966656
+fps step: 10168 fps step and policy inference: 9422 fps total: 6205 epoch: 61/15000 frames: 983040
+fps step: 10238 fps step and policy inference: 9358 fps total: 6229 epoch: 62/15000 frames: 999424
+fps step: 10073 fps step and policy inference: 9046 fps total: 6058 epoch: 63/15000 frames: 1015808
+fps step: 10061 fps step and policy inference: 9236 fps total: 6118 epoch: 64/15000 frames: 1032192
+fps step: 9708 fps step and policy inference: 9013 fps total: 5593 epoch: 65/15000 frames: 1048576
+fps step: 10532 fps step and policy inference: 9740 fps total: 6351 epoch: 66/15000 frames: 1064960
+fps step: 10582 fps step and policy inference: 9675 fps total: 6361 epoch: 67/15000 frames: 1081344
+fps step: 10746 fps step and policy inference: 8504 fps total: 5758 epoch: 68/15000 frames: 1097728
+fps step: 10943 fps step and policy inference: 10084 fps total: 6506 epoch: 69/15000 frames: 1114112
+fps step: 10664 fps step and policy inference: 9849 fps total: 6325 epoch: 70/15000 frames: 1130496
+fps step: 10017 fps step and policy inference: 9270 fps total: 6233 epoch: 71/15000 frames: 1146880
+fps step: 10325 fps step and policy inference: 9581 fps total: 6225 epoch: 72/15000 frames: 1163264
+fps step: 10196 fps step and policy inference: 9313 fps total: 6118 epoch: 73/15000 frames: 1179648
+fps step: 9786 fps step and policy inference: 8706 fps total: 5833 epoch: 74/15000 frames: 1196032
+fps step: 10037 fps step and policy inference: 9086 fps total: 6077 epoch: 75/15000 frames: 1212416
+fps step: 10059 fps step and policy inference: 8991 fps total: 5649 epoch: 76/15000 frames: 1228800
+fps step: 10363 fps step and policy inference: 9521 fps total: 6269 epoch: 77/15000 frames: 1245184
+fps step: 11106 fps step and policy inference: 10100 fps total: 6504 epoch: 78/15000 frames: 1261568
+fps step: 10697 fps step and policy inference: 8530 fps total: 5703 epoch: 79/15000 frames: 1277952
+fps step: 10072 fps step and policy inference: 9323 fps total: 6083 epoch: 80/15000 frames: 1294336
+fps step: 10033 fps step and policy inference: 9258 fps total: 6122 epoch: 81/15000 frames: 1310720
+fps step: 10705 fps step and policy inference: 9899 fps total: 6404 epoch: 82/15000 frames: 1327104
+fps step: 10628 fps step and policy inference: 9870 fps total: 6425 epoch: 83/15000 frames: 1343488
+fps step: 10371 fps step and policy inference: 9458 fps total: 6312 epoch: 84/15000 frames: 1359872
+fps step: 10754 fps step and policy inference: 9803 fps total: 6357 epoch: 85/15000 frames: 1376256
+fps step: 10386 fps step and policy inference: 9111 fps total: 6037 epoch: 86/15000 frames: 1392640
+fps step: 10665 fps step and policy inference: 9404 fps total: 6244 epoch: 87/15000 frames: 1409024
+fps step: 11226 fps step and policy inference: 10342 fps total: 6577 epoch: 88/15000 frames: 1425408
+fps step: 14944 fps step and policy inference: 13503 fps total: 8010 epoch: 89/15000 frames: 1441792
+fps step: 15642 fps step and policy inference: 11690 fps total: 7122 epoch: 90/15000 frames: 1458176
+fps step: 14926 fps step and policy inference: 13584 fps total: 7934 epoch: 91/15000 frames: 1474560
+fps step: 14427 fps step and policy inference: 13189 fps total: 7797 epoch: 92/15000 frames: 1490944
+fps step: 14124 fps step and policy inference: 12951 fps total: 7589 epoch: 93/15000 frames: 1507328
+fps step: 14090 fps step and policy inference: 12909 fps total: 7628 epoch: 94/15000 frames: 1523712
+fps step: 14284 fps step and policy inference: 13121 fps total: 7784 epoch: 95/15000 frames: 1540096
+fps step: 13892 fps step and policy inference: 12472 fps total: 7563 epoch: 96/15000 frames: 1556480
+fps step: 13906 fps step and policy inference: 12334 fps total: 7371 epoch: 97/15000 frames: 1572864
+fps step: 13892 fps step and policy inference: 12369 fps total: 7537 epoch: 98/15000 frames: 1589248
+fps step: 14322 fps step and policy inference: 13109 fps total: 7813 epoch: 99/15000 frames: 1605632
+fps step: 14516 fps step and policy inference: 13153 fps total: 7811 epoch: 100/15000 frames: 1622016
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/last_CapUnscrewArm_A33_20260817_221012_ep_100_rew_-679.45105_sr_0.0_fr_1.0.pth'
+fps step: 14827 fps step and policy inference: 11320 fps total: 7172 epoch: 101/15000 frames: 1638400
+fps step: 14621 fps step and policy inference: 13450 fps total: 7555 epoch: 102/15000 frames: 1654784
+fps step: 14075 fps step and policy inference: 12937 fps total: 7491 epoch: 103/15000 frames: 1671168
+fps step: 13999 fps step and policy inference: 12824 fps total: 7471 epoch: 104/15000 frames: 1687552
+fps step: 13452 fps step and policy inference: 12200 fps total: 7304 epoch: 105/15000 frames: 1703936
+fps step: 14195 fps step and policy inference: 13008 fps total: 7720 epoch: 106/15000 frames: 1720320
+fps step: 13969 fps step and policy inference: 12537 fps total: 7472 epoch: 107/15000 frames: 1736704
+fps step: 14229 fps step and policy inference: 12472 fps total: 7471 epoch: 108/15000 frames: 1753088
+fps step: 15082 fps step and policy inference: 13310 fps total: 7718 epoch: 109/15000 frames: 1769472
+fps step: 15884 fps step and policy inference: 14252 fps total: 8096 epoch: 110/15000 frames: 1785856
+fps step: 15921 fps step and policy inference: 14555 fps total: 8154 epoch: 111/15000 frames: 1802240
+fps step: 16106 fps step and policy inference: 14346 fps total: 8075 epoch: 112/15000 frames: 1818624
+fps step: 15498 fps step and policy inference: 11649 fps total: 7105 epoch: 113/15000 frames: 1835008
+fps step: 14308 fps step and policy inference: 13015 fps total: 7534 epoch: 114/15000 frames: 1851392
+fps step: 14548 fps step and policy inference: 13276 fps total: 7721 epoch: 115/15000 frames: 1867776
+fps step: 13902 fps step and policy inference: 12675 fps total: 7375 epoch: 116/15000 frames: 1884160
+fps step: 13986 fps step and policy inference: 12797 fps total: 7504 epoch: 117/15000 frames: 1900544
+fps step: 14173 fps step and policy inference: 12858 fps total: 7545 epoch: 118/15000 frames: 1916928
+fps step: 14142 fps step and policy inference: 12418 fps total: 7415 epoch: 119/15000 frames: 1933312
+fps step: 13891 fps step and policy inference: 12453 fps total: 6835 epoch: 120/15000 frames: 1949696
+fps step: 13837 fps step and policy inference: 12196 fps total: 7035 epoch: 121/15000 frames: 1966080
+fps step: 13142 fps step and policy inference: 11895 fps total: 7040 epoch: 122/15000 frames: 1982464
+fps step: 11629 fps step and policy inference: 10530 fps total: 6562 epoch: 123/15000 frames: 1998848
+fps step: 11050 fps step and policy inference: 8677 fps total: 5857 epoch: 124/15000 frames: 2015232
+fps step: 10581 fps step and policy inference: 9728 fps total: 6335 epoch: 125/15000 frames: 2031616
+fps step: 10890 fps step and policy inference: 10007 fps total: 6378 epoch: 126/15000 frames: 2048000
+fps step: 10735 fps step and policy inference: 9955 fps total: 6436 epoch: 127/15000 frames: 2064384
+fps step: 10590 fps step and policy inference: 9771 fps total: 6301 epoch: 128/15000 frames: 2080768
+fps step: 10421 fps step and policy inference: 9506 fps total: 6296 epoch: 129/15000 frames: 2097152
+fps step: 10879 fps step and policy inference: 9790 fps total: 6412 epoch: 130/15000 frames: 2113536
+fps step: 10444 fps step and policy inference: 9093 fps total: 6117 epoch: 131/15000 frames: 2129920
+fps step: 11167 fps step and policy inference: 9942 fps total: 6357 epoch: 132/15000 frames: 2146304
+fps step: 14553 fps step and policy inference: 13265 fps total: 7714 epoch: 133/15000 frames: 2162688
+fps step: 15024 fps step and policy inference: 13688 fps total: 8016 epoch: 134/15000 frames: 2179072
+fps step: 15208 fps step and policy inference: 11465 fps total: 7121 epoch: 135/15000 frames: 2195456
+fps step: 14319 fps step and policy inference: 13118 fps total: 7722 epoch: 136/15000 frames: 2211840
+fps step: 14184 fps step and policy inference: 13072 fps total: 7456 epoch: 137/15000 frames: 2228224
+fps step: 12706 fps step and policy inference: 11620 fps total: 6930 epoch: 138/15000 frames: 2244608
+fps step: 10617 fps step and policy inference: 9733 fps total: 6371 epoch: 139/15000 frames: 2260992
+fps step: 10819 fps step and policy inference: 9970 fps total: 6405 epoch: 140/15000 frames: 2277376
+fps step: 10546 fps step and policy inference: 9387 fps total: 6203 epoch: 141/15000 frames: 2293760
+fps step: 10425 fps step and policy inference: 9070 fps total: 6047 epoch: 142/15000 frames: 2310144
+fps step: 10803 fps step and policy inference: 9601 fps total: 6253 epoch: 143/15000 frames: 2326528
+fps step: 11121 fps step and policy inference: 10255 fps total: 6489 epoch: 144/15000 frames: 2342912
+fps step: 11522 fps step and policy inference: 10458 fps total: 6707 epoch: 145/15000 frames: 2359296
+fps step: 11386 fps step and policy inference: 8910 fps total: 6049 epoch: 146/15000 frames: 2375680
+saving next best rewards:  [-643.07]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10879 fps step and policy inference: 10149 fps total: 6543 epoch: 147/15000 frames: 2392064
+fps step: 10637 fps step and policy inference: 9823 fps total: 6388 epoch: 148/15000 frames: 2408448
+fps step: 11020 fps step and policy inference: 10175 fps total: 6604 epoch: 149/15000 frames: 2424832
+fps step: 11318 fps step and policy inference: 10460 fps total: 6682 epoch: 150/15000 frames: 2441216
+fps step: 11719 fps step and policy inference: 10820 fps total: 6841 epoch: 151/15000 frames: 2457600
+fps step: 10777 fps step and policy inference: 9510 fps total: 6166 epoch: 152/15000 frames: 2473984
+saving next best rewards:  [-642.99]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10801 fps step and policy inference: 9518 fps total: 6194 epoch: 153/15000 frames: 2490368
+fps step: 10188 fps step and policy inference: 8969 fps total: 6000 epoch: 154/15000 frames: 2506752
+saving next best rewards:  [-641.3]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10492 fps step and policy inference: 9760 fps total: 6270 epoch: 155/15000 frames: 2523136
+fps step: 11235 fps step and policy inference: 10292 fps total: 6601 epoch: 156/15000 frames: 2539520
+fps step: 11308 fps step and policy inference: 10264 fps total: 6552 epoch: 157/15000 frames: 2555904
+fps step: 10644 fps step and policy inference: 8485 fps total: 5788 epoch: 158/15000 frames: 2572288
+saving next best rewards:  [-620.47]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10533 fps step and policy inference: 9806 fps total: 6285 epoch: 159/15000 frames: 2588672
+fps step: 10719 fps step and policy inference: 9862 fps total: 6014 epoch: 160/15000 frames: 2605056
+fps step: 9249 fps step and policy inference: 8426 fps total: 5426 epoch: 161/15000 frames: 2621440
+fps step: 10106 fps step and policy inference: 9142 fps total: 5521 epoch: 162/15000 frames: 2637824
+fps step: 10933 fps step and policy inference: 9897 fps total: 6054 epoch: 163/15000 frames: 2654208
+fps step: 10446 fps step and policy inference: 9019 fps total: 6073 epoch: 164/15000 frames: 2670592
+saving next best rewards:  [-618.17]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 9868 fps step and policy inference: 8658 fps total: 5644 epoch: 165/15000 frames: 2686976
+saving next best rewards:  [-616.81]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11298 fps step and policy inference: 10355 fps total: 6645 epoch: 166/15000 frames: 2703360
+saving next best rewards:  [-615.35]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11810 fps step and policy inference: 10940 fps total: 6883 epoch: 167/15000 frames: 2719744
+fps step: 12121 fps step and policy inference: 10934 fps total: 6970 epoch: 168/15000 frames: 2736128
+fps step: 11633 fps step and policy inference: 9198 fps total: 6160 epoch: 169/15000 frames: 2752512
+saving next best rewards:  [-606.09]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11145 fps step and policy inference: 10374 fps total: 6600 epoch: 170/15000 frames: 2768896
+fps step: 10925 fps step and policy inference: 10091 fps total: 5897 epoch: 171/15000 frames: 2785280
+fps step: 11089 fps step and policy inference: 10202 fps total: 6587 epoch: 172/15000 frames: 2801664
+fps step: 11479 fps step and policy inference: 10545 fps total: 6637 epoch: 173/15000 frames: 2818048
+fps step: 11191 fps step and policy inference: 10175 fps total: 6519 epoch: 174/15000 frames: 2834432
+saving next best rewards:  [-605.74]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10646 fps step and policy inference: 9378 fps total: 6153 epoch: 175/15000 frames: 2850816
+fps step: 10576 fps step and policy inference: 9546 fps total: 6180 epoch: 176/15000 frames: 2867200
+fps step: 11204 fps step and policy inference: 9947 fps total: 6307 epoch: 177/15000 frames: 2883584
+saving next best rewards:  [-604.59]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11616 fps step and policy inference: 10752 fps total: 6640 epoch: 178/15000 frames: 2899968
+fps step: 12007 fps step and policy inference: 10890 fps total: 6844 epoch: 179/15000 frames: 2916352
+saving next best rewards:  [-603.5]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11423 fps step and policy inference: 9051 fps total: 5788 epoch: 180/15000 frames: 2932736
+saving next best rewards:  [-595.08]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 9846 fps step and policy inference: 9119 fps total: 6026 epoch: 181/15000 frames: 2949120
+fps step: 10852 fps step and policy inference: 10045 fps total: 6501 epoch: 182/15000 frames: 2965504
+fps step: 10628 fps step and policy inference: 9860 fps total: 6327 epoch: 183/15000 frames: 2981888
+fps step: 10663 fps step and policy inference: 9904 fps total: 6200 epoch: 184/15000 frames: 2998272
+fps step: 11163 fps step and policy inference: 10156 fps total: 6443 epoch: 185/15000 frames: 3014656
+saving next best rewards:  [-595.07]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10420 fps step and policy inference: 9420 fps total: 6268 epoch: 186/15000 frames: 3031040
+saving next best rewards:  [-594.29]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10808 fps step and policy inference: 9495 fps total: 5994 epoch: 187/15000 frames: 3047424
+saving next best rewards:  [-593.08]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10756 fps step and policy inference: 9549 fps total: 6263 epoch: 188/15000 frames: 3063808
+fps step: 11563 fps step and policy inference: 10652 fps total: 6732 epoch: 189/15000 frames: 3080192
+fps step: 11547 fps step and policy inference: 10494 fps total: 6420 epoch: 190/15000 frames: 3096576
+saving next best rewards:  [-591.68]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10202 fps step and policy inference: 8080 fps total: 5407 epoch: 191/15000 frames: 3112960
+saving next best rewards:  [-590.73]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 9967 fps step and policy inference: 9262 fps total: 6148 epoch: 192/15000 frames: 3129344
+fps step: 9591 fps step and policy inference: 8866 fps total: 5934 epoch: 193/15000 frames: 3145728
+fps step: 8547 fps step and policy inference: 7956 fps total: 5560 epoch: 194/15000 frames: 3162112
+fps step: 8343 fps step and policy inference: 7778 fps total: 5489 epoch: 195/15000 frames: 3178496
+fps step: 8489 fps step and policy inference: 7844 fps total: 5533 epoch: 196/15000 frames: 3194880
+fps step: 8502 fps step and policy inference: 7366 fps total: 5238 epoch: 197/15000 frames: 3211264
+fps step: 8592 fps step and policy inference: 7348 fps total: 5252 epoch: 198/15000 frames: 3227648
+fps step: 8804 fps step and policy inference: 7638 fps total: 5428 epoch: 199/15000 frames: 3244032
+fps step: 9102 fps step and policy inference: 8394 fps total: 5811 epoch: 200/15000 frames: 3260416
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/last_CapUnscrewArm_A33_20260817_221012_ep_200_rew_-592.54535_sr_0.0_fr_1.0.pth'
+fps step: 9468 fps step and policy inference: 8577 fps total: 5884 epoch: 201/15000 frames: 3276800
+fps step: 9629 fps step and policy inference: 7642 fps total: 5416 epoch: 202/15000 frames: 3293184
+fps step: 8988 fps step and policy inference: 8281 fps total: 5700 epoch: 203/15000 frames: 3309568
+fps step: 8431 fps step and policy inference: 7811 fps total: 5508 epoch: 204/15000 frames: 3325952
+fps step: 9256 fps step and policy inference: 8504 fps total: 5671 epoch: 205/15000 frames: 3342336
+fps step: 10352 fps step and policy inference: 9593 fps total: 6248 epoch: 206/15000 frames: 3358720
+fps step: 10121 fps step and policy inference: 9298 fps total: 6138 epoch: 207/15000 frames: 3375104
+fps step: 10411 fps step and policy inference: 9413 fps total: 6065 epoch: 208/15000 frames: 3391488
+fps step: 10552 fps step and policy inference: 9103 fps total: 6107 epoch: 209/15000 frames: 3407872
+fps step: 10723 fps step and policy inference: 9627 fps total: 6263 epoch: 210/15000 frames: 3424256
+fps step: 11413 fps step and policy inference: 10423 fps total: 6461 epoch: 211/15000 frames: 3440640
+fps step: 11304 fps step and policy inference: 10314 fps total: 6464 epoch: 212/15000 frames: 3457024
+fps step: 11500 fps step and policy inference: 10438 fps total: 6685 epoch: 213/15000 frames: 3473408
+fps step: 10631 fps step and policy inference: 8462 fps total: 5758 epoch: 214/15000 frames: 3489792
+fps step: 10583 fps step and policy inference: 9788 fps total: 6460 epoch: 215/15000 frames: 3506176
+fps step: 10255 fps step and policy inference: 9563 fps total: 6277 epoch: 216/15000 frames: 3522560
+fps step: 9731 fps step and policy inference: 8943 fps total: 6017 epoch: 217/15000 frames: 3538944
+fps step: 10414 fps step and policy inference: 9610 fps total: 6283 epoch: 218/15000 frames: 3555328
+fps step: 10389 fps step and policy inference: 9475 fps total: 6264 epoch: 219/15000 frames: 3571712
+fps step: 10509 fps step and policy inference: 9178 fps total: 6076 epoch: 220/15000 frames: 3588096
+fps step: 10999 fps step and policy inference: 9944 fps total: 6355 epoch: 221/15000 frames: 3604480
+fps step: 10762 fps step and policy inference: 9573 fps total: 6161 epoch: 222/15000 frames: 3620864
+fps step: 11478 fps step and policy inference: 10524 fps total: 6650 epoch: 223/15000 frames: 3637248
+fps step: 11375 fps step and policy inference: 10306 fps total: 6625 epoch: 224/15000 frames: 3653632
+fps step: 10744 fps step and policy inference: 8527 fps total: 5781 epoch: 225/15000 frames: 3670016
+fps step: 10352 fps step and policy inference: 9635 fps total: 6354 epoch: 226/15000 frames: 3686400
+fps step: 10142 fps step and policy inference: 9448 fps total: 6233 epoch: 227/15000 frames: 3702784
+fps step: 10214 fps step and policy inference: 9464 fps total: 6241 epoch: 228/15000 frames: 3719168
+fps step: 10371 fps step and policy inference: 9628 fps total: 6226 epoch: 229/15000 frames: 3735552
+fps step: 10394 fps step and policy inference: 9426 fps total: 5894 epoch: 230/15000 frames: 3751936
+fps step: 10390 fps step and policy inference: 9126 fps total: 6060 epoch: 231/15000 frames: 3768320
+fps step: 10935 fps step and policy inference: 9666 fps total: 6328 epoch: 232/15000 frames: 3784704
+fps step: 11094 fps step and policy inference: 9757 fps total: 6294 epoch: 233/15000 frames: 3801088
+fps step: 11047 fps step and policy inference: 10103 fps total: 6427 epoch: 234/15000 frames: 3817472
+fps step: 11446 fps step and policy inference: 10305 fps total: 6625 epoch: 235/15000 frames: 3833856
+fps step: 11432 fps step and policy inference: 9044 fps total: 6040 epoch: 236/15000 frames: 3850240
+fps step: 10867 fps step and policy inference: 10021 fps total: 6526 epoch: 237/15000 frames: 3866624
+fps step: 10971 fps step and policy inference: 10167 fps total: 6634 epoch: 238/15000 frames: 3883008
+fps step: 10931 fps step and policy inference: 10108 fps total: 6488 epoch: 239/15000 frames: 3899392
+fps step: 11179 fps step and policy inference: 10400 fps total: 6718 epoch: 240/15000 frames: 3915776
+fps step: 11130 fps step and policy inference: 10215 fps total: 6577 epoch: 241/15000 frames: 3932160
+fps step: 10782 fps step and policy inference: 9580 fps total: 6320 epoch: 242/15000 frames: 3948544
+fps step: 10956 fps step and policy inference: 9535 fps total: 6237 epoch: 243/15000 frames: 3964928
+fps step: 11026 fps step and policy inference: 9692 fps total: 6031 epoch: 244/15000 frames: 3981312
+fps step: 10726 fps step and policy inference: 9872 fps total: 6348 epoch: 245/15000 frames: 3997696
+fps step: 11276 fps step and policy inference: 10212 fps total: 6546 epoch: 246/15000 frames: 4014080
+fps step: 11341 fps step and policy inference: 8940 fps total: 5936 epoch: 247/15000 frames: 4030464
+fps step: 10884 fps step and policy inference: 10076 fps total: 6525 epoch: 248/15000 frames: 4046848
+fps step: 10086 fps step and policy inference: 9411 fps total: 6244 epoch: 249/15000 frames: 4063232
+fps step: 10306 fps step and policy inference: 9603 fps total: 6423 epoch: 250/15000 frames: 4079616
+fps step: 10525 fps step and policy inference: 9718 fps total: 6430 epoch: 251/15000 frames: 4096000
+fps step: 11438 fps step and policy inference: 10578 fps total: 6732 epoch: 252/15000 frames: 4112384
+fps step: 10815 fps step and policy inference: 9640 fps total: 6375 epoch: 253/15000 frames: 4128768
+fps step: 10931 fps step and policy inference: 9546 fps total: 6129 epoch: 254/15000 frames: 4145152
+fps step: 10914 fps step and policy inference: 9631 fps total: 6310 epoch: 255/15000 frames: 4161536
+fps step: 11405 fps step and policy inference: 10523 fps total: 6716 epoch: 256/15000 frames: 4177920
+fps step: 11461 fps step and policy inference: 10564 fps total: 6731 epoch: 257/15000 frames: 4194304
+fps step: 11419 fps step and policy inference: 10313 fps total: 6666 epoch: 258/15000 frames: 4210688
+fps step: 10621 fps step and policy inference: 8475 fps total: 5841 epoch: 259/15000 frames: 4227072
+saving next best rewards:  [-544.33]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10236 fps step and policy inference: 9591 fps total: 6257 epoch: 260/15000 frames: 4243456
+fps step: 10182 fps step and policy inference: 9434 fps total: 6199 epoch: 261/15000 frames: 4259840
+fps step: 10334 fps step and policy inference: 9601 fps total: 6294 epoch: 262/15000 frames: 4276224
+fps step: 10883 fps step and policy inference: 10100 fps total: 6497 epoch: 263/15000 frames: 4292608
+fps step: 10985 fps step and policy inference: 10020 fps total: 6438 epoch: 264/15000 frames: 4308992
+fps step: 10774 fps step and policy inference: 9282 fps total: 6227 epoch: 265/15000 frames: 4325376
+saving next best rewards:  [-541.52]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11144 fps step and policy inference: 9944 fps total: 6516 epoch: 266/15000 frames: 4341760
+saving next best rewards:  [-541.13]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10728 fps step and policy inference: 9815 fps total: 6378 epoch: 267/15000 frames: 4358144
+saving next best rewards:  [-539.24]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10614 fps step and policy inference: 9834 fps total: 6214 epoch: 268/15000 frames: 4374528
+fps step: 11080 fps step and policy inference: 10041 fps total: 6497 epoch: 269/15000 frames: 4390912
+saving next best rewards:  [-537.28]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11251 fps step and policy inference: 8909 fps total: 5972 epoch: 270/15000 frames: 4407296
+saving next best rewards:  [-505.14]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10334 fps step and policy inference: 9633 fps total: 6348 epoch: 271/15000 frames: 4423680
+fps step: 10327 fps step and policy inference: 9578 fps total: 6326 epoch: 272/15000 frames: 4440064
+fps step: 10391 fps step and policy inference: 9684 fps total: 6251 epoch: 273/15000 frames: 4456448
+fps step: 10652 fps step and policy inference: 9870 fps total: 6343 epoch: 274/15000 frames: 4472832
+fps step: 10952 fps step and policy inference: 9953 fps total: 6378 epoch: 275/15000 frames: 4489216
+fps step: 11095 fps step and policy inference: 9659 fps total: 6289 epoch: 276/15000 frames: 4505600
+saving next best rewards:  [-504.7]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11162 fps step and policy inference: 10008 fps total: 6493 epoch: 277/15000 frames: 4521984
+saving next best rewards:  [-503.22]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11197 fps step and policy inference: 9898 fps total: 6440 epoch: 278/15000 frames: 4538368
+saving next best rewards:  [-499.09]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10859 fps step and policy inference: 10031 fps total: 6402 epoch: 279/15000 frames: 4554752
+fps step: 10904 fps step and policy inference: 9914 fps total: 6449 epoch: 280/15000 frames: 4571136
+saving next best rewards:  [-497.63]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10949 fps step and policy inference: 8697 fps total: 5844 epoch: 281/15000 frames: 4587520
+saving next best rewards:  [-458.71]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10152 fps step and policy inference: 9349 fps total: 5801 epoch: 282/15000 frames: 4603904
+fps step: 10693 fps step and policy inference: 9920 fps total: 6279 epoch: 283/15000 frames: 4620288
+fps step: 9084 fps step and policy inference: 8355 fps total: 5435 epoch: 284/15000 frames: 4636672
+fps step: 9560 fps step and policy inference: 8806 fps total: 5584 epoch: 285/15000 frames: 4653056
+fps step: 10344 fps step and policy inference: 9347 fps total: 5878 epoch: 286/15000 frames: 4669440
+fps step: 10495 fps step and policy inference: 9374 fps total: 6009 epoch: 287/15000 frames: 4685824
+saving next best rewards:  [-456.83]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10194 fps step and policy inference: 8899 fps total: 5842 epoch: 288/15000 frames: 4702208
+saving next best rewards:  [-455.94]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11052 fps step and policy inference: 9824 fps total: 6336 epoch: 289/15000 frames: 4718592
+saving next best rewards:  [-455.79]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11240 fps step and policy inference: 10425 fps total: 6590 epoch: 290/15000 frames: 4734976
+fps step: 11084 fps step and policy inference: 10006 fps total: 5920 epoch: 291/15000 frames: 4751360
+saving next best rewards:  [-454.73]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11110 fps step and policy inference: 8816 fps total: 5802 epoch: 292/15000 frames: 4767744
+saving next best rewards:  [-406.63]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10798 fps step and policy inference: 10052 fps total: 6342 epoch: 293/15000 frames: 4784128
+fps step: 10132 fps step and policy inference: 9404 fps total: 5780 epoch: 294/15000 frames: 4800512
+fps step: 10180 fps step and policy inference: 9435 fps total: 6134 epoch: 295/15000 frames: 4816896
+fps step: 10719 fps step and policy inference: 9888 fps total: 6392 epoch: 296/15000 frames: 4833280
+fps step: 10895 fps step and policy inference: 10024 fps total: 6374 epoch: 297/15000 frames: 4849664
+fps step: 10913 fps step and policy inference: 9495 fps total: 6159 epoch: 298/15000 frames: 4866048
+saving next best rewards:  [-403.97]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10748 fps step and policy inference: 9435 fps total: 5933 epoch: 299/15000 frames: 4882432
+saving next best rewards:  [-399.77]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10651 fps step and policy inference: 9469 fps total: 6104 epoch: 300/15000 frames: 4898816
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/last_CapUnscrewArm_A33_20260817_221012_ep_300_rew_-402.23953_sr_0.0_fr_1.0.pth'
+fps step: 10783 fps step and policy inference: 10022 fps total: 6401 epoch: 301/15000 frames: 4915200
+fps step: 11328 fps step and policy inference: 10325 fps total: 6470 epoch: 302/15000 frames: 4931584
+saving next best rewards:  [-399.72]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11068 fps step and policy inference: 8764 fps total: 5872 epoch: 303/15000 frames: 4947968
+fps step: 10794 fps step and policy inference: 9942 fps total: 6394 epoch: 304/15000 frames: 4964352
+fps step: 9983 fps step and policy inference: 9266 fps total: 6073 epoch: 305/15000 frames: 4980736
+fps step: 10137 fps step and policy inference: 9406 fps total: 6174 epoch: 306/15000 frames: 4997120
+fps step: 10049 fps step and policy inference: 9352 fps total: 6172 epoch: 307/15000 frames: 5013504
+fps step: 10685 fps step and policy inference: 9896 fps total: 6406 epoch: 308/15000 frames: 5029888
+fps step: 11245 fps step and policy inference: 9912 fps total: 6387 epoch: 309/15000 frames: 5046272
+fps step: 10683 fps step and policy inference: 9290 fps total: 5773 epoch: 310/15000 frames: 5062656
+fps step: 10587 fps step and policy inference: 9462 fps total: 6045 epoch: 311/15000 frames: 5079040
+fps step: 10842 fps step and policy inference: 9869 fps total: 6376 epoch: 312/15000 frames: 5095424
+fps step: 11047 fps step and policy inference: 10138 fps total: 6313 epoch: 313/15000 frames: 5111808
+fps step: 10975 fps step and policy inference: 9961 fps total: 6406 epoch: 314/15000 frames: 5128192
+fps step: 10865 fps step and policy inference: 8525 fps total: 5785 epoch: 315/15000 frames: 5144576
+fps step: 9990 fps step and policy inference: 9259 fps total: 6094 epoch: 316/15000 frames: 5160960
+fps step: 9512 fps step and policy inference: 8798 fps total: 5841 epoch: 317/15000 frames: 5177344
+fps step: 10089 fps step and policy inference: 9405 fps total: 6182 epoch: 318/15000 frames: 5193728
+fps step: 10347 fps step and policy inference: 9613 fps total: 6377 epoch: 319/15000 frames: 5210112
+fps step: 10660 fps step and policy inference: 9691 fps total: 6079 epoch: 320/15000 frames: 5226496
+fps step: 10774 fps step and policy inference: 9287 fps total: 6178 epoch: 321/15000 frames: 5242880
+fps step: 11360 fps step and policy inference: 10336 fps total: 6639 epoch: 322/15000 frames: 5259264
+fps step: 11008 fps step and policy inference: 9669 fps total: 6159 epoch: 323/15000 frames: 5275648
+fps step: 11476 fps step and policy inference: 10565 fps total: 6561 epoch: 324/15000 frames: 5292032
+fps step: 11444 fps step and policy inference: 10395 fps total: 6546 epoch: 325/15000 frames: 5308416
+fps step: 11046 fps step and policy inference: 8777 fps total: 5878 epoch: 326/15000 frames: 5324800
+fps step: 10231 fps step and policy inference: 9518 fps total: 6293 epoch: 327/15000 frames: 5341184
+fps step: 10322 fps step and policy inference: 9622 fps total: 6357 epoch: 328/15000 frames: 5357568
+fps step: 10656 fps step and policy inference: 9868 fps total: 6449 epoch: 329/15000 frames: 5373952
+fps step: 10576 fps step and policy inference: 9799 fps total: 6325 epoch: 330/15000 frames: 5390336
+fps step: 11199 fps step and policy inference: 10203 fps total: 6515 epoch: 331/15000 frames: 5406720
+fps step: 11320 fps step and policy inference: 9876 fps total: 6407 epoch: 332/15000 frames: 5423104
+fps step: 10738 fps step and policy inference: 9537 fps total: 6273 epoch: 333/15000 frames: 5439488
+fps step: 11566 fps step and policy inference: 10143 fps total: 6499 epoch: 334/15000 frames: 5455872
+fps step: 11584 fps step and policy inference: 10641 fps total: 6751 epoch: 335/15000 frames: 5472256
+fps step: 11449 fps step and policy inference: 10333 fps total: 6508 epoch: 336/15000 frames: 5488640
+fps step: 11265 fps step and policy inference: 8911 fps total: 6013 epoch: 337/15000 frames: 5505024
+saving next best rewards:  [-394.46]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10636 fps step and policy inference: 9916 fps total: 6428 epoch: 338/15000 frames: 5521408
+fps step: 9948 fps step and policy inference: 9242 fps total: 6113 epoch: 339/15000 frames: 5537792
+fps step: 10373 fps step and policy inference: 9612 fps total: 6385 epoch: 340/15000 frames: 5554176
+fps step: 10798 fps step and policy inference: 10009 fps total: 6518 epoch: 341/15000 frames: 5570560
+fps step: 11656 fps step and policy inference: 10607 fps total: 6752 epoch: 342/15000 frames: 5586944
+saving next best rewards:  [-393.62]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10739 fps step and policy inference: 9634 fps total: 6254 epoch: 343/15000 frames: 5603328
+saving next best rewards:  [-393.21]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11145 fps step and policy inference: 9754 fps total: 6234 epoch: 344/15000 frames: 5619712
+saving next best rewards:  [-387.4]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10972 fps step and policy inference: 9742 fps total: 6393 epoch: 345/15000 frames: 5636096
+saving next best rewards:  [-384.58]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11302 fps step and policy inference: 10475 fps total: 6415 epoch: 346/15000 frames: 5652480
+fps step: 11640 fps step and policy inference: 10553 fps total: 6476 epoch: 347/15000 frames: 5668864
+saving next best rewards:  [-382.95]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11654 fps step and policy inference: 9181 fps total: 6064 epoch: 348/15000 frames: 5685248
+saving next best rewards:  [-356.55]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10276 fps step and policy inference: 9507 fps total: 6204 epoch: 349/15000 frames: 5701632
+fps step: 10244 fps step and policy inference: 9514 fps total: 6307 epoch: 350/15000 frames: 5718016
+fps step: 10156 fps step and policy inference: 9454 fps total: 6214 epoch: 351/15000 frames: 5734400
+fps step: 10278 fps step and policy inference: 9528 fps total: 6287 epoch: 352/15000 frames: 5750784
+fps step: 10787 fps step and policy inference: 9986 fps total: 6453 epoch: 353/15000 frames: 5767168
+fps step: 11343 fps step and policy inference: 9991 fps total: 6460 epoch: 354/15000 frames: 5783552
+saving next best rewards:  [-354.31]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11289 fps step and policy inference: 9865 fps total: 6435 epoch: 355/15000 frames: 5799936
+saving next best rewards:  [-349.69]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11500 fps step and policy inference: 10198 fps total: 6558 epoch: 356/15000 frames: 5816320
+fps step: 11364 fps step and policy inference: 10484 fps total: 6542 epoch: 357/15000 frames: 5832704
+fps step: 11419 fps step and policy inference: 10534 fps total: 6660 epoch: 358/15000 frames: 5849088
+fps step: 11603 fps step and policy inference: 10517 fps total: 6580 epoch: 359/15000 frames: 5865472
+saving next best rewards:  [-262.64]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11266 fps step and policy inference: 8978 fps total: 6086 epoch: 360/15000 frames: 5881856
+fps step: 9733 fps step and policy inference: 9038 fps total: 6035 epoch: 361/15000 frames: 5898240
+fps step: 10292 fps step and policy inference: 9559 fps total: 6249 epoch: 362/15000 frames: 5914624
+fps step: 10414 fps step and policy inference: 9668 fps total: 6303 epoch: 363/15000 frames: 5931008
+fps step: 10869 fps step and policy inference: 10088 fps total: 6398 epoch: 364/15000 frames: 5947392
+fps step: 10901 fps step and policy inference: 9910 fps total: 6385 epoch: 365/15000 frames: 5963776
+saving next best rewards:  [-258.38]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11033 fps step and policy inference: 9570 fps total: 6248 epoch: 366/15000 frames: 5980160
+fps step: 10903 fps step and policy inference: 9566 fps total: 6134 epoch: 367/15000 frames: 5996544
+fps step: 11166 fps step and policy inference: 10080 fps total: 6474 epoch: 368/15000 frames: 6012928
+fps step: 11330 fps step and policy inference: 10405 fps total: 6597 epoch: 369/15000 frames: 6029312
+fps step: 10929 fps step and policy inference: 9945 fps total: 6386 epoch: 370/15000 frames: 6045696
+fps step: 10932 fps step and policy inference: 8626 fps total: 5830 epoch: 371/15000 frames: 6062080
+fps step: 10354 fps step and policy inference: 9596 fps total: 6235 epoch: 372/15000 frames: 6078464
+fps step: 10127 fps step and policy inference: 9361 fps total: 6203 epoch: 373/15000 frames: 6094848
+fps step: 10226 fps step and policy inference: 9500 fps total: 6205 epoch: 374/15000 frames: 6111232
+fps step: 10416 fps step and policy inference: 9709 fps total: 6378 epoch: 375/15000 frames: 6127616
+fps step: 10623 fps step and policy inference: 9693 fps total: 6230 epoch: 376/15000 frames: 6144000
+fps step: 10706 fps step and policy inference: 9368 fps total: 6236 epoch: 377/15000 frames: 6160384
+fps step: 11088 fps step and policy inference: 9999 fps total: 6436 epoch: 378/15000 frames: 6176768
+fps step: 11201 fps step and policy inference: 9928 fps total: 6502 epoch: 379/15000 frames: 6193152
+fps step: 11257 fps step and policy inference: 10222 fps total: 6635 epoch: 380/15000 frames: 6209536
+fps step: 10989 fps step and policy inference: 9974 fps total: 6476 epoch: 381/15000 frames: 6225920
+fps step: 11224 fps step and policy inference: 8870 fps total: 5935 epoch: 382/15000 frames: 6242304
+fps step: 10927 fps step and policy inference: 10107 fps total: 6529 epoch: 383/15000 frames: 6258688
+fps step: 10296 fps step and policy inference: 9505 fps total: 6192 epoch: 384/15000 frames: 6275072
+fps step: 10105 fps step and policy inference: 9317 fps total: 6070 epoch: 385/15000 frames: 6291456
+fps step: 10140 fps step and policy inference: 9433 fps total: 6279 epoch: 386/15000 frames: 6307840
+fps step: 10491 fps step and policy inference: 9580 fps total: 6297 epoch: 387/15000 frames: 6324224
+fps step: 10827 fps step and policy inference: 9759 fps total: 6384 epoch: 388/15000 frames: 6340608
+fps step: 11094 fps step and policy inference: 9699 fps total: 6415 epoch: 389/15000 frames: 6356992
+fps step: 11135 fps step and policy inference: 9841 fps total: 6358 epoch: 390/15000 frames: 6373376
+fps step: 11520 fps step and policy inference: 10653 fps total: 6761 epoch: 391/15000 frames: 6389760
+fps step: 11361 fps step and policy inference: 10181 fps total: 6535 epoch: 392/15000 frames: 6406144
+fps step: 11167 fps step and policy inference: 8802 fps total: 5936 epoch: 393/15000 frames: 6422528
+saving next best rewards:  [-213.8]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11276 fps step and policy inference: 10483 fps total: 6638 epoch: 394/15000 frames: 6438912
+fps step: 10157 fps step and policy inference: 9417 fps total: 6222 epoch: 395/15000 frames: 6455296
+fps step: 10088 fps step and policy inference: 9336 fps total: 6181 epoch: 396/15000 frames: 6471680
+fps step: 10382 fps step and policy inference: 9659 fps total: 6146 epoch: 397/15000 frames: 6488064
+fps step: 9973 fps step and policy inference: 9192 fps total: 5850 epoch: 398/15000 frames: 6504448
+fps step: 10647 fps step and policy inference: 9465 fps total: 6093 epoch: 399/15000 frames: 6520832
+saving next best rewards:  [-209.82]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10200 fps step and policy inference: 8825 fps total: 5927 epoch: 400/15000 frames: 6537216
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/last_CapUnscrewArm_A33_20260817_221012_ep_400_rew_-207.65622_sr_0.0_fr_1.0.pth'
+saving next best rewards:  [-207.66]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10737 fps step and policy inference: 9503 fps total: 6201 epoch: 401/15000 frames: 6553600
+fps step: 10779 fps step and policy inference: 9920 fps total: 6342 epoch: 402/15000 frames: 6569984
+fps step: 10777 fps step and policy inference: 9701 fps total: 6256 epoch: 403/15000 frames: 6586368
+saving next best rewards:  [-205.94]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11077 fps step and policy inference: 8733 fps total: 5867 epoch: 404/15000 frames: 6602752
+saving next best rewards:  [-161.41]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11223 fps step and policy inference: 10414 fps total: 6604 epoch: 405/15000 frames: 6619136
+fps step: 10098 fps step and policy inference: 9321 fps total: 5933 epoch: 406/15000 frames: 6635520
+fps step: 9740 fps step and policy inference: 9067 fps total: 6106 epoch: 407/15000 frames: 6651904
+fps step: 10121 fps step and policy inference: 9429 fps total: 6141 epoch: 408/15000 frames: 6668288
+fps step: 10290 fps step and policy inference: 9602 fps total: 6349 epoch: 409/15000 frames: 6684672
+fps step: 10483 fps step and policy inference: 9324 fps total: 6220 epoch: 410/15000 frames: 6701056
+saving next best rewards:  [-159.76]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10627 fps step and policy inference: 9371 fps total: 6187 epoch: 411/15000 frames: 6717440
+saving next best rewards:  [-157.05]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10289 fps step and policy inference: 9287 fps total: 6113 epoch: 412/15000 frames: 6733824
+saving next best rewards:  [-154.29]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10786 fps step and policy inference: 9888 fps total: 6390 epoch: 413/15000 frames: 6750208
+fps step: 10827 fps step and policy inference: 9840 fps total: 6369 epoch: 414/15000 frames: 6766592
+fps step: 10477 fps step and policy inference: 9581 fps total: 6288 epoch: 415/15000 frames: 6782976
+fps step: 11003 fps step and policy inference: 8694 fps total: 5890 epoch: 416/15000 frames: 6799360
+saving next best rewards:  [-124.36]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11192 fps step and policy inference: 10427 fps total: 6738 epoch: 417/15000 frames: 6815744
+fps step: 10524 fps step and policy inference: 9761 fps total: 6447 epoch: 418/15000 frames: 6832128
+fps step: 10318 fps step and policy inference: 9573 fps total: 6372 epoch: 419/15000 frames: 6848512
+fps step: 9215 fps step and policy inference: 8387 fps total: 5815 epoch: 420/15000 frames: 6864896
+fps step: 10631 fps step and policy inference: 9688 fps total: 6411 epoch: 421/15000 frames: 6881280
+saving next best rewards:  [-123.91]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10738 fps step and policy inference: 9357 fps total: 6235 epoch: 422/15000 frames: 6897664
+saving next best rewards:  [-123.59]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10686 fps step and policy inference: 9654 fps total: 6326 epoch: 423/15000 frames: 6914048
+saving next best rewards:  [-120.96]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10614 fps step and policy inference: 9618 fps total: 6380 epoch: 424/15000 frames: 6930432
+fps step: 10968 fps step and policy inference: 10009 fps total: 6417 epoch: 425/15000 frames: 6946816
+saving next best rewards:  [-120.81]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10682 fps step and policy inference: 9815 fps total: 6399 epoch: 426/15000 frames: 6963200
+saving next best rewards:  [-120.31]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11206 fps step and policy inference: 8914 fps total: 5970 epoch: 427/15000 frames: 6979584
+saving next best rewards:  [-119.93]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11349 fps step and policy inference: 10548 fps total: 6735 epoch: 428/15000 frames: 6995968
+fps step: 11015 fps step and policy inference: 10183 fps total: 6545 epoch: 429/15000 frames: 7012352
+fps step: 10348 fps step and policy inference: 9606 fps total: 6321 epoch: 430/15000 frames: 7028736
+fps step: 9818 fps step and policy inference: 9155 fps total: 5969 epoch: 431/15000 frames: 7045120
+fps step: 9919 fps step and policy inference: 9096 fps total: 6021 epoch: 432/15000 frames: 7061504
+saving next best rewards:  [-119.06]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10069 fps step and policy inference: 8883 fps total: 5891 epoch: 433/15000 frames: 7077888
+saving next best rewards:  [-115.06]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 9891 fps step and policy inference: 8966 fps total: 5979 epoch: 434/15000 frames: 7094272
+saving next best rewards:  [-112.64]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10178 fps step and policy inference: 9120 fps total: 6077 epoch: 435/15000 frames: 7110656
+saving next best rewards:  [-110.25]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10539 fps step and policy inference: 9633 fps total: 6336 epoch: 436/15000 frames: 7127040
+fps step: 10482 fps step and policy inference: 9486 fps total: 6065 epoch: 437/15000 frames: 7143424
+fps step: 10279 fps step and policy inference: 8215 fps total: 5675 epoch: 438/15000 frames: 7159808
+fps step: 9491 fps step and policy inference: 8816 fps total: 5919 epoch: 439/15000 frames: 7176192
+fps step: 9723 fps step and policy inference: 9014 fps total: 6033 epoch: 440/15000 frames: 7192576
+fps step: 9711 fps step and policy inference: 9011 fps total: 5993 epoch: 441/15000 frames: 7208960
+fps step: 10077 fps step and policy inference: 9366 fps total: 5890 epoch: 442/15000 frames: 7225344
+fps step: 9906 fps step and policy inference: 9047 fps total: 5898 epoch: 443/15000 frames: 7241728
+fps step: 10119 fps step and policy inference: 9184 fps total: 6099 epoch: 444/15000 frames: 7258112
+fps step: 10569 fps step and policy inference: 9275 fps total: 6172 epoch: 445/15000 frames: 7274496
+fps step: 10602 fps step and policy inference: 9450 fps total: 6179 epoch: 446/15000 frames: 7290880
+fps step: 10992 fps step and policy inference: 10233 fps total: 6637 epoch: 447/15000 frames: 7307264
+fps step: 10889 fps step and policy inference: 9775 fps total: 6407 epoch: 448/15000 frames: 7323648
+fps step: 10828 fps step and policy inference: 8626 fps total: 5896 epoch: 449/15000 frames: 7340032
+saving next best rewards:  [-72.34]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10839 fps step and policy inference: 10114 fps total: 6401 epoch: 450/15000 frames: 7356416
+fps step: 10513 fps step and policy inference: 9745 fps total: 6406 epoch: 451/15000 frames: 7372800
+fps step: 10189 fps step and policy inference: 9478 fps total: 6223 epoch: 452/15000 frames: 7389184
+fps step: 9917 fps step and policy inference: 9224 fps total: 6128 epoch: 453/15000 frames: 7405568
+fps step: 9927 fps step and policy inference: 9288 fps total: 6173 epoch: 454/15000 frames: 7421952
+fps step: 10208 fps step and policy inference: 9098 fps total: 6004 epoch: 455/15000 frames: 7438336
+saving next best rewards:  [-71.05]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10259 fps step and policy inference: 8988 fps total: 5936 epoch: 456/15000 frames: 7454720
+saving next best rewards:  [-65.58]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10588 fps step and policy inference: 9483 fps total: 6174 epoch: 457/15000 frames: 7471104
+saving next best rewards:  [-62.54]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10878 fps step and policy inference: 10128 fps total: 6382 epoch: 458/15000 frames: 7487488
+fps step: 10816 fps step and policy inference: 9734 fps total: 6381 epoch: 459/15000 frames: 7503872
+saving next best rewards:  [-58.26]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10688 fps step and policy inference: 8172 fps total: 5569 epoch: 460/15000 frames: 7520256
+saving next best rewards:  [-22.77]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10658 fps step and policy inference: 9936 fps total: 6491 epoch: 461/15000 frames: 7536640
+fps step: 10590 fps step and policy inference: 9793 fps total: 6281 epoch: 462/15000 frames: 7553024
+fps step: 10457 fps step and policy inference: 9697 fps total: 6236 epoch: 463/15000 frames: 7569408
+fps step: 10037 fps step and policy inference: 9354 fps total: 6121 epoch: 464/15000 frames: 7585792
+fps step: 10194 fps step and policy inference: 9500 fps total: 6185 epoch: 465/15000 frames: 7602176
+fps step: 10049 fps step and policy inference: 9103 fps total: 6086 epoch: 466/15000 frames: 7618560
+saving next best rewards:  [-20.75]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10399 fps step and policy inference: 9139 fps total: 6190 epoch: 467/15000 frames: 7634944
+saving next best rewards:  [-18.91]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10497 fps step and policy inference: 9394 fps total: 6325 epoch: 468/15000 frames: 7651328
+saving next best rewards:  [-17.56]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11012 fps step and policy inference: 10114 fps total: 6609 epoch: 469/15000 frames: 7667712
+saving next best rewards:  [-16.69]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10661 fps step and policy inference: 9788 fps total: 6449 epoch: 470/15000 frames: 7684096
+fps step: 10711 fps step and policy inference: 9825 fps total: 6430 epoch: 471/15000 frames: 7700480
+fps step: 11193 fps step and policy inference: 8846 fps total: 5959 epoch: 472/15000 frames: 7716864
+saving next best rewards:  [55.71]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11436 fps step and policy inference: 10616 fps total: 6691 epoch: 473/15000 frames: 7733248
+fps step: 10568 fps step and policy inference: 9794 fps total: 6445 epoch: 474/15000 frames: 7749632
+fps step: 10833 fps step and policy inference: 10044 fps total: 6536 epoch: 475/15000 frames: 7766016
+fps step: 10478 fps step and policy inference: 9691 fps total: 6341 epoch: 476/15000 frames: 7782400
+fps step: 10276 fps step and policy inference: 9417 fps total: 6192 epoch: 477/15000 frames: 7798784
+saving next best rewards:  [57.92]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10121 fps step and policy inference: 8975 fps total: 5988 epoch: 478/15000 frames: 7815168
+fps step: 10285 fps step and policy inference: 9275 fps total: 6215 epoch: 479/15000 frames: 7831552
+saving next best rewards:  [59.66]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10379 fps step and policy inference: 9078 fps total: 6101 epoch: 480/15000 frames: 7847936
+saving next best rewards:  [64.86]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11179 fps step and policy inference: 10243 fps total: 6615 epoch: 481/15000 frames: 7864320
+saving next best rewards:  [65.27]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10897 fps step and policy inference: 9985 fps total: 6484 epoch: 482/15000 frames: 7880704
+saving next best rewards:  [66.93]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11012 fps step and policy inference: 8756 fps total: 5847 epoch: 483/15000 frames: 7897088
+saving next best rewards:  [121.23]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10646 fps step and policy inference: 9859 fps total: 6336 epoch: 484/15000 frames: 7913472
+fps step: 10287 fps step and policy inference: 9575 fps total: 6143 epoch: 485/15000 frames: 7929856
+fps step: 9902 fps step and policy inference: 9069 fps total: 5944 epoch: 486/15000 frames: 7946240
+fps step: 10467 fps step and policy inference: 9678 fps total: 6194 epoch: 487/15000 frames: 7962624
+fps step: 10295 fps step and policy inference: 9484 fps total: 6212 epoch: 488/15000 frames: 7979008
+fps step: 10303 fps step and policy inference: 9286 fps total: 6100 epoch: 489/15000 frames: 7995392
+saving next best rewards:  [121.55]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10496 fps step and policy inference: 9271 fps total: 6069 epoch: 490/15000 frames: 8011776
+saving next best rewards:  [126.44]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10621 fps step and policy inference: 9424 fps total: 6053 epoch: 491/15000 frames: 8028160
+saving next best rewards:  [129.75]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10884 fps step and policy inference: 10092 fps total: 6438 epoch: 492/15000 frames: 8044544
+fps step: 11344 fps step and policy inference: 10132 fps total: 6433 epoch: 493/15000 frames: 8060928
+saving next best rewards:  [133.07]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11293 fps step and policy inference: 8970 fps total: 6080 epoch: 494/15000 frames: 8077312
+fps step: 11584 fps step and policy inference: 10672 fps total: 6764 epoch: 495/15000 frames: 8093696
+fps step: 11608 fps step and policy inference: 10740 fps total: 6860 epoch: 496/15000 frames: 8110080
+fps step: 11501 fps step and policy inference: 10560 fps total: 6740 epoch: 497/15000 frames: 8126464
+fps step: 11218 fps step and policy inference: 10412 fps total: 6642 epoch: 498/15000 frames: 8142848
+fps step: 10504 fps step and policy inference: 9747 fps total: 6400 epoch: 499/15000 frames: 8159232
+fps step: 10140 fps step and policy inference: 9086 fps total: 6066 epoch: 500/15000 frames: 8175616
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/last_CapUnscrewArm_A33_20260817_221012_ep_500_rew_92.6051_sr_0.0_fr_1.0.pth'
+fps step: 10313 fps step and policy inference: 9123 fps total: 6047 epoch: 501/15000 frames: 8192000
+fps step: 11021 fps step and policy inference: 9778 fps total: 6445 epoch: 502/15000 frames: 8208384
+fps step: 11217 fps step and policy inference: 10366 fps total: 6630 epoch: 503/15000 frames: 8224768
+fps step: 11212 fps step and policy inference: 10079 fps total: 6522 epoch: 504/15000 frames: 8241152
+fps step: 11113 fps step and policy inference: 8816 fps total: 5963 epoch: 505/15000 frames: 8257536
+saving next best rewards:  [162.81]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11002 fps step and policy inference: 10260 fps total: 6650 epoch: 506/15000 frames: 8273920
+fps step: 11606 fps step and policy inference: 10681 fps total: 6781 epoch: 507/15000 frames: 8290304
+fps step: 11176 fps step and policy inference: 10336 fps total: 6708 epoch: 508/15000 frames: 8306688
+fps step: 10260 fps step and policy inference: 9563 fps total: 5973 epoch: 509/15000 frames: 8323072
+fps step: 10282 fps step and policy inference: 9600 fps total: 6380 epoch: 510/15000 frames: 8339456
+fps step: 10207 fps step and policy inference: 9165 fps total: 6134 epoch: 511/15000 frames: 8355840
+saving next best rewards:  [164.47]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10309 fps step and policy inference: 9143 fps total: 6067 epoch: 512/15000 frames: 8372224
+saving next best rewards:  [167.35]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10692 fps step and policy inference: 9581 fps total: 6309 epoch: 513/15000 frames: 8388608
+saving next best rewards:  [171.15]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11225 fps step and policy inference: 10441 fps total: 6769 epoch: 514/15000 frames: 8404992
+fps step: 11368 fps step and policy inference: 10295 fps total: 6533 epoch: 515/15000 frames: 8421376
+saving next best rewards:  [174.35]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11389 fps step and policy inference: 10397 fps total: 6622 epoch: 516/15000 frames: 8437760
+saving next best rewards:  [175.92]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11332 fps step and policy inference: 9032 fps total: 5917 epoch: 517/15000 frames: 8454144
+saving next best rewards:  [276.88]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11052 fps step and policy inference: 10265 fps total: 6586 epoch: 518/15000 frames: 8470528
+fps step: 10657 fps step and policy inference: 9882 fps total: 6456 epoch: 519/15000 frames: 8486912
+fps step: 10562 fps step and policy inference: 9820 fps total: 6474 epoch: 520/15000 frames: 8503296
+fps step: 10242 fps step and policy inference: 9510 fps total: 6288 epoch: 521/15000 frames: 8519680
+fps step: 10104 fps step and policy inference: 9306 fps total: 6226 epoch: 522/15000 frames: 8536064
+saving next best rewards:  [277.39]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10145 fps step and policy inference: 8879 fps total: 6006 epoch: 523/15000 frames: 8552448
+saving next best rewards:  [286.28]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10353 fps step and policy inference: 9306 fps total: 6236 epoch: 524/15000 frames: 8568832
+saving next best rewards:  [287.]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10300 fps step and policy inference: 9492 fps total: 6286 epoch: 525/15000 frames: 8585216
+saving next best rewards:  [287.31]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10699 fps step and policy inference: 9845 fps total: 6421 epoch: 526/15000 frames: 8601600
+saving next best rewards:  [288.72]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10256 fps step and policy inference: 9425 fps total: 6177 epoch: 527/15000 frames: 8617984
+saving next best rewards:  [289.16]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11103 fps step and policy inference: 8848 fps total: 6044 epoch: 528/15000 frames: 8634368
+saving next best rewards:  [297.87]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11161 fps step and policy inference: 10351 fps total: 6644 epoch: 529/15000 frames: 8650752
+fps step: 11185 fps step and policy inference: 10352 fps total: 6626 epoch: 530/15000 frames: 8667136
+fps step: 10468 fps step and policy inference: 9685 fps total: 6380 epoch: 531/15000 frames: 8683520
+fps step: 10360 fps step and policy inference: 9613 fps total: 6289 epoch: 532/15000 frames: 8699904
+fps step: 9986 fps step and policy inference: 9188 fps total: 6221 epoch: 533/15000 frames: 8716288
+saving next best rewards:  [298.74]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 9924 fps step and policy inference: 8820 fps total: 5947 epoch: 534/15000 frames: 8732672
+fps step: 9874 fps step and policy inference: 8984 fps total: 6057 epoch: 535/15000 frames: 8749056
+fps step: 10081 fps step and policy inference: 9037 fps total: 6052 epoch: 536/15000 frames: 8765440
+fps step: 10060 fps step and policy inference: 9183 fps total: 6153 epoch: 537/15000 frames: 8781824
+fps step: 10448 fps step and policy inference: 9562 fps total: 6295 epoch: 538/15000 frames: 8798208
+fps step: 10961 fps step and policy inference: 8704 fps total: 5900 epoch: 539/15000 frames: 8814592
+fps step: 10757 fps step and policy inference: 9976 fps total: 6417 epoch: 540/15000 frames: 8830976
+fps step: 10451 fps step and policy inference: 9714 fps total: 6362 epoch: 541/15000 frames: 8847360
+fps step: 10493 fps step and policy inference: 9719 fps total: 6344 epoch: 542/15000 frames: 8863744
+fps step: 10190 fps step and policy inference: 9448 fps total: 6242 epoch: 543/15000 frames: 8880128
+fps step: 10183 fps step and policy inference: 9375 fps total: 6196 epoch: 544/15000 frames: 8896512
+fps step: 9864 fps step and policy inference: 8988 fps total: 5973 epoch: 545/15000 frames: 8912896
+fps step: 10093 fps step and policy inference: 8870 fps total: 5855 epoch: 546/15000 frames: 8929280
+fps step: 10101 fps step and policy inference: 8972 fps total: 6041 epoch: 547/15000 frames: 8945664
+fps step: 10541 fps step and policy inference: 9750 fps total: 6265 epoch: 548/15000 frames: 8962048
+fps step: 10921 fps step and policy inference: 9845 fps total: 6436 epoch: 549/15000 frames: 8978432
+fps step: 11080 fps step and policy inference: 8755 fps total: 5787 epoch: 550/15000 frames: 8994816
+saving next best rewards:  [347.81]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11239 fps step and policy inference: 10437 fps total: 6686 epoch: 551/15000 frames: 9011200
+fps step: 10572 fps step and policy inference: 9770 fps total: 6278 epoch: 552/15000 frames: 9027584
+fps step: 10659 fps step and policy inference: 9858 fps total: 6447 epoch: 553/15000 frames: 9043968
+fps step: 10349 fps step and policy inference: 9599 fps total: 6255 epoch: 554/15000 frames: 9060352
+fps step: 10325 fps step and policy inference: 9575 fps total: 6234 epoch: 555/15000 frames: 9076736
+fps step: 9968 fps step and policy inference: 8911 fps total: 5976 epoch: 556/15000 frames: 9093120
+saving next best rewards:  [354.31]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10032 fps step and policy inference: 8880 fps total: 5910 epoch: 557/15000 frames: 9109504
+fps step: 9906 fps step and policy inference: 8780 fps total: 5877 epoch: 558/15000 frames: 9125888
+fps step: 9790 fps step and policy inference: 9074 fps total: 6053 epoch: 559/15000 frames: 9142272
+fps step: 10177 fps step and policy inference: 9163 fps total: 6093 epoch: 560/15000 frames: 9158656
+fps step: 10628 fps step and policy inference: 8503 fps total: 5782 epoch: 561/15000 frames: 9175040
+saving next best rewards:  [385.76]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11363 fps step and policy inference: 10535 fps total: 6685 epoch: 562/15000 frames: 9191424
+fps step: 11408 fps step and policy inference: 10570 fps total: 6756 epoch: 563/15000 frames: 9207808
+fps step: 10551 fps step and policy inference: 9766 fps total: 6392 epoch: 564/15000 frames: 9224192
+fps step: 10331 fps step and policy inference: 9572 fps total: 6321 epoch: 565/15000 frames: 9240576
+fps step: 10110 fps step and policy inference: 9424 fps total: 6038 epoch: 566/15000 frames: 9256960
+fps step: 10138 fps step and policy inference: 9105 fps total: 6107 epoch: 567/15000 frames: 9273344
+saving next best rewards:  [392.87]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10010 fps step and policy inference: 8745 fps total: 5969 epoch: 568/15000 frames: 9289728
+saving next best rewards:  [399.95]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10163 fps step and policy inference: 9265 fps total: 6167 epoch: 569/15000 frames: 9306112
+saving next best rewards:  [402.09]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10481 fps step and policy inference: 9619 fps total: 6319 epoch: 570/15000 frames: 9322496
+saving next best rewards:  [402.61]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11093 fps step and policy inference: 10000 fps total: 6471 epoch: 571/15000 frames: 9338880
+fps step: 11159 fps step and policy inference: 10086 fps total: 6445 epoch: 572/15000 frames: 9355264
+fps step: 11333 fps step and policy inference: 8920 fps total: 6020 epoch: 573/15000 frames: 9371648
+saving next best rewards:  [458.02]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10958 fps step and policy inference: 10195 fps total: 6563 epoch: 574/15000 frames: 9388032
+fps step: 10678 fps step and policy inference: 9849 fps total: 6426 epoch: 575/15000 frames: 9404416
+fps step: 10446 fps step and policy inference: 9671 fps total: 6369 epoch: 576/15000 frames: 9420800
+fps step: 10498 fps step and policy inference: 9738 fps total: 6343 epoch: 577/15000 frames: 9437184
+fps step: 10131 fps step and policy inference: 9277 fps total: 6154 epoch: 578/15000 frames: 9453568
+saving next best rewards:  [459.61]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10004 fps step and policy inference: 8856 fps total: 5946 epoch: 579/15000 frames: 9469952
+saving next best rewards:  [468.]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10190 fps step and policy inference: 9128 fps total: 6025 epoch: 580/15000 frames: 9486336
+fps step: 10458 fps step and policy inference: 9290 fps total: 6199 epoch: 581/15000 frames: 9502720
+fps step: 10526 fps step and policy inference: 9474 fps total: 6282 epoch: 582/15000 frames: 9519104
+fps step: 10696 fps step and policy inference: 9754 fps total: 6441 epoch: 583/15000 frames: 9535488
+fps step: 11109 fps step and policy inference: 8820 fps total: 6010 epoch: 584/15000 frames: 9551872
+saving next best rewards:  [488.67]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10942 fps step and policy inference: 10201 fps total: 6538 epoch: 585/15000 frames: 9568256
+fps step: 9835 fps step and policy inference: 9204 fps total: 6112 epoch: 586/15000 frames: 9584640
+fps step: 9763 fps step and policy inference: 9103 fps total: 6043 epoch: 587/15000 frames: 9601024
+fps step: 10075 fps step and policy inference: 9340 fps total: 6167 epoch: 588/15000 frames: 9617408
+fps step: 10141 fps step and policy inference: 9283 fps total: 6072 epoch: 589/15000 frames: 9633792
+fps step: 10046 fps step and policy inference: 8933 fps total: 6024 epoch: 590/15000 frames: 9650176
+fps step: 10353 fps step and policy inference: 9081 fps total: 6065 epoch: 591/15000 frames: 9666560
+saving next best rewards:  [490.96]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10284 fps step and policy inference: 9233 fps total: 6161 epoch: 592/15000 frames: 9682944
+fps step: 10383 fps step and policy inference: 9446 fps total: 6241 epoch: 593/15000 frames: 9699328
+fps step: 11086 fps step and policy inference: 9972 fps total: 6483 epoch: 594/15000 frames: 9715712
+saving next best rewards:  [494.53]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11165 fps step and policy inference: 8870 fps total: 6031 epoch: 595/15000 frames: 9732096
+saving next best rewards:  [550.13]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11150 fps step and policy inference: 10383 fps total: 6672 epoch: 596/15000 frames: 9748480
+fps step: 10059 fps step and policy inference: 9316 fps total: 6190 epoch: 597/15000 frames: 9764864
+fps step: 9891 fps step and policy inference: 9194 fps total: 6020 epoch: 598/15000 frames: 9781248
+fps step: 9902 fps step and policy inference: 9223 fps total: 6061 epoch: 599/15000 frames: 9797632
+fps step: 9878 fps step and policy inference: 9167 fps total: 6124 epoch: 600/15000 frames: 9814016
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/last_CapUnscrewArm_A33_20260817_221012_ep_600_rew_552.25946_sr_0.0_fr_0.9999998211860657.pth'
+saving next best rewards:  [552.26]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 9656 fps step and policy inference: 8678 fps total: 5917 epoch: 601/15000 frames: 9830400
+fps step: 10182 fps step and policy inference: 8958 fps total: 5923 epoch: 602/15000 frames: 9846784
+saving next best rewards:  [553.74]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10566 fps step and policy inference: 9330 fps total: 6175 epoch: 603/15000 frames: 9863168
+fps step: 10589 fps step and policy inference: 9574 fps total: 6338 epoch: 604/15000 frames: 9879552
+fps step: 11320 fps step and policy inference: 10183 fps total: 6613 epoch: 605/15000 frames: 9895936
+fps step: 11321 fps step and policy inference: 8921 fps total: 6045 epoch: 606/15000 frames: 9912320
+saving next best rewards:  [619.64]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11189 fps step and policy inference: 10398 fps total: 6642 epoch: 607/15000 frames: 9928704
+fps step: 10104 fps step and policy inference: 9365 fps total: 6161 epoch: 608/15000 frames: 9945088
+fps step: 9861 fps step and policy inference: 9219 fps total: 6033 epoch: 609/15000 frames: 9961472
+fps step: 10066 fps step and policy inference: 9320 fps total: 6069 epoch: 610/15000 frames: 9977856
+fps step: 10111 fps step and policy inference: 9448 fps total: 6050 epoch: 611/15000 frames: 9994240
+fps step: 10092 fps step and policy inference: 8976 fps total: 5903 epoch: 612/15000 frames: 10010624
+fps step: 10038 fps step and policy inference: 8851 fps total: 5942 epoch: 613/15000 frames: 10027008
+fps step: 10396 fps step and policy inference: 9088 fps total: 6009 epoch: 614/15000 frames: 10043392
+fps step: 11080 fps step and policy inference: 10078 fps total: 6521 epoch: 615/15000 frames: 10059776
+fps step: 11177 fps step and policy inference: 10042 fps total: 6453 epoch: 616/15000 frames: 10076160
+fps step: 11210 fps step and policy inference: 10171 fps total: 6550 epoch: 617/15000 frames: 10092544
+fps step: 11304 fps step and policy inference: 8904 fps total: 6016 epoch: 618/15000 frames: 10108928
+fps step: 10828 fps step and policy inference: 10019 fps total: 6554 epoch: 619/15000 frames: 10125312
+fps step: 9988 fps step and policy inference: 9331 fps total: 6134 epoch: 620/15000 frames: 10141696
+fps step: 10070 fps step and policy inference: 9343 fps total: 6155 epoch: 621/15000 frames: 10158080
+fps step: 9931 fps step and policy inference: 9247 fps total: 6054 epoch: 622/15000 frames: 10174464
+fps step: 10214 fps step and policy inference: 9376 fps total: 6216 epoch: 623/15000 frames: 10190848
+fps step: 10176 fps step and policy inference: 8844 fps total: 5951 epoch: 624/15000 frames: 10207232
+fps step: 10780 fps step and policy inference: 9470 fps total: 6224 epoch: 625/15000 frames: 10223616
+fps step: 10796 fps step and policy inference: 9736 fps total: 6371 epoch: 626/15000 frames: 10240000
+fps step: 10855 fps step and policy inference: 9786 fps total: 6386 epoch: 627/15000 frames: 10256384
+fps step: 10749 fps step and policy inference: 9760 fps total: 6363 epoch: 628/15000 frames: 10272768
+fps step: 11164 fps step and policy inference: 8854 fps total: 6004 epoch: 629/15000 frames: 10289152
+fps step: 10364 fps step and policy inference: 9627 fps total: 6285 epoch: 630/15000 frames: 10305536
+fps step: 10672 fps step and policy inference: 9882 fps total: 6450 epoch: 631/15000 frames: 10321920
+fps step: 10581 fps step and policy inference: 9838 fps total: 6416 epoch: 632/15000 frames: 10338304
+fps step: 10241 fps step and policy inference: 9501 fps total: 6254 epoch: 633/15000 frames: 10354688
+fps step: 10044 fps step and policy inference: 9175 fps total: 6087 epoch: 634/15000 frames: 10371072
+fps step: 10036 fps step and policy inference: 8796 fps total: 5955 epoch: 635/15000 frames: 10387456
+fps step: 10514 fps step and policy inference: 9314 fps total: 6164 epoch: 636/15000 frames: 10403840
+fps step: 10757 fps step and policy inference: 9457 fps total: 6277 epoch: 637/15000 frames: 10420224
+fps step: 10719 fps step and policy inference: 9496 fps total: 6268 epoch: 638/15000 frames: 10436608
+fps step: 10920 fps step and policy inference: 9920 fps total: 6426 epoch: 639/15000 frames: 10452992
+fps step: 11120 fps step and policy inference: 8724 fps total: 5849 epoch: 640/15000 frames: 10469376
+saving next best rewards:  [685.18]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11237 fps step and policy inference: 10410 fps total: 6555 epoch: 641/15000 frames: 10485760
+fps step: 10892 fps step and policy inference: 10031 fps total: 6506 epoch: 642/15000 frames: 10502144
+fps step: 10264 fps step and policy inference: 9553 fps total: 6276 epoch: 643/15000 frames: 10518528
+fps step: 10107 fps step and policy inference: 9428 fps total: 6122 epoch: 644/15000 frames: 10534912
+fps step: 10159 fps step and policy inference: 9282 fps total: 6117 epoch: 645/15000 frames: 10551296
+saving next best rewards:  [689.56]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 9986 fps step and policy inference: 9037 fps total: 6023 epoch: 646/15000 frames: 10567680
+fps step: 10561 fps step and policy inference: 9201 fps total: 6111 epoch: 647/15000 frames: 10584064
+fps step: 11110 fps step and policy inference: 9648 fps total: 6282 epoch: 648/15000 frames: 10600448
+saving next best rewards:  [693.07]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11324 fps step and policy inference: 10189 fps total: 6562 epoch: 649/15000 frames: 10616832
+fps step: 10777 fps step and policy inference: 9708 fps total: 6360 epoch: 650/15000 frames: 10633216
+fps step: 11154 fps step and policy inference: 8804 fps total: 5974 epoch: 651/15000 frames: 10649600
+saving next best rewards:  [737.86]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11205 fps step and policy inference: 10411 fps total: 6698 epoch: 652/15000 frames: 10665984
+fps step: 10858 fps step and policy inference: 10011 fps total: 6515 epoch: 653/15000 frames: 10682368
+fps step: 10152 fps step and policy inference: 9405 fps total: 6192 epoch: 654/15000 frames: 10698752
+fps step: 10094 fps step and policy inference: 9380 fps total: 6136 epoch: 655/15000 frames: 10715136
+fps step: 10137 fps step and policy inference: 9395 fps total: 6230 epoch: 656/15000 frames: 10731520
+fps step: 10110 fps step and policy inference: 9047 fps total: 5991 epoch: 657/15000 frames: 10747904
+fps step: 10356 fps step and policy inference: 9105 fps total: 6086 epoch: 658/15000 frames: 10764288
+saving next best rewards:  [743.03]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10636 fps step and policy inference: 9400 fps total: 6184 epoch: 659/15000 frames: 10780672
+saving next best rewards:  [751.17]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11045 fps step and policy inference: 9981 fps total: 6435 epoch: 660/15000 frames: 10797056
+saving next best rewards:  [756.29]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10974 fps step and policy inference: 9778 fps total: 6324 epoch: 661/15000 frames: 10813440
+fps step: 11127 fps step and policy inference: 8830 fps total: 5939 epoch: 662/15000 frames: 10829824
+saving next best rewards:  [821.03]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11543 fps step and policy inference: 10706 fps total: 6714 epoch: 663/15000 frames: 10846208
+fps step: 10876 fps step and policy inference: 10023 fps total: 6465 epoch: 664/15000 frames: 10862592
+fps step: 10463 fps step and policy inference: 9660 fps total: 6271 epoch: 665/15000 frames: 10878976
+fps step: 10331 fps step and policy inference: 9578 fps total: 6134 epoch: 666/15000 frames: 10895360
+fps step: 9888 fps step and policy inference: 9210 fps total: 6041 epoch: 667/15000 frames: 10911744
+fps step: 9997 fps step and policy inference: 8925 fps total: 5930 epoch: 668/15000 frames: 10928128
+fps step: 10442 fps step and policy inference: 9105 fps total: 6045 epoch: 669/15000 frames: 10944512
+fps step: 10700 fps step and policy inference: 9501 fps total: 6260 epoch: 670/15000 frames: 10960896
+fps step: 10880 fps step and policy inference: 9794 fps total: 6323 epoch: 671/15000 frames: 10977280
+saving next best rewards:  [823.98]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11238 fps step and policy inference: 10114 fps total: 6510 epoch: 672/15000 frames: 10993664
+saving next best rewards:  [831.29]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10929 fps step and policy inference: 9884 fps total: 6475 epoch: 673/15000 frames: 11010048
+saving next best rewards:  [831.72]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11462 fps step and policy inference: 9082 fps total: 6087 epoch: 674/15000 frames: 11026432
+saving next best rewards:  [865.22]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10607 fps step and policy inference: 9868 fps total: 6453 epoch: 675/15000 frames: 11042816
+fps step: 10351 fps step and policy inference: 9610 fps total: 6264 epoch: 676/15000 frames: 11059200
+fps step: 10173 fps step and policy inference: 9488 fps total: 6233 epoch: 677/15000 frames: 11075584
+fps step: 10116 fps step and policy inference: 9429 fps total: 6181 epoch: 678/15000 frames: 11091968
+fps step: 10131 fps step and policy inference: 9242 fps total: 6152 epoch: 679/15000 frames: 11108352
+saving next best rewards:  [868.41]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10255 fps step and policy inference: 8922 fps total: 5979 epoch: 680/15000 frames: 11124736
+saving next best rewards:  [875.65]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11135 fps step and policy inference: 10021 fps total: 6531 epoch: 681/15000 frames: 11141120
+saving next best rewards:  [878.59]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11521 fps step and policy inference: 10088 fps total: 6522 epoch: 682/15000 frames: 11157504
+saving next best rewards:  [885.61]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10975 fps step and policy inference: 9858 fps total: 6378 epoch: 683/15000 frames: 11173888
+fps step: 11152 fps step and policy inference: 9990 fps total: 6498 epoch: 684/15000 frames: 11190272
+saving next best rewards:  [893.42]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10484 fps step and policy inference: 8326 fps total: 5712 epoch: 685/15000 frames: 11206656
+fps step: 10426 fps step and policy inference: 9660 fps total: 6332 epoch: 686/15000 frames: 11223040
+fps step: 10544 fps step and policy inference: 9793 fps total: 6460 epoch: 687/15000 frames: 11239424
+fps step: 10633 fps step and policy inference: 9868 fps total: 6442 epoch: 688/15000 frames: 11255808
+fps step: 10035 fps step and policy inference: 9291 fps total: 6169 epoch: 689/15000 frames: 11272192
+fps step: 10411 fps step and policy inference: 9578 fps total: 6346 epoch: 690/15000 frames: 11288576
+fps step: 10484 fps step and policy inference: 9156 fps total: 6106 epoch: 691/15000 frames: 11304960
+fps step: 10644 fps step and policy inference: 9461 fps total: 6283 epoch: 692/15000 frames: 11321344
+fps step: 10206 fps step and policy inference: 9098 fps total: 6046 epoch: 693/15000 frames: 11337728
+fps step: 9902 fps step and policy inference: 8784 fps total: 5923 epoch: 694/15000 frames: 11354112
+fps step: 10843 fps step and policy inference: 9611 fps total: 6267 epoch: 695/15000 frames: 11370496
+fps step: 10398 fps step and policy inference: 8307 fps total: 5630 epoch: 696/15000 frames: 11386880
+saving next best rewards:  [925.03]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10928 fps step and policy inference: 10140 fps total: 6253 epoch: 697/15000 frames: 11403264
+fps step: 10848 fps step and policy inference: 10015 fps total: 6452 epoch: 698/15000 frames: 11419648
+fps step: 9638 fps step and policy inference: 8935 fps total: 5681 epoch: 699/15000 frames: 11436032
+fps step: 9645 fps step and policy inference: 8932 fps total: 5776 epoch: 700/15000 frames: 11452416
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/last_CapUnscrewArm_A33_20260817_221012_ep_700_rew_925.02747_sr_0.0_fr_1.0.pth'
+fps step: 9368 fps step and policy inference: 8579 fps total: 5828 epoch: 701/15000 frames: 11468800
+fps step: 10412 fps step and policy inference: 9407 fps total: 5924 epoch: 702/15000 frames: 11485184
+fps step: 10251 fps step and policy inference: 8876 fps total: 5885 epoch: 703/15000 frames: 11501568
+saving next best rewards:  [931.05]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11118 fps step and policy inference: 9576 fps total: 5892 epoch: 704/15000 frames: 11517952
+saving next best rewards:  [937.99]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11330 fps step and policy inference: 10218 fps total: 6475 epoch: 705/15000 frames: 11534336
+saving next best rewards:  [941.24]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11032 fps step and policy inference: 9796 fps total: 6340 epoch: 706/15000 frames: 11550720
+saving next best rewards:  [945.4]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10817 fps step and policy inference: 8630 fps total: 5776 epoch: 707/15000 frames: 11567104
+saving next best rewards:  [1010.7]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10741 fps step and policy inference: 9939 fps total: 6318 epoch: 708/15000 frames: 11583488
+fps step: 10336 fps step and policy inference: 9546 fps total: 6232 epoch: 709/15000 frames: 11599872
+fps step: 9876 fps step and policy inference: 9083 fps total: 6079 epoch: 710/15000 frames: 11616256
+fps step: 10573 fps step and policy inference: 9798 fps total: 6338 epoch: 711/15000 frames: 11632640
+fps step: 10172 fps step and policy inference: 9449 fps total: 6231 epoch: 712/15000 frames: 11649024
+fps step: 10638 fps step and policy inference: 9449 fps total: 6147 epoch: 713/15000 frames: 11665408
+saving next best rewards:  [1011.85]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11074 fps step and policy inference: 9703 fps total: 6137 epoch: 714/15000 frames: 11681792
+saving next best rewards:  [1019.67]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11360 fps step and policy inference: 9929 fps total: 6190 epoch: 715/15000 frames: 11698176
+fps step: 11348 fps step and policy inference: 10266 fps total: 6590 epoch: 716/15000 frames: 11714560
+fps step: 10918 fps step and policy inference: 9587 fps total: 6147 epoch: 717/15000 frames: 11730944
+fps step: 10590 fps step and policy inference: 9587 fps total: 6274 epoch: 718/15000 frames: 11747328
+saving next best rewards:  [1025.68]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11151 fps step and policy inference: 8807 fps total: 5742 epoch: 719/15000 frames: 11763712
+fps step: 10339 fps step and policy inference: 9529 fps total: 6135 epoch: 720/15000 frames: 11780096
+fps step: 10235 fps step and policy inference: 9435 fps total: 6085 epoch: 721/15000 frames: 11796480
+fps step: 9955 fps step and policy inference: 9224 fps total: 6037 epoch: 722/15000 frames: 11812864
+fps step: 8527 fps step and policy inference: 7848 fps total: 5410 epoch: 723/15000 frames: 11829248
+fps step: 8655 fps step and policy inference: 7878 fps total: 5501 epoch: 724/15000 frames: 11845632
+fps step: 8880 fps step and policy inference: 7464 fps total: 5312 epoch: 725/15000 frames: 11862016
+saving next best rewards:  [1027.8]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 8913 fps step and policy inference: 7577 fps total: 5214 epoch: 726/15000 frames: 11878400
+saving next best rewards:  [1028.33]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 9092 fps step and policy inference: 8040 fps total: 5617 epoch: 727/15000 frames: 11894784
+fps step: 8948 fps step and policy inference: 7890 fps total: 5561 epoch: 728/15000 frames: 11911168
+fps step: 8863 fps step and policy inference: 7862 fps total: 5457 epoch: 729/15000 frames: 11927552
+fps step: 8706 fps step and policy inference: 7041 fps total: 5056 epoch: 730/15000 frames: 11943936
+saving next best rewards:  [1101.54]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 8811 fps step and policy inference: 8163 fps total: 5644 epoch: 731/15000 frames: 11960320
+fps step: 8062 fps step and policy inference: 7418 fps total: 5188 epoch: 732/15000 frames: 11976704
+fps step: 8298 fps step and policy inference: 7634 fps total: 5359 epoch: 733/15000 frames: 11993088
+fps step: 8250 fps step and policy inference: 7624 fps total: 5346 epoch: 734/15000 frames: 12009472
+fps step: 8341 fps step and policy inference: 7546 fps total: 5348 epoch: 735/15000 frames: 12025856
+fps step: 8712 fps step and policy inference: 7428 fps total: 5273 epoch: 736/15000 frames: 12042240
+saving next best rewards:  [1102.03]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 9035 fps step and policy inference: 7804 fps total: 5450 epoch: 737/15000 frames: 12058624
+saving next best rewards:  [1105.]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 9281 fps step and policy inference: 7994 fps total: 5553 epoch: 738/15000 frames: 12075008
+saving next best rewards:  [1108.83]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 9056 fps step and policy inference: 7839 fps total: 5437 epoch: 739/15000 frames: 12091392
+fps step: 8512 fps step and policy inference: 7607 fps total: 5373 epoch: 740/15000 frames: 12107776
+fps step: 8662 fps step and policy inference: 7047 fps total: 5068 epoch: 741/15000 frames: 12124160
+saving next best rewards:  [1144.56]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 8636 fps step and policy inference: 8038 fps total: 5585 epoch: 742/15000 frames: 12140544
+fps step: 8689 fps step and policy inference: 7977 fps total: 5531 epoch: 743/15000 frames: 12156928
+fps step: 8495 fps step and policy inference: 7827 fps total: 5479 epoch: 744/15000 frames: 12173312
+fps step: 8203 fps step and policy inference: 7530 fps total: 5231 epoch: 745/15000 frames: 12189696
+fps step: 8299 fps step and policy inference: 7479 fps total: 5117 epoch: 746/15000 frames: 12206080
+saving next best rewards:  [1146.74]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 8657 fps step and policy inference: 7664 fps total: 5282 epoch: 747/15000 frames: 12222464
+saving next best rewards:  [1148.4]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 8701 fps step and policy inference: 7194 fps total: 4912 epoch: 748/15000 frames: 12238848
+saving next best rewards:  [1148.5]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 7029 fps step and policy inference: 6099 fps total: 4495 epoch: 749/15000 frames: 12255232
+saving next best rewards:  [1154.42]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 7214 fps step and policy inference: 6356 fps total: 4683 epoch: 750/15000 frames: 12271616
+saving next best rewards:  [1156.38]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 6843 fps step and policy inference: 5974 fps total: 4466 epoch: 751/15000 frames: 12288000
+fps step: 7094 fps step and policy inference: 5880 fps total: 4406 epoch: 752/15000 frames: 12304384
+saving next best rewards:  [1219.25]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 7088 fps step and policy inference: 6610 fps total: 4836 epoch: 753/15000 frames: 12320768
+fps step: 6642 fps step and policy inference: 6172 fps total: 4535 epoch: 754/15000 frames: 12337152
+fps step: 6512 fps step and policy inference: 6017 fps total: 4456 epoch: 755/15000 frames: 12353536
+fps step: 6566 fps step and policy inference: 6050 fps total: 4463 epoch: 756/15000 frames: 12369920
+fps step: 7777 fps step and policy inference: 7249 fps total: 5127 epoch: 757/15000 frames: 12386304
+fps step: 8324 fps step and policy inference: 7263 fps total: 5141 epoch: 758/15000 frames: 12402688
+fps step: 8703 fps step and policy inference: 7353 fps total: 5154 epoch: 759/15000 frames: 12419072
+fps step: 8672 fps step and policy inference: 7309 fps total: 5173 epoch: 760/15000 frames: 12435456
+fps step: 8425 fps step and policy inference: 7433 fps total: 5262 epoch: 761/15000 frames: 12451840
+fps step: 8349 fps step and policy inference: 7217 fps total: 5119 epoch: 762/15000 frames: 12468224
+fps step: 8527 fps step and policy inference: 6876 fps total: 4884 epoch: 763/15000 frames: 12484608
+fps step: 8326 fps step and policy inference: 7722 fps total: 5360 epoch: 764/15000 frames: 12500992
+fps step: 8185 fps step and policy inference: 7615 fps total: 5315 epoch: 765/15000 frames: 12517376
+fps step: 7909 fps step and policy inference: 7330 fps total: 5164 epoch: 766/15000 frames: 12533760
+fps step: 7924 fps step and policy inference: 7399 fps total: 5240 epoch: 767/15000 frames: 12550144
+fps step: 8056 fps step and policy inference: 7511 fps total: 5242 epoch: 768/15000 frames: 12566528
+fps step: 8263 fps step and policy inference: 7222 fps total: 5140 epoch: 769/15000 frames: 12582912
+fps step: 8310 fps step and policy inference: 7064 fps total: 4947 epoch: 770/15000 frames: 12599296
+fps step: 8094 fps step and policy inference: 7049 fps total: 4735 epoch: 771/15000 frames: 12615680
+fps step: 8496 fps step and policy inference: 7514 fps total: 5244 epoch: 772/15000 frames: 12632064
+fps step: 8236 fps step and policy inference: 7019 fps total: 5050 epoch: 773/15000 frames: 12648448
+fps step: 7916 fps step and policy inference: 7020 fps total: 5049 epoch: 774/15000 frames: 12664832
+fps step: 8391 fps step and policy inference: 6759 fps total: 4850 epoch: 775/15000 frames: 12681216
+fps step: 8204 fps step and policy inference: 7638 fps total: 5361 epoch: 776/15000 frames: 12697600
+fps step: 9448 fps step and policy inference: 8694 fps total: 5864 epoch: 777/15000 frames: 12713984
+fps step: 9210 fps step and policy inference: 8480 fps total: 5578 epoch: 778/15000 frames: 12730368
+fps step: 9054 fps step and policy inference: 8395 fps total: 5626 epoch: 779/15000 frames: 12746752
+fps step: 9161 fps step and policy inference: 8266 fps total: 5598 epoch: 780/15000 frames: 12763136
+fps step: 10057 fps step and policy inference: 8476 fps total: 5800 epoch: 781/15000 frames: 12779520
+fps step: 10008 fps step and policy inference: 8606 fps total: 5907 epoch: 782/15000 frames: 12795904
+fps step: 10044 fps step and policy inference: 8655 fps total: 5799 epoch: 783/15000 frames: 12812288
+fps step: 9765 fps step and policy inference: 8679 fps total: 5852 epoch: 784/15000 frames: 12828672
+fps step: 9354 fps step and policy inference: 8132 fps total: 5610 epoch: 785/15000 frames: 12845056
+fps step: 9837 fps step and policy inference: 7867 fps total: 5512 epoch: 786/15000 frames: 12861440
+fps step: 9008 fps step and policy inference: 8278 fps total: 5715 epoch: 787/15000 frames: 12877824
+fps step: 9660 fps step and policy inference: 8939 fps total: 5966 epoch: 788/15000 frames: 12894208
+fps step: 9453 fps step and policy inference: 8723 fps total: 5932 epoch: 789/15000 frames: 12910592
+fps step: 9604 fps step and policy inference: 8862 fps total: 6019 epoch: 790/15000 frames: 12926976
+fps step: 9530 fps step and policy inference: 8588 fps total: 5696 epoch: 791/15000 frames: 12943360
+fps step: 9860 fps step and policy inference: 8413 fps total: 5653 epoch: 792/15000 frames: 12959744
+fps step: 9871 fps step and policy inference: 8626 fps total: 5843 epoch: 793/15000 frames: 12976128
+fps step: 9935 fps step and policy inference: 8486 fps total: 5679 epoch: 794/15000 frames: 12992512
+fps step: 9900 fps step and policy inference: 8660 fps total: 5853 epoch: 795/15000 frames: 13008896
+fps step: 9650 fps step and policy inference: 8447 fps total: 5731 epoch: 796/15000 frames: 13025280
+fps step: 9457 fps step and policy inference: 7579 fps total: 5362 epoch: 797/15000 frames: 13041664
+saving next best rewards:  [1233.87]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 9490 fps step and policy inference: 8811 fps total: 5912 epoch: 798/15000 frames: 13058048
+fps step: 9331 fps step and policy inference: 8552 fps total: 5848 epoch: 799/15000 frames: 13074432
+fps step: 9080 fps step and policy inference: 8379 fps total: 5575 epoch: 800/15000 frames: 13090816
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/last_CapUnscrewArm_A33_20260817_221012_ep_800_rew_1233.8704_sr_0.0_fr_1.0.pth'
+fps step: 8938 fps step and policy inference: 8248 fps total: 5555 epoch: 801/15000 frames: 13107200
+fps step: 9074 fps step and policy inference: 8211 fps total: 5552 epoch: 802/15000 frames: 13123584
+saving next best rewards:  [1234.]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 9588 fps step and policy inference: 8530 fps total: 5687 epoch: 803/15000 frames: 13139968
+saving next best rewards:  [1238.21]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 9816 fps step and policy inference: 8452 fps total: 5539 epoch: 804/15000 frames: 13156352
+saving next best rewards:  [1241.4]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 9976 fps step and policy inference: 8612 fps total: 5831 epoch: 805/15000 frames: 13172736
+fps step: 9512 fps step and policy inference: 8219 fps total: 5702 epoch: 806/15000 frames: 13189120
+fps step: 9526 fps step and policy inference: 8106 fps total: 5564 epoch: 807/15000 frames: 13205504
+saving next best rewards:  [1242.83]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 9468 fps step and policy inference: 7568 fps total: 5287 epoch: 808/15000 frames: 13221888
+saving next best rewards:  [1266.17]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 9674 fps step and policy inference: 9004 fps total: 5885 epoch: 809/15000 frames: 13238272
+fps step: 9347 fps step and policy inference: 8581 fps total: 5854 epoch: 810/15000 frames: 13254656
+fps step: 9355 fps step and policy inference: 8618 fps total: 5808 epoch: 811/15000 frames: 13271040
+fps step: 8851 fps step and policy inference: 8124 fps total: 5570 epoch: 812/15000 frames: 13287424
+fps step: 9108 fps step and policy inference: 8396 fps total: 5716 epoch: 813/15000 frames: 13303808
+fps step: 9523 fps step and policy inference: 8377 fps total: 5768 epoch: 814/15000 frames: 13320192
+saving next best rewards:  [1270.44]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10350 fps step and policy inference: 8877 fps total: 6029 epoch: 815/15000 frames: 13336576
+saving next best rewards:  [1273.53]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10091 fps step and policy inference: 8679 fps total: 5830 epoch: 816/15000 frames: 13352960
+saving next best rewards:  [1277.94]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10125 fps step and policy inference: 9031 fps total: 6005 epoch: 817/15000 frames: 13369344
+saving next best rewards:  [1278.88]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 9779 fps step and policy inference: 8263 fps total: 5643 epoch: 818/15000 frames: 13385728
+fps step: 9720 fps step and policy inference: 7612 fps total: 5211 epoch: 819/15000 frames: 13402112
+fps step: 8733 fps step and policy inference: 7990 fps total: 5483 epoch: 820/15000 frames: 13418496
+fps step: 8361 fps step and policy inference: 7770 fps total: 5456 epoch: 821/15000 frames: 13434880
+fps step: 8145 fps step and policy inference: 7542 fps total: 5267 epoch: 822/15000 frames: 13451264
+fps step: 7791 fps step and policy inference: 7257 fps total: 5163 epoch: 823/15000 frames: 13467648
+fps step: 7713 fps step and policy inference: 7124 fps total: 5075 epoch: 824/15000 frames: 13484032
+fps step: 8138 fps step and policy inference: 7240 fps total: 5122 epoch: 825/15000 frames: 13500416
+fps step: 8401 fps step and policy inference: 7083 fps total: 5041 epoch: 826/15000 frames: 13516800
+fps step: 8471 fps step and policy inference: 7181 fps total: 4996 epoch: 827/15000 frames: 13533184
+fps step: 8505 fps step and policy inference: 7312 fps total: 5209 epoch: 828/15000 frames: 13549568
+saving next best rewards:  [1280.48]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 8502 fps step and policy inference: 7388 fps total: 5188 epoch: 829/15000 frames: 13565952
+fps step: 8412 fps step and policy inference: 7381 fps total: 5237 epoch: 830/15000 frames: 13582336
+fps step: 8061 fps step and policy inference: 6517 fps total: 4747 epoch: 831/15000 frames: 13598720
+saving next best rewards:  [1313.59]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 7921 fps step and policy inference: 7341 fps total: 5159 epoch: 832/15000 frames: 13615104
+fps step: 7915 fps step and policy inference: 7303 fps total: 5182 epoch: 833/15000 frames: 13631488
+fps step: 7786 fps step and policy inference: 7180 fps total: 5134 epoch: 834/15000 frames: 13647872
+fps step: 8026 fps step and policy inference: 7425 fps total: 5153 epoch: 835/15000 frames: 13664256
+fps step: 8179 fps step and policy inference: 7402 fps total: 5120 epoch: 836/15000 frames: 13680640
+fps step: 7942 fps step and policy inference: 6731 fps total: 4834 epoch: 837/15000 frames: 13697024
+fps step: 8105 fps step and policy inference: 7044 fps total: 4980 epoch: 838/15000 frames: 13713408
+fps step: 8165 fps step and policy inference: 6909 fps total: 4957 epoch: 839/15000 frames: 13729792
+fps step: 8713 fps step and policy inference: 7556 fps total: 5218 epoch: 840/15000 frames: 13746176
+fps step: 8675 fps step and policy inference: 7550 fps total: 5312 epoch: 841/15000 frames: 13762560
+saving next best rewards:  [1315.45]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 8018 fps step and policy inference: 6472 fps total: 4753 epoch: 842/15000 frames: 13778944
+saving next best rewards:  [1364.]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 8148 fps step and policy inference: 7543 fps total: 5142 epoch: 843/15000 frames: 13795328
+fps step: 8208 fps step and policy inference: 7608 fps total: 5337 epoch: 844/15000 frames: 13811712
+fps step: 7526 fps step and policy inference: 7030 fps total: 5028 epoch: 845/15000 frames: 13828096
+fps step: 7920 fps step and policy inference: 7399 fps total: 5262 epoch: 846/15000 frames: 13844480
+fps step: 7845 fps step and policy inference: 7130 fps total: 5026 epoch: 847/15000 frames: 13860864
+fps step: 8149 fps step and policy inference: 7098 fps total: 5099 epoch: 848/15000 frames: 13877248
+fps step: 8533 fps step and policy inference: 7022 fps total: 5046 epoch: 849/15000 frames: 13893632
+fps step: 8725 fps step and policy inference: 7494 fps total: 5267 epoch: 850/15000 frames: 13910016
+fps step: 8697 fps step and policy inference: 7532 fps total: 5270 epoch: 851/15000 frames: 13926400
+fps step: 8802 fps step and policy inference: 7434 fps total: 5300 epoch: 852/15000 frames: 13942784
+fps step: 8505 fps step and policy inference: 6834 fps total: 5012 epoch: 853/15000 frames: 13959168
+saving next best rewards:  [1397.41]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 8273 fps step and policy inference: 7682 fps total: 5413 epoch: 854/15000 frames: 13975552
+fps step: 8117 fps step and policy inference: 7535 fps total: 5382 epoch: 855/15000 frames: 13991936
+fps step: 7720 fps step and policy inference: 7195 fps total: 5057 epoch: 856/15000 frames: 14008320
+fps step: 7914 fps step and policy inference: 7386 fps total: 5265 epoch: 857/15000 frames: 14024704
+fps step: 7900 fps step and policy inference: 7374 fps total: 5199 epoch: 858/15000 frames: 14041088
+fps step: 8185 fps step and policy inference: 7169 fps total: 5146 epoch: 859/15000 frames: 14057472
+fps step: 8259 fps step and policy inference: 7017 fps total: 5001 epoch: 860/15000 frames: 14073856
+fps step: 8883 fps step and policy inference: 7470 fps total: 5276 epoch: 861/15000 frames: 14090240
+fps step: 8387 fps step and policy inference: 7265 fps total: 5099 epoch: 862/15000 frames: 14106624
+fps step: 8182 fps step and policy inference: 7034 fps total: 5045 epoch: 863/15000 frames: 14123008
+fps step: 7995 fps step and policy inference: 6510 fps total: 4693 epoch: 864/15000 frames: 14139392
+fps step: 7656 fps step and policy inference: 7034 fps total: 4710 epoch: 865/15000 frames: 14155776
+fps step: 8258 fps step and policy inference: 7652 fps total: 5411 epoch: 866/15000 frames: 14172160
+fps step: 8327 fps step and policy inference: 7754 fps total: 5435 epoch: 867/15000 frames: 14188544
+fps step: 7825 fps step and policy inference: 7309 fps total: 5215 epoch: 868/15000 frames: 14204928
+fps step: 7615 fps step and policy inference: 6990 fps total: 4995 epoch: 869/15000 frames: 14221312
+fps step: 7959 fps step and policy inference: 6970 fps total: 5048 epoch: 870/15000 frames: 14237696
+fps step: 8483 fps step and policy inference: 7137 fps total: 4955 epoch: 871/15000 frames: 14254080
+fps step: 8178 fps step and policy inference: 6966 fps total: 4979 epoch: 872/15000 frames: 14270464
+saving next best rewards:  [1398.54]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 8661 fps step and policy inference: 7734 fps total: 5344 epoch: 873/15000 frames: 14286848
+fps step: 8125 fps step and policy inference: 6728 fps total: 4876 epoch: 874/15000 frames: 14303232
+fps step: 8216 fps step and policy inference: 7387 fps total: 5136 epoch: 875/15000 frames: 14319616
+fps step: 7902 fps step and policy inference: 6359 fps total: 4637 epoch: 876/15000 frames: 14336000
+fps step: 7655 fps step and policy inference: 7060 fps total: 4855 epoch: 877/15000 frames: 14352384
+fps step: 7889 fps step and policy inference: 7372 fps total: 5174 epoch: 878/15000 frames: 14368768
+fps step: 7796 fps step and policy inference: 7328 fps total: 5180 epoch: 879/15000 frames: 14385152
+fps step: 7737 fps step and policy inference: 7169 fps total: 5077 epoch: 880/15000 frames: 14401536
+fps step: 8038 fps step and policy inference: 7321 fps total: 5218 epoch: 881/15000 frames: 14417920
+fps step: 8214 fps step and policy inference: 6877 fps total: 4978 epoch: 882/15000 frames: 14434304
+fps step: 8539 fps step and policy inference: 7239 fps total: 5082 epoch: 883/15000 frames: 14450688
+fps step: 8501 fps step and policy inference: 7328 fps total: 5060 epoch: 884/15000 frames: 14467072
+fps step: 8583 fps step and policy inference: 7399 fps total: 5088 epoch: 885/15000 frames: 14483456
+fps step: 8160 fps step and policy inference: 7110 fps total: 5074 epoch: 886/15000 frames: 14499840
+fps step: 7777 fps step and policy inference: 6385 fps total: 4735 epoch: 887/15000 frames: 14516224
+fps step: 7992 fps step and policy inference: 7432 fps total: 5172 epoch: 888/15000 frames: 14532608
+fps step: 7879 fps step and policy inference: 7308 fps total: 5206 epoch: 889/15000 frames: 14548992
+fps step: 7592 fps step and policy inference: 7106 fps total: 5080 epoch: 890/15000 frames: 14565376
+fps step: 7607 fps step and policy inference: 7058 fps total: 5057 epoch: 891/15000 frames: 14581760
+fps step: 7475 fps step and policy inference: 6808 fps total: 4827 epoch: 892/15000 frames: 14598144
+fps step: 7886 fps step and policy inference: 6759 fps total: 4940 epoch: 893/15000 frames: 14614528
+fps step: 8602 fps step and policy inference: 7455 fps total: 4852 epoch: 894/15000 frames: 14630912
+fps step: 8571 fps step and policy inference: 7202 fps total: 5118 epoch: 895/15000 frames: 14647296
+fps step: 8904 fps step and policy inference: 7683 fps total: 5240 epoch: 896/15000 frames: 14663680
+fps step: 8373 fps step and policy inference: 7106 fps total: 5030 epoch: 897/15000 frames: 14680064
+fps step: 8058 fps step and policy inference: 6603 fps total: 4823 epoch: 898/15000 frames: 14696448
+fps step: 7830 fps step and policy inference: 7275 fps total: 4846 epoch: 899/15000 frames: 14712832
+fps step: 8079 fps step and policy inference: 7537 fps total: 5349 epoch: 900/15000 frames: 14729216
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/last_CapUnscrewArm_A33_20260817_221012_ep_900_rew_1349.2812_sr_0.0_fr_1.0.pth'
+fps step: 7755 fps step and policy inference: 7210 fps total: 5170 epoch: 901/15000 frames: 14745600
+fps step: 7951 fps step and policy inference: 7384 fps total: 5280 epoch: 902/15000 frames: 14761984
+fps step: 7867 fps step and policy inference: 7204 fps total: 5134 epoch: 903/15000 frames: 14778368
+fps step: 8149 fps step and policy inference: 7283 fps total: 5175 epoch: 904/15000 frames: 14794752
+fps step: 8432 fps step and policy inference: 7168 fps total: 5174 epoch: 905/15000 frames: 14811136
+fps step: 8793 fps step and policy inference: 7376 fps total: 5256 epoch: 906/15000 frames: 14827520
+fps step: 8559 fps step and policy inference: 7334 fps total: 5165 epoch: 907/15000 frames: 14843904
+fps step: 8310 fps step and policy inference: 6975 fps total: 4899 epoch: 908/15000 frames: 14860288
+fps step: 8139 fps step and policy inference: 6624 fps total: 4864 epoch: 909/15000 frames: 14876672
+saving next best rewards:  [1427.29]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 8123 fps step and policy inference: 7548 fps total: 5110 epoch: 910/15000 frames: 14893056
+fps step: 7948 fps step and policy inference: 7424 fps total: 5263 epoch: 911/15000 frames: 14909440
+fps step: 7510 fps step and policy inference: 6958 fps total: 4854 epoch: 912/15000 frames: 14925824
+fps step: 7697 fps step and policy inference: 7150 fps total: 5046 epoch: 913/15000 frames: 14942208
+fps step: 7852 fps step and policy inference: 7296 fps total: 5170 epoch: 914/15000 frames: 14958592
+fps step: 7778 fps step and policy inference: 6858 fps total: 4932 epoch: 915/15000 frames: 14974976
+fps step: 8238 fps step and policy inference: 7018 fps total: 5080 epoch: 916/15000 frames: 14991360
+saving next best rewards:  [1431.29]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 8598 fps step and policy inference: 7315 fps total: 5124 epoch: 917/15000 frames: 15007744
+fps step: 8189 fps step and policy inference: 7163 fps total: 5115 epoch: 918/15000 frames: 15024128
+fps step: 8333 fps step and policy inference: 6912 fps total: 5003 epoch: 919/15000 frames: 15040512
+fps step: 8608 fps step and policy inference: 6910 fps total: 4936 epoch: 920/15000 frames: 15056896
+fps step: 7928 fps step and policy inference: 7408 fps total: 5219 epoch: 921/15000 frames: 15073280
+fps step: 7599 fps step and policy inference: 7095 fps total: 4995 epoch: 922/15000 frames: 15089664
+fps step: 7827 fps step and policy inference: 7254 fps total: 4966 epoch: 923/15000 frames: 15106048
+fps step: 7259 fps step and policy inference: 6791 fps total: 4589 epoch: 924/15000 frames: 15122432
+fps step: 7185 fps step and policy inference: 6687 fps total: 4422 epoch: 925/15000 frames: 15138816
+fps step: 8096 fps step and policy inference: 7139 fps total: 5045 epoch: 926/15000 frames: 15155200
+fps step: 7882 fps step and policy inference: 6506 fps total: 4562 epoch: 927/15000 frames: 15171584
+fps step: 8385 fps step and policy inference: 7202 fps total: 5095 epoch: 928/15000 frames: 15187968
+fps step: 8371 fps step and policy inference: 7156 fps total: 5017 epoch: 929/15000 frames: 15204352
+fps step: 8017 fps step and policy inference: 6904 fps total: 4876 epoch: 930/15000 frames: 15220736
+fps step: 8328 fps step and policy inference: 7207 fps total: 5143 epoch: 931/15000 frames: 15237120
+fps step: 8131 fps step and policy inference: 6780 fps total: 4819 epoch: 932/15000 frames: 15253504
+fps step: 8156 fps step and policy inference: 7518 fps total: 5316 epoch: 933/15000 frames: 15269888
+fps step: 7751 fps step and policy inference: 7222 fps total: 5071 epoch: 934/15000 frames: 15286272
+fps step: 7935 fps step and policy inference: 7406 fps total: 5227 epoch: 935/15000 frames: 15302656
+fps step: 7791 fps step and policy inference: 7261 fps total: 5027 epoch: 936/15000 frames: 15319040
+fps step: 7523 fps step and policy inference: 6830 fps total: 4888 epoch: 937/15000 frames: 15335424
+fps step: 8209 fps step and policy inference: 7005 fps total: 4900 epoch: 938/15000 frames: 15351808
+fps step: 8124 fps step and policy inference: 7017 fps total: 4980 epoch: 939/15000 frames: 15368192
+fps step: 8608 fps step and policy inference: 7310 fps total: 5165 epoch: 940/15000 frames: 15384576
+fps step: 8479 fps step and policy inference: 7146 fps total: 5099 epoch: 941/15000 frames: 15400960
+fps step: 8187 fps step and policy inference: 7125 fps total: 5002 epoch: 942/15000 frames: 15417344
+fps step: 8107 fps step and policy inference: 6571 fps total: 4755 epoch: 943/15000 frames: 15433728
+fps step: 8036 fps step and policy inference: 7463 fps total: 5071 epoch: 944/15000 frames: 15450112
+fps step: 7719 fps step and policy inference: 7111 fps total: 4965 epoch: 945/15000 frames: 15466496
+fps step: 7801 fps step and policy inference: 7315 fps total: 5073 epoch: 946/15000 frames: 15482880
+fps step: 7749 fps step and policy inference: 7201 fps total: 5093 epoch: 947/15000 frames: 15499264
+fps step: 7829 fps step and policy inference: 7134 fps total: 5109 epoch: 948/15000 frames: 15515648
+fps step: 7851 fps step and policy inference: 6923 fps total: 4955 epoch: 949/15000 frames: 15532032
+fps step: 8321 fps step and policy inference: 7088 fps total: 5085 epoch: 950/15000 frames: 15548416
+saving next best rewards:  [1431.35]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 8814 fps step and policy inference: 7727 fps total: 5433 epoch: 951/15000 frames: 15564800
+fps step: 8757 fps step and policy inference: 7562 fps total: 5352 epoch: 952/15000 frames: 15581184
+fps step: 8556 fps step and policy inference: 6891 fps total: 4999 epoch: 953/15000 frames: 15597568
+fps step: 8487 fps step and policy inference: 6692 fps total: 4913 epoch: 954/15000 frames: 15613952
+fps step: 8022 fps step and policy inference: 7474 fps total: 5250 epoch: 955/15000 frames: 15630336
+fps step: 7952 fps step and policy inference: 7327 fps total: 5141 epoch: 956/15000 frames: 15646720
+fps step: 7888 fps step and policy inference: 7353 fps total: 5143 epoch: 957/15000 frames: 15663104
+fps step: 7872 fps step and policy inference: 7325 fps total: 5068 epoch: 958/15000 frames: 15679488
+fps step: 7878 fps step and policy inference: 7308 fps total: 5199 epoch: 959/15000 frames: 15695872
+fps step: 8157 fps step and policy inference: 7070 fps total: 5010 epoch: 960/15000 frames: 15712256
+saving next best rewards:  [1434.7]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 8725 fps step and policy inference: 7324 fps total: 5146 epoch: 961/15000 frames: 15728640
+fps step: 8643 fps step and policy inference: 7362 fps total: 5112 epoch: 962/15000 frames: 15745024
+fps step: 8424 fps step and policy inference: 7340 fps total: 5206 epoch: 963/15000 frames: 15761408
+fps step: 8531 fps step and policy inference: 6896 fps total: 5009 epoch: 964/15000 frames: 15777792
+fps step: 10786 fps step and policy inference: 8291 fps total: 5696 epoch: 965/15000 frames: 15794176
+saving next best rewards:  [1449.39]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10459 fps step and policy inference: 9713 fps total: 6271 epoch: 966/15000 frames: 15810560
+fps step: 10551 fps step and policy inference: 9697 fps total: 6176 epoch: 967/15000 frames: 15826944
+fps step: 10273 fps step and policy inference: 9474 fps total: 6048 epoch: 968/15000 frames: 15843328
+fps step: 9996 fps step and policy inference: 9295 fps total: 6188 epoch: 969/15000 frames: 15859712
+fps step: 9853 fps step and policy inference: 9171 fps total: 5940 epoch: 970/15000 frames: 15876096
+fps step: 10462 fps step and policy inference: 9338 fps total: 6109 epoch: 971/15000 frames: 15892480
+saving next best rewards:  [1453.86]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 9761 fps step and policy inference: 8490 fps total: 5554 epoch: 972/15000 frames: 15908864
+fps step: 11031 fps step and policy inference: 9639 fps total: 6246 epoch: 973/15000 frames: 15925248
+fps step: 11142 fps step and policy inference: 9872 fps total: 6177 epoch: 974/15000 frames: 15941632
+fps step: 9696 fps step and policy inference: 7960 fps total: 5555 epoch: 975/15000 frames: 15958016
+fps step: 9072 fps step and policy inference: 7720 fps total: 5440 epoch: 976/15000 frames: 15974400
+fps step: 8627 fps step and policy inference: 7032 fps total: 5096 epoch: 977/15000 frames: 15990784
+saving next best rewards:  [1478.16]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10286 fps step and policy inference: 9542 fps total: 6208 epoch: 978/15000 frames: 16007168
+fps step: 10436 fps step and policy inference: 9687 fps total: 6361 epoch: 979/15000 frames: 16023552
+fps step: 10196 fps step and policy inference: 9520 fps total: 6253 epoch: 980/15000 frames: 16039936
+fps step: 10122 fps step and policy inference: 9378 fps total: 6199 epoch: 981/15000 frames: 16056320
+fps step: 10495 fps step and policy inference: 9588 fps total: 6363 epoch: 982/15000 frames: 16072704
+saving next best rewards:  [1479.28]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10929 fps step and policy inference: 9498 fps total: 6214 epoch: 983/15000 frames: 16089088
+saving next best rewards:  [1484.37]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11545 fps step and policy inference: 10071 fps total: 6439 epoch: 984/15000 frames: 16105472
+saving next best rewards:  [1485.52]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11775 fps step and policy inference: 10404 fps total: 6619 epoch: 985/15000 frames: 16121856
+saving next best rewards:  [1486.87]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11956 fps step and policy inference: 10521 fps total: 6673 epoch: 986/15000 frames: 16138240
+saving next best rewards:  [1492.56]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11789 fps step and policy inference: 9953 fps total: 6374 epoch: 987/15000 frames: 16154624
+fps step: 10931 fps step and policy inference: 8723 fps total: 5823 epoch: 988/15000 frames: 16171008
+saving next best rewards:  [1500.42]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10332 fps step and policy inference: 9657 fps total: 6074 epoch: 989/15000 frames: 16187392
+fps step: 10222 fps step and policy inference: 9502 fps total: 6222 epoch: 990/15000 frames: 16203776
+fps step: 10174 fps step and policy inference: 9428 fps total: 6134 epoch: 991/15000 frames: 16220160
+fps step: 10131 fps step and policy inference: 9417 fps total: 6122 epoch: 992/15000 frames: 16236544
+fps step: 9567 fps step and policy inference: 8747 fps total: 5884 epoch: 993/15000 frames: 16252928
+saving next best rewards:  [1503.17]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10641 fps step and policy inference: 9395 fps total: 6117 epoch: 994/15000 frames: 16269312
+saving next best rewards:  [1508.21]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10722 fps step and policy inference: 9512 fps total: 6209 epoch: 995/15000 frames: 16285696
+fps step: 11184 fps step and policy inference: 9650 fps total: 6396 epoch: 996/15000 frames: 16302080
+saving next best rewards:  [1510.5]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11451 fps step and policy inference: 10119 fps total: 6439 epoch: 997/15000 frames: 16318464
+saving next best rewards:  [1521.33]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10527 fps step and policy inference: 8771 fps total: 5720 epoch: 998/15000 frames: 16334848
+saving next best rewards:  [1521.76]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10965 fps step and policy inference: 8609 fps total: 5804 epoch: 999/15000 frames: 16351232
+saving next best rewards:  [1554.91]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10111 fps step and policy inference: 9405 fps total: 5993 epoch: 1000/15000 frames: 16367616
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/last_CapUnscrewArm_A33_20260817_221012_ep_1000_rew_1554.9126_sr_0.0_fr_0.9999998807907104.pth'
+fps step: 9864 fps step and policy inference: 9136 fps total: 5934 epoch: 1001/15000 frames: 16384000
+fps step: 10196 fps step and policy inference: 9448 fps total: 6157 epoch: 1002/15000 frames: 16400384
+fps step: 9878 fps step and policy inference: 9194 fps total: 6077 epoch: 1003/15000 frames: 16416768
+fps step: 9769 fps step and policy inference: 8866 fps total: 5651 epoch: 1004/15000 frames: 16433152
+saving next best rewards:  [1556.62]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10255 fps step and policy inference: 9341 fps total: 6158 epoch: 1005/15000 frames: 16449536
+saving next best rewards:  [1559.18]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10300 fps step and policy inference: 9073 fps total: 6007 epoch: 1006/15000 frames: 16465920
+saving next best rewards:  [1564.55]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10621 fps step and policy inference: 9350 fps total: 6156 epoch: 1007/15000 frames: 16482304
+fps step: 11562 fps step and policy inference: 10233 fps total: 6427 epoch: 1008/15000 frames: 16498688
+saving next best rewards:  [1565.9]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11412 fps step and policy inference: 9721 fps total: 6315 epoch: 1009/15000 frames: 16515072
+saving next best rewards:  [1575.87]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11329 fps step and policy inference: 8665 fps total: 5859 epoch: 1010/15000 frames: 16531456
+saving next best rewards:  [1613.37]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 10492 fps step and policy inference: 9792 fps total: 6355 epoch: 1011/15000 frames: 16547840
+fps step: 10390 fps step and policy inference: 9671 fps total: 6360 epoch: 1012/15000 frames: 16564224
+fps step: 10130 fps step and policy inference: 9454 fps total: 6260 epoch: 1013/15000 frames: 16580608
+fps step: 10037 fps step and policy inference: 9342 fps total: 6186 epoch: 1014/15000 frames: 16596992
+fps step: 10148 fps step and policy inference: 9477 fps total: 6290 epoch: 1015/15000 frames: 16613376
+fps step: 10321 fps step and policy inference: 9175 fps total: 6146 epoch: 1016/15000 frames: 16629760
+fps step: 10616 fps step and policy inference: 9307 fps total: 6178 epoch: 1017/15000 frames: 16646144
+saving next best rewards:  [1618.04]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11364 fps step and policy inference: 9920 fps total: 6405 epoch: 1018/15000 frames: 16662528
+fps step: 11550 fps step and policy inference: 10165 fps total: 6612 epoch: 1019/15000 frames: 16678912
+fps step: 11307 fps step and policy inference: 9517 fps total: 6204 epoch: 1020/15000 frames: 16695296
+saving next best rewards:  [1620.55]
+=> saving checkpoint 'runs/CapUnscrewArm_A33_20260817_221012__08-17-22-10-15/nn/CapUnscrewArm_A33_20260817_221012.pth'
+fps step: 11134 fps step and policy inference: 8525 fps total: 5802 epoch: 1021/15000 frames: 16711680
+fps step: 10696 fps step and policy inference: 9845 fps total: 6436 epoch: 1022/15000 frames: 16728064
+fps step: 10483 fps step and policy inference: 9712 fps total: 6393 epoch: 1023/15000 frames: 16744448
+fps step: 10144 fps step and policy inference: 9432 fps total: 6143 epoch: 1024/15000 frames: 16760832
+fps step: 9987 fps step and policy inference: 9260 fps total: 6076 epoch: 1025/15000 frames: 16777216
+fps step: 9417 fps step and policy inference: 8681 fps total: 5896 epoch: 1026/15000 frames: 16793600
+fps step: 10297 fps step and policy inference: 9210 fps total: 6024 epoch: 1027/15000 frames: 16809984
+fps step: 10517 fps step and policy inference: 9187 fps total: 6086 epoch: 1028/15000 frames: 16826368
+fps step: 11063 fps step and policy inference: 9781 fps total: 6405 epoch: 1029/15000 frames: 16842752
+fps step: 10973 fps step and policy inference: 9631 fps total: 6297 epoch: 1030/15000 frames: 16859136
+fps step: 11302 fps step and policy inference: 9715 fps total: 6378 epoch: 1031/15000 frames: 16875520
+fps step: 11211 fps step and policy inference: 9571 fps total: 6220 epoch: 1032/15000 frames: 16891904
+fps step: 10859 fps step and policy inference: 8693 fps total: 5817 epoch: 1033/15000 frames: 16908288
+fps step: 10406 fps step and policy inference: 9631 fps total: 6142 epoch: 1034/15000 frames: 16924672
+fps step: 10442 fps step and policy inference: 9657 fps total: 6347 epoch: 1035/15000 frames: 16941056
+fps step: 10198 fps step and policy inference: 9470 fps total: 6275 epoch: 1036/15000 frames: 16957440
+fps step: 10288 fps step and policy inference: 9586 fps total: 6315 epoch: 1037/15000 frames: 16973824
+fps step: 10280 fps step and policy inference: 9453 fps total: 6305 epoch: 1038/15000 frames: 16990208
+fps step: 10351 fps step and policy inference: 8993 fps total: 6002 epoch: 1039/15000 frames: 17006592
+fps step: 11032 fps step and policy inference: 9870 fps total: 6459 epoch: 1040/15000 frames: 17022976
+fps step: 11290 fps step and policy inference: 9737 fps total: 6341 epoch: 1041/15000 frames: 17039360
+fps step: 11534 fps step and policy inference: 10206 fps total: 6564 epoch: 1042/15000 frames: 17055744

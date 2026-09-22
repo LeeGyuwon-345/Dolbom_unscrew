@@ -1,0 +1,376 @@
+학습 trajectory 수: 464, num_envs=512, experiment=dg5fs_imitator_rh
+Importing module 'gym_38' (/home/leegyuwon/Documents/isaacgym/python/isaacgym/_bindings/linux-x86_64/gym_38.so)
+Setting GYM_USD_PLUG_INFO_PATH to /home/leegyuwon/Documents/isaacgym/python/isaacgym/_bindings/linux-x86_64/usd/plugInfo.json
+PyTorch version 1.13.1+cu117
+Device count 1
+/home/leegyuwon/Documents/isaacgym/python/isaacgym/_bindings/src/gymtorch
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/hydra/_internal/hydra.py:119: UserWarning: Future Hydra versions will no longer change working directory at job runtime by default.
+See https://hydra.cc/docs/1.2/upgrades/1.1_to_1.2/changes_to_job_working_dir/ for more information.
+  ret = run_job(
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/torch/utils/cpp_extension.py:25: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+  from pkg_resources import packaging  # type: ignore[attr-defined]
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/pkg_resources/__init__.py:3154: DeprecationWarning: Deprecated call to `pkg_resources.declare_namespace('mpl_toolkits')`.
+Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages
+  declare_namespace(pkg)
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/pkg_resources/__init__.py:3154: DeprecationWarning: Deprecated call to `pkg_resources.declare_namespace('google')`.
+Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages
+  declare_namespace(pkg)
+Using /home/leegyuwon/.cache/torch_extensions/py38_cu117 as PyTorch extensions root...
+Emitting ninja build file /home/leegyuwon/.cache/torch_extensions/py38_cu117/gymtorch/build.ninja...
+Building extension module gymtorch...
+Allowing ninja to set a default number of workers... (overridable by setting the environment variable MAX_JOBS=N)
+ninja: no work to do.
+task: 
+    name: DexHandImitatorRH
+    physics_engine: physx
+    seed: 42
+    env: 
+        numEnvs: 512
+        dexhand: dg5fs
+        episodeLength: 2000
+        training: True
+        usePIDControl: False
+        rolloutStateInit: False
+        randomStateInit: True
+        dataIndices: ['0b3d1@3', '178ef@1', '235ac@0', '62681@0', '7653f@1', '77583@2', '7b8bf@0', '9588d@0', '9decc@0', '9e461@0', 'ad924@0', 'd2192@0', '05d45@7', '0b3a0@1', '0b3a0@8', '11da4@2', '1a04a@1', '1eccd@5', '22db0@0', '24cff@2', '24cff@3', '24cff@5', '27c72@1', '27c72@5', '31218@7', '35fb7@1', '35fb7@2', '35fb7@3', '380c7@2', '3ae08@1', '3bf15@4', '43dea@0', '49a83@0', '5870f@8', '5a5d6@7', '5a5d6@9', '5da24@0', '5fef0@2', '72bb9@0', '75b94@2', '75b94@7', '7c801@4', '7c801@6', '7c801@9', '7c801@12', '7c801@19', '7c801@23', '7c801@27', '7cc68@3', '7cc68@4', '82d76@0', '83207@2', '86e2a@1', '86e2a@3', '86e2a@4', '86e2a@6', '894b2@0', '8bb23@0', '916da@1', '916da@2', '925aa@5', '925aa@7', '9d4bf@0', '9f436@0', 'a7a1a@2', 'a7a1a@7', 'b1494@1', 'b2063@1', 'b9bb2@7', 'bcb36@0', 'bd3b9@0', 'c1b07@9', 'c1b07@11', 'c4375@0', 'c4375@1', 'c4375@3', 'c992d@3', 'cb8f2@1', 'ce2f0@2', 'ce2f0@10', 'd05b4@18', 'd4ddf@0', 'd4ddf@1', 'd4ddf@2', 'e76b2@4', 'e9343@2', 'ebf46@3', 'edd68@0', 'f014a@2', 'f447c@0', 'fc1e5@1', 'fe346@0', '1469a@0', '29b5a@0', '4102c@0', '4b813@2', '67084@0', '7f874@0', 'c08f9@3', 'c1e36@0', 'c81af@0', 'f4786@2', 'f4786@3', '0ef67@0', '29266@0', '29266@1', '29266@2', '29266@3', '29266@4', '29266@6', '29266@7', '29266@9', '29266@10', '4fd8e@0', '65ef0@0', '65ef0@4', '65ef0@6', '7c014@0', '7ed08@0', '82fc7@0', '86fb0@0', '86fb0@5', '86fb0@7', '86fb0@8', '86fb0@10', '86fb0@12', 'cd0ae@0', 'cd0ae@1', 'cd0ae@2', 'cd0ae@3', 'cd0ae@4', 'cd0ae@6', 'd01e2@0', 'fccd8@0', '085b5@0', '0b666@0', '0b666@3', '0b666@5', '0b666@7', '0b666@9', '0b666@11', '183ce@0', '26fd9@1', '37838@0', '4602f@1', '7055a@0', '90724@0', 'a4e00@0', 'a4e00@2', 'a4e00@3', 'a4e00@5', 'c11fb@0', 'c3f6f@0', 'c8881@0', 'f3c30@0', '07994@0', '1ad2e@0', '40db1@1', '495b6@0', '4aefa@0', '4e902@0', '5a065@0', '5f8e2@0', '6803d@0', '70982@0', 'a3ff7@0', 'ab46c@0', 'af836@0', '1292e@0', '13d53@0', '171c4@0', '1e305@0', '20034@2', '20034@4', '25012@0', '2d90f@0', '468f5@0', '5c913@1', '67132@0', '67132@1', '733f9@0', '8ec65@0', '97fc3@0', '97fc3@1', '97fc3@3', '97fc3@4', '97fc3@6', '97fc3@7', '97fc3@9', '97fc3@10', '97fc3@11', '97fc3@17', 'b9695@0', '16df1@1', '1c29f@0', '1c29f@1', '1c29f@3', '374a7@0', '40952@0', '56210@0', 'a3323@3', 'ac736@0', 'ac736@1', 'b5736@1', 'cebe9@0', 'cebe9@4', 'f0408@1', 'f1029@0', 'f1029@4', 'f1029@7', 'f1114@5', 'fbc74@4', 'fc88d@0', 'fcb20@1', '105a5@0', '20b58@0', '2a44f@0', '2d169@0', '2d169@2', 'ed3a1@0', 'fd02f@0', '17716@1', '17716@2', '1a81a@0', '1b938@9', '352c9@2', '5844a@0', '59a87@3', '59a87@5', '59a87@13', '701e7@3', '7cd8f@0', '817fb@0', '8e463@6', '959a0@10', '9cf44@4', '9d88b@2', '9d88b@4', 'b4b28@1', 'b4b28@9', 'b4b28@13', 'b4b28@15', 'c8fd4@1', 'c8fd4@12', 'ce343@9', 'e7d0d@0', 'f9da9@6', '0464d@0', '0ec0d@0', '39c30@0', '39c30@7', '5e99c@0', '5e99c@6', '76f7d@0', '783a1@0', '78810@0', '78810@6', 'a5d2c@0', 'a5d2c@7', 'a5e8a@0', 'e04db@1', 'efd16@0', 'f0b72@0', 'fb969@3', 'fb969@4', '0308b@4', '0308b@13', '06d2f@0', '0e05b@0', '368db@0', '47e95@9', '4e42c@14', '59796@7', '63ca8@0', '63ca8@13', '63ca8@15', '662b0@7', '662b0@13', '82851@0', '82851@18', '82851@24', '87c3c@0', '87c3c@10', '8e4b0@2', '95c93@5', '95c93@7', '9a028@0', '9a028@14', '9bb17@0', 'ad141@8', 'ad141@9', 'ad141@17', 'eb5f9@0', 'f9b2f@4', '07862@0', '638fe@0', 'd4478@1', 'e9e88@0', '2a060@0', 'eb877@0', 'a8bfc@1', '031b7@0', '0646d@1', '0f900@1', '0f900@5', '0f900@8', '0f900@9', '0f900@11', '0f900@13', '0ffc7@0', '11cb7@0', '11cb7@3', '155cb@3', '3b1e6@1', '3b1e6@3', '3b1e6@4', '3b1e6@8', '3b1e6@11', '3b1e6@13', '3b1e6@15', '419a3@0', '419a3@4', '5fde1@2', '6ca00@4', '6ca00@9', '6ca00@13', '6ca00@14', '6ca00@17', '6ece6@2', '720b2@0', '720b2@3', '79eb5@2', '89667@0', '89667@4', '897a4@1', '8e5df@1', '8e5df@3', '8e5df@4', '8e5df@5', '8e5df@9', '8e5df@12', '94d04@1', '9523f@3', '9523f@9', 'acc89@1', 'b0b13@0', 'b0b13@9', 'b0b13@10', 'b0b13@12', 'b0b13@17', 'b5fa3@0', 'b5fa3@5', 'b5fa3@9', 'b7853@0', 'b7853@3', 'b7853@10', 'beb8f@2', 'c50ce@2', 'c8c4e@0', 'cf9b2@4', 'cf9b2@5', 'db0a0@1', 'dee46@3', 'e177c@5', 'e177c@7', 'e177c@8', 'f25e3@0', 'f2d09@2', 'f7d37@0', 'f7d37@4', 'f7d37@7', 'f7d37@15', 'f7d37@17', 'facbc@3', 'facbc@14', '22c9e@1', '2563d@4', '2563d@8', '9f9ee@0', 'd77d9@1', 'e53a4@0', 'e53a4@1', '15642@0', '1c03f@0', '1c03f@1', '1c03f@2', '1c03f@3', '1c03f@6', '1c03f@17', '1c5d6@2', '211a2@1', '211a2@2', '211a2@3', '211a2@4', '211a2@7', '211a2@20', '233b9@4', '2bae9@2', '2bae9@4', '2bae9@5', '2bae9@17', '2bae9@18', '2bae9@19', '2bae9@23', '2bae9@24', '2bae9@31', '2ddc8@1', '384b1@2', '384b1@3', '38754@0', '38754@1', '38754@2', '38754@4', '38754@16', '39e5e@1', '39e5e@2', '39e5e@3', '39e5e@4', '39e5e@6', '39e5e@16', '39e5e@18', '39e5e@19', '39e5e@20', '41d83@0', '41d83@3', '41d83@8', '43581@1', '494ca@3', '639d4@0', '639d4@5', '7fa33@1', '863d5@1', '904b2@7', 'a3a31@2', 'a78a0@3', 'b4d44@4', 'b4fca@1', 'bbefc@0', 'bbefc@4', 'c5685@0', 'c5685@13', 'c5685@14', 'c5685@15', 'cfcc8@4', 'cffb9@2', 'd4caf@0', 'd4caf@1', 'd4caf@2', 'd4caf@3', 'd4caf@4', 'd4caf@5', 'd6fe3@1', 'd6fe3@6', 'fac91@3', 'fac91@4', 'fac91@6', '122ba@1', '3e29c@0', '5ce69@0', '667a8@11', 'b4a4e@1', 'c2f83@0', 'e626d@0', '5d49e@1']
+        obsFutureLength: 1
+        clipObservations: 5.0
+        clipActions: 1.0
+        furniture: just_one_leg
+        frankaDofNoise: 0.25
+        targetLiftHeight: 0.05
+        distanceReward: 0.1
+        liftReward: 1.0
+        successReward: 1.0
+        aggregateMode: 3
+        tightenMethod: exp_decay
+        tightenFactor: 0.7
+        tightenSteps: 128000
+        actionScale: 1.0
+        useQuatRot: False
+        propDumpInfo: 
+            q: 20
+            dq: 20
+            base_state: 13
+        actionsMovingAverage: 1.0
+        translationScale: 1.0
+        orientationScale: 0.1
+        bimanual_mode: united
+        propObsDim: 73
+        obsKeys: ['q', 'cos_q', 'sin_q', 'base_state']
+        privilegedObsDim: 20
+        privilegedObsKeys: ['dq']
+        enableCameraSensors: False
+    sim: 
+        dt: 0.0166667
+        substeps: 2
+        up_axis: z
+        use_gpu_pipeline: True
+        gravity: [0.0, 0.0, -9.81]
+        physx: 
+            num_threads: 4
+            solver_type: 1
+            use_gpu: True
+            num_position_iterations: 8
+            num_velocity_iterations: 1
+            contact_offset: 0.005
+            rest_offset: 0.0
+            bounce_threshold_velocity: 0.2
+            max_depenetration_velocity: 1000.0
+            default_buffer_size_multiplier: 5.0
+            max_gpu_contact_pairs: 1048576
+            num_subscenes: 4
+            contact_collection: 1
+    task: 
+        randomize: False
+        randomization_params: 
+            frequency: 1
+            sim_params: 
+                gravity: 
+                    range: [0, 0.4]
+                    operation: additive
+                    distribution: uniform
+                    schedule: linear
+                    schedule_steps: 100000000
+            actor_params: 
+                franka: 
+                    color: True
+                    rigid_body_properties: 
+                        mass: 
+                            range: [0.5, 1.5]
+                            operation: scaling
+                            distribution: uniform
+                            setup_only: True
+                            schedule: linear
+                            schedule_steps: 100000000
+                    rigid_shape_properties: 
+                        friction: 
+                            num_buckets: 250
+                            range: [0.7, 1.3]
+                            operation: scaling
+                            distribution: uniform
+                            schedule: linear
+                            schedule_steps: 100000000
+                    dof_properties: 
+                        lower: 
+                            range: [1.0, 1.010050167084168]
+                            operation: scaling
+                            distribution: loguniform
+                            schedule: linear
+                            schedule_steps: 100000000
+                        upper: 
+                            range: [1.0, 1.010050167084168]
+                            operation: scaling
+                            distribution: loguniform
+                            schedule: linear
+                            schedule_steps: 100000000
+                        stiffness: 
+                            range: [1.0, 1.010050167084168]
+                            operation: scaling
+                            distribution: loguniform
+                            schedule: linear
+                            schedule_steps: 100000000
+                        damping: 
+                            range: [1.0, 1.010050167084168]
+                            operation: scaling
+                            distribution: loguniform
+                            schedule: linear
+                            schedule_steps: 100000000
+                table: 
+                    color: True
+                    rigid_shape_properties: 
+                        friction: 
+                            num_buckets: 250
+                            range: [0.5, 1.5]
+                            operation: scaling
+                            distribution: uniform
+                            schedule: linear
+                            schedule_steps: 100000000
+                leg: 
+                    color: True
+                    scale: 
+                        range: [0.9, 1.1]
+                        operation: scaling
+                        distribution: uniform
+                        setup_only: True
+                        schedule: linear
+                        schedule_steps: 100000000
+                    rigid_body_properties: 
+                        mass: 
+                            range: [0.5, 1.5]
+                            operation: scaling
+                            distribution: uniform
+                            setup_only: True
+                            schedule: linear
+                            schedule_steps: 100000000
+                    rigid_shape_properties: 
+                        friction: 
+                            num_buckets: 250
+                            range: [0.5, 1.5]
+                            operation: scaling
+                            distribution: uniform
+                            schedule: linear
+                            schedule_steps: 100000000
+                        rolling_friction: 
+                            num_buckets: 250
+                            range: [0.5, 1.5]
+                            operation: scaling
+                            distribution: uniform
+                            schedule: linear
+                            schedule_steps: 100000000
+                        torsion_friction: 
+                            num_buckets: 250
+                            range: [0.5, 1.5]
+                            operation: scaling
+                            distribution: uniform
+                            schedule: linear
+                            schedule_steps: 100000000
+                        restitution: 
+                            range: [0.0, 1.0]
+                            operation: additive
+                            distribution: uniform
+                            schedule: linear
+                            schedule_steps: 100000000
+                        compliance: 
+                            range: [0.0, 1.0]
+                            operation: additive
+                            distribution: uniform
+                            schedule: linear
+                            schedule_steps: 100000000
+rl_train: 
+    params: 
+        seed: 42
+        algo: 
+            name: ppo
+        model: 
+            name: my_continuous_a2c_logstd
+        network: 
+            name: dict_obs_actor_critic
+            separate: False
+            space: 
+                continuous: 
+                    mu_activation: None
+                    sigma_activation: None
+                    mu_init: 
+                        name: default
+                    sigma_init: 
+                        name: const_initializer
+                        val: 0
+                    fixed_sigma: True
+            dict_feature_encoder: 
+                _target_: lib.nn.features.SimpleFeatureFusion
+                extractors: 
+                    privileged: 
+                        _target_: lib.nn.features.Identity
+                        input_dim: 73
+                    proprioception: 
+                        _target_: lib.nn.features.Identity
+                        input_dim: 20
+                    target: 
+                        _target_: lib.nn.features.Identity
+                        input_dim: 248
+                hidden_depth: 3
+                hidden_dim: 512
+                output_dim: 256
+                activation: swish
+                add_input_activation: False
+                add_output_activation: False
+            mlp: 
+                units: [256, 512, 128, 64]
+                activation: elu
+                d2rl: False
+                initializer: 
+                    name: default
+                regularizer: 
+                    name: None
+        load_checkpoint: False
+        load_path: 
+        dexhand: dg5fs
+        config: 
+            name: dg5fs_imitator_rh
+            full_experiment_name: dg5fs_imitator_rh
+            env_name: rlgpu
+            multi_gpu: False
+            ppo: True
+            mixed_precision: False
+            normalize_input: True
+            normalize_input_excluded_keys: []
+            normalize_value: True
+            use_pid_control: False
+            value_bootstrap: True
+            num_actors: 512
+            reward_shaper: 
+                scale_value: 1.0
+            normalize_advantage: True
+            gamma: 0.99
+            tau: 0.95
+            learning_rate: 0.0005
+            lr_schedule: adaptive
+            schedule_type: standard
+            kl_threshold: 0.008
+            score_to_win: 10000
+            max_epochs: 9999999999999
+            early_stop_epochs: 9999999999999
+            save_best_after: 10
+            save_frequency: 1000
+            print_stats: True
+            grad_norm: 1.0
+            entropy_coef: 0.0
+            truncate_grads: True
+            e_clip: 0.2
+            horizon_length: 32
+            minibatch_size: 1024
+            mini_epochs: 5
+            critic_coef: 4
+            clip_value: True
+            seq_len: 4
+            bounds_loss_coef: 0.0001
+            use_soft_clamp: True
+task_name: DexHandImitatorRH
+experiment: dg5fs_imitator_rh
+side: RH
+bimanual_mode: united
+dexhand: dg5fs
+rh_base_model_checkpoint: assets/imitator_rh_inspire.pth
+lh_base_model_checkpoint: assets/imitator_lh_inspire.pth
+num_envs: 512
+rolloutStateInit: False
+randomStateInit: True
+rolloutLen: None
+rolloutBegin: None
+learning_rate: 0.0005
+actionsMovingAverage: 1.0
+usePIDControl: False
+dataIndices: [Warning] [carb.gym.plugin] useGpu is set, forcing single scene (0 subscenes)
+Not connected to PVD
++++ Using GPU PhysX
+Physics Engine: PhysX
+Physics Device: cuda:0
+GPU Pipeline: enabled
+Loading extension module gymtorch...
+/home/leegyuwon/Documents/isaacgym/python/isaacgym/torch_utils.py:135: DeprecationWarning: `np.float` is a deprecated alias for the builtin `float`. To silence this warning, use `float` by itself. Doing this will not modify any behavior and is safe. If you specifically wanted the numpy scalar type, use `np.float64` here.
+Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
+  def get_axis_params(value, axis_idx, x_value=0., dtype=np.float, n_dims=3):
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/networkx/classes/graph.py:23: DeprecationWarning: Using or importing the ABCs from 'collections' instead of from 'collections.abc' is deprecated since Python 3.3, and in 3.10 it will stop working
+  from collections import Mapping
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/networkx/classes/reportviews.py:95: DeprecationWarning: Using or importing the ABCs from 'collections' instead of from 'collections.abc' is deprecated since Python 3.3, and in 3.10 it will stop working
+  from collections import Mapping, Set, Iterable
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/networkx/readwrite/graphml.py:346: DeprecationWarning: `np.int` is a deprecated alias for the builtin `int`. To silence this warning, use `int` by itself. Doing this will not modify any behavior and is safe. When replacing `np.int`, you may wish to use e.g. `np.int64` or `np.int32` to specify the precision. If you wish to review your current use, check the release note link for additional information.
+Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
+  (np.int, "int"), (np.int8, "int"),
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/wandb/util.py:116: SentryHubDeprecationWarning: `sentry_sdk.Hub` is deprecated and will be removed in a future major release. Please consult our 1.x to 2.x migration guide for details on how to migrate `Hub` usage to the new API: https://docs.sentry.io/platforms/python/migration/1.x-to-2.x
+  sentry_hub = sentry_sdk.Hub(sentry_client)
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/torch/utils/tensorboard/__init__.py:4: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+  if not hasattr(tensorboard, "__version__") or LooseVersion(
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/gym/spaces/box.py:84: UserWarning: [33mWARN: Box bound precision lowered by casting to float32[0m
+  logger.warn(f"Box bound precision lowered by casting to {self.dtype}")
+/home/leegyuwon/Documents/ManipTrans/maniptrans_envs/lib/envs/tasks/dexhandimitator.py:251: DeprecationWarning: an integer is required (got type isaacgym._bindings.linux-x86_64.gym_38.DofDriveMode).  Implicit conversion to integers using __int__ is deprecated, and may be removed in a future version of Python.
+  asset_options.default_dof_drive_mode = gymapi.DOF_MODE_POS
+['0b3d1@3', '178ef@1', '235ac@0', '62681@0', '7653f@1', '77583@2', '7b8bf@0', '9588d@0', '9decc@0', '9e461@0', 'ad924@0', 'd2192@0', '05d45@7', '0b3a0@1', '0b3a0@8', '11da4@2', '1a04a@1', '1eccd@5', '22db0@0', '24cff@2', '24cff@3', '24cff@5', '27c72@1', '27c72@5', '31218@7', '35fb7@1', '35fb7@2', '35fb7@3', '380c7@2', '3ae08@1', '3bf15@4', '43dea@0', '49a83@0', '5870f@8', '5a5d6@7', '5a5d6@9', '5da24@0', '5fef0@2', '72bb9@0', '75b94@2', '75b94@7', '7c801@4', '7c801@6', '7c801@9', '7c801@12', '7c801@19', '7c801@23', '7c801@27', '7cc68@3', '7cc68@4', '82d76@0', '83207@2', '86e2a@1', '86e2a@3', '86e2a@4', '86e2a@6', '894b2@0', '8bb23@0', '916da@1', '916da@2', '925aa@5', '925aa@7', '9d4bf@0', '9f436@0', 'a7a1a@2', 'a7a1a@7', 'b1494@1', 'b2063@1', 'b9bb2@7', 'bcb36@0', 'bd3b9@0', 'c1b07@9', 'c1b07@11', 'c4375@0', 'c4375@1', 'c4375@3', 'c992d@3', 'cb8f2@1', 'ce2f0@2', 'ce2f0@10', 'd05b4@18', 'd4ddf@0', 'd4ddf@1', 'd4ddf@2', 'e76b2@4', 'e9343@2', 'ebf46@3', 'edd68@0', 'f014a@2', 'f447c@0', 'fc1e5@1', 'fe346@0', '1469a@0', '29b5a@0', '4102c@0', '4b813@2', '67084@0', '7f874@0', 'c08f9@3', 'c1e36@0', 'c81af@0', 'f4786@2', 'f4786@3', '0ef67@0', '29266@0', '29266@1', '29266@2', '29266@3', '29266@4', '29266@6', '29266@7', '29266@9', '29266@10', '4fd8e@0', '65ef0@0', '65ef0@4', '65ef0@6', '7c014@0', '7ed08@0', '82fc7@0', '86fb0@0', '86fb0@5', '86fb0@7', '86fb0@8', '86fb0@10', '86fb0@12', 'cd0ae@0', 'cd0ae@1', 'cd0ae@2', 'cd0ae@3', 'cd0ae@4', 'cd0ae@6', 'd01e2@0', 'fccd8@0', '085b5@0', '0b666@0', '0b666@3', '0b666@5', '0b666@7', '0b666@9', '0b666@11', '183ce@0', '26fd9@1', '37838@0', '4602f@1', '7055a@0', '90724@0', 'a4e00@0', 'a4e00@2', 'a4e00@3', 'a4e00@5', 'c11fb@0', 'c3f6f@0', 'c8881@0', 'f3c30@0', '07994@0', '1ad2e@0', '40db1@1', '495b6@0', '4aefa@0', '4e902@0', '5a065@0', '5f8e2@0', '6803d@0', '70982@0', 'a3ff7@0', 'ab46c@0', 'af836@0', '1292e@0', '13d53@0', '171c4@0', '1e305@0', '20034@2', '20034@4', '25012@0', '2d90f@0', '468f5@0', '5c913@1', '67132@0', '67132@1', '733f9@0', '8ec65@0', '97fc3@0', '97fc3@1', '97fc3@3', '97fc3@4', '97fc3@6', '97fc3@7', '97fc3@9', '97fc3@10', '97fc3@11', '97fc3@17', 'b9695@0', '16df1@1', '1c29f@0', '1c29f@1', '1c29f@3', '374a7@0', '40952@0', '56210@0', 'a3323@3', 'ac736@0', 'ac736@1', 'b5736@1', 'cebe9@0', 'cebe9@4', 'f0408@1', 'f1029@0', 'f1029@4', 'f1029@7', 'f1114@5', 'fbc74@4', 'fc88d@0', 'fcb20@1', '105a5@0', '20b58@0', '2a44f@0', '2d169@0', '2d169@2', 'ed3a1@0', 'fd02f@0', '17716@1', '17716@2', '1a81a@0', '1b938@9', '352c9@2', '5844a@0', '59a87@3', '59a87@5', '59a87@13', '701e7@3', '7cd8f@0', '817fb@0', '8e463@6', '959a0@10', '9cf44@4', '9d88b@2', '9d88b@4', 'b4b28@1', 'b4b28@9', 'b4b28@13', 'b4b28@15', 'c8fd4@1', 'c8fd4@12', 'ce343@9', 'e7d0d@0', 'f9da9@6', '0464d@0', '0ec0d@0', '39c30@0', '39c30@7', '5e99c@0', '5e99c@6', '76f7d@0', '783a1@0', '78810@0', '78810@6', 'a5d2c@0', 'a5d2c@7', 'a5e8a@0', 'e04db@1', 'efd16@0', 'f0b72@0', 'fb969@3', 'fb969@4', '0308b@4', '0308b@13', '06d2f@0', '0e05b@0', '368db@0', '47e95@9', '4e42c@14', '59796@7', '63ca8@0', '63ca8@13', '63ca8@15', '662b0@7', '662b0@13', '82851@0', '82851@18', '82851@24', '87c3c@0', '87c3c@10', '8e4b0@2', '95c93@5', '95c93@7', '9a028@0', '9a028@14', '9bb17@0', 'ad141@8', 'ad141@9', 'ad141@17', 'eb5f9@0', 'f9b2f@4', '07862@0', '638fe@0', 'd4478@1', 'e9e88@0', '2a060@0', 'eb877@0', 'a8bfc@1', '031b7@0', '0646d@1', '0f900@1', '0f900@5', '0f900@8', '0f900@9', '0f900@11', '0f900@13', '0ffc7@0', '11cb7@0', '11cb7@3', '155cb@3', '3b1e6@1', '3b1e6@3', '3b1e6@4', '3b1e6@8', '3b1e6@11', '3b1e6@13', '3b1e6@15', '419a3@0', '419a3@4', '5fde1@2', '6ca00@4', '6ca00@9', '6ca00@13', '6ca00@14', '6ca00@17', '6ece6@2', '720b2@0', '720b2@3', '79eb5@2', '89667@0', '89667@4', '897a4@1', '8e5df@1', '8e5df@3', '8e5df@4', '8e5df@5', '8e5df@9', '8e5df@12', '94d04@1', '9523f@3', '9523f@9', 'acc89@1', 'b0b13@0', 'b0b13@9', 'b0b13@10', 'b0b13@12', 'b0b13@17', 'b5fa3@0', 'b5fa3@5', 'b5fa3@9', 'b7853@0', 'b7853@3', 'b7853@10', 'beb8f@2', 'c50ce@2', 'c8c4e@0', 'cf9b2@4', 'cf9b2@5', 'db0a0@1', 'dee46@3', 'e177c@5', 'e177c@7', 'e177c@8', 'f25e3@0', 'f2d09@2', 'f7d37@0', 'f7d37@4', 'f7d37@7', 'f7d37@15', 'f7d37@17', 'facbc@3', 'facbc@14', '22c9e@1', '2563d@4', '2563d@8', '9f9ee@0', 'd77d9@1', 'e53a4@0', 'e53a4@1', '15642@0', '1c03f@0', '1c03f@1', '1c03f@2', '1c03f@3', '1c03f@6', '1c03f@17', '1c5d6@2', '211a2@1', '211a2@2', '211a2@3', '211a2@4', '211a2@7', '211a2@20', '233b9@4', '2bae9@2', '2bae9@4', '2bae9@5', '2bae9@17', '2bae9@18', '2bae9@19', '2bae9@23', '2bae9@24', '2bae9@31', '2ddc8@1', '384b1@2', '384b1@3', '38754@0', '38754@1', '38754@2', '38754@4', '38754@16', '39e5e@1', '39e5e@2', '39e5e@3', '39e5e@4', '39e5e@6', '39e5e@16', '39e5e@18', '39e5e@19', '39e5e@20', '41d83@0', '41d83@3', '41d83@8', '43581@1', '494ca@3', '639d4@0', '639d4@5', '7fa33@1', '863d5@1', '904b2@7', 'a3a31@2', 'a78a0@3', 'b4d44@4', 'b4fca@1', 'bbefc@0', 'bbefc@4', 'c5685@0', 'c5685@13', 'c5685@14', 'c5685@15', 'cfcc8@4', 'cffb9@2', 'd4caf@0', 'd4caf@1', 'd4caf@2', 'd4caf@3', 'd4caf@4', 'd4caf@5', 'd6fe3@1', 'd6fe3@6', 'fac91@3', 'fac91@4', 'fac91@6', '122ba@1', '3e29c@0', '5ce69@0', '667a8@11', 'b4a4e@1', 'c2f83@0', 'e626d@0', '5d49e@1']
+seed: 42
+torch_deterministic: False
+max_iterations: 9999999999999
+early_stop_epochs: 9999999999999
+physics_engine: physx
+pipeline: gpu
+sim_device: cuda:0
+rl_device: cuda:0
+graphics_device_id: 0
+num_threads: 4
+solver_type: 1
+num_subscenes: 4
+test: False
+save_rollouts: False
+save_successful_rollouts_only: True
+num_rollouts_to_save: 20000
+num_rollouts_to_run: 9999999999999
+min_episode_length: 20
+checkpoint: 
+from_ckpt_epoch: False
+sigma: 
+multi_gpu: False
+wandb_activate: False
+wandb_group: 
+wandb_name: dg5fs_imitator_rh
+wandb_entity: None
+wandb_project: None
+wandb_tags: []
+wandb_logcode_dir: 
+capture_video: False
+n_parallel_recorders: 8
+n_successful_videos_to_record: 50
+display: False
+headless: True
+Setting seed: 42
+Using rl_device: cuda:0
+Using sim_device: cuda:0
+{'name': 'dg5fs_imitator_rh', 'full_experiment_name': None, 'env_name': 'rlgpu', 'multi_gpu': False, 'ppo': True, 'mixed_precision': False, 'normalize_input': True, 'normalize_input_excluded_keys': [], 'normalize_value': True, 'use_pid_control': False, 'value_bootstrap': True, 'num_actors': 512, 'reward_shaper': {'scale_value': 1.0}, 'normalize_advantage': True, 'gamma': 0.99, 'tau': 0.95, 'learning_rate': 0.0005, 'lr_schedule': 'adaptive', 'schedule_type': 'standard', 'kl_threshold': 0.008, 'score_to_win': 10000, 'max_epochs': 9999999999999, 'early_stop_epochs': 9999999999999, 'save_best_after': 10, 'save_frequency': 1000, 'print_stats': True, 'grad_norm': 1.0, 'entropy_coef': 0.0, 'truncate_grads': True, 'e_clip': 0.2, 'horizon_length': 32, 'minibatch_size': 1024, 'mini_epochs': 5, 'critic_coef': 4, 'clip_value': True, 'seq_len': 4, 'bounds_loss_coef': 0.0001, 'use_soft_clamp': True, 'device': 'cuda:0', 'population_based_training': False, 'pbt_idx': None}
+self.seed = 42
+Started to train
+Exact experiment name requested from command line: dg5fs_imitator_rh__07-20-12-55-54
+Num dexhand Bodies: 26
+Num dexhand DOFs: 20
+  0%|          | 0/512 [00:00<?, ?it/s]  0%|          | 1/512 [00:06<56:59,  6.69s/it]  0%|          | 2/512 [00:13<57:44,  6.79s/it]  1%|          | 3/512 [00:20<59:22,  7.00s/it]  1%|          | 4/512 [00:24<48:53,  5.77s/it]  1%|          | 5/512 [00:31<51:21,  6.08s/it]  1%|          | 6/512 [00:37<52:03,  6.17s/it]  1%|▏         | 7/512 [00:42<47:47,  5.68s/it]  2%|▏         | 8/512 [00:49<51:36,  6.14s/it]  2%|▏         | 9/512 [00:52<43:41,  5.21s/it]  2%|▏         | 10/512 [00:55<37:50,  4.52s/it]  2%|▏         | 11/512 [01:01<42:31,  5.09s/it]  2%|▏         | 12/512 [01:04<36:07,  4.34s/it]  3%|▎         | 13/512 [01:16<54:08,  6.51s/it]  3%|▎         | 14/512 [01:31<1:16:27,  9.21s/it]  3%|▎         | 15/512 [01:46<1:31:46, 11.08s/it]  3%|▎         | 16/512 [01:58<1:31:45, 11.10s/it]  3%|▎         | 17/512 [02:03<1:17:51,  9.44s/it]  4%|▎         | 18/512 [02:18<1:31:35, 11.12s/it]  4%|▎         | 19/512 [02:23<1:14:32,  9.07s/it]  4%|▍         | 20/512 [02:35<1:23:30, 10.18s/it]  4%|▍         | 21/512 [02:48<1:28:23, 10.80s/it]  4%|▍         | 22/512 [03:00<1:33:07, 11.40s/it]  4%|▍         | 23/512 [03:19<1:51:03, 13.63s/it]  5%|▍         | 24/512 [03:38<2:04:05, 15.26s/it]  5%|▍         | 25/512 [03:56<2:10:03, 16.02s/it]  5%|▌         | 26/512 [04:06<1:53:50, 14.05s/it]  5%|▌         | 27/512 [04:15<1:42:18, 12.66s/it]  5%|▌         | 28/512 [04:25<1:34:44, 11.75s/it]  6%|▌         | 29/512 [04:33<1:27:22, 10.85s/it]  6%|▌         | 30/512 [04:51<1:42:53, 12.81s/it]  6%|▌         | 31/512 [05:10<1:57:10, 14.62s/it]  6%|▋         | 32/512 [05:14<1:33:28, 11.68s/it]  6%|▋         | 33/512 [05:18<1:14:04,  9.28s/it]  7%|▋         | 34/512 [05:30<1:19:15,  9.95s/it]  7%|▋         | 35/512 [05:56<1:58:45, 14.94s/it]tools/train_stage1.sh: line 28: 403516 Killed                  $PY main/rl/train.py task=DexHandImitator dexhand=dg5fs side=RH headless=true num_envs="$NUM_ENVS" learning_rate=5e-4 randomStateInit=true dataIndices="[$IDX]" experiment="$EXP"

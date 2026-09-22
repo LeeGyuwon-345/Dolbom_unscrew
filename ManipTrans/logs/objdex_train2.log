@@ -1,0 +1,544 @@
+[train_objdex] envs=256 iter=20000 exp=ObjDexUnscrew_97fc3_servo
+[train_objdex] OBJCENTRIC_OBS=1 SINGLE_POLICY=1 CAP_AXIAL_TRANS=1 CAP_FREE_LIFT=0.03 WRIST_PLANNER_NPZ set
+Importing module 'gym_38' (/home/leegyuwon/Documents/isaacgym/python/isaacgym/_bindings/linux-x86_64/gym_38.so)
+Setting GYM_USD_PLUG_INFO_PATH to /home/leegyuwon/Documents/isaacgym/python/isaacgym/_bindings/linux-x86_64/usd/plugInfo.json
+PyTorch version 1.13.1+cu117
+Device count 1
+/home/leegyuwon/Documents/isaacgym/python/isaacgym/_bindings/src/gymtorch
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/hydra/_internal/hydra.py:119: UserWarning: Future Hydra versions will no longer change working directory at job runtime by default.
+See https://hydra.cc/docs/1.2/upgrades/1.1_to_1.2/changes_to_job_working_dir/ for more information.
+  ret = run_job(
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/torch/utils/cpp_extension.py:25: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+  from pkg_resources import packaging  # type: ignore[attr-defined]
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/pkg_resources/__init__.py:3154: DeprecationWarning: Deprecated call to `pkg_resources.declare_namespace('mpl_toolkits')`.
+Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages
+  declare_namespace(pkg)
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/pkg_resources/__init__.py:3154: DeprecationWarning: Deprecated call to `pkg_resources.declare_namespace('google')`.
+Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages
+  declare_namespace(pkg)
+Using /home/leegyuwon/.cache/torch_extensions/py38_cu117 as PyTorch extensions root...
+Emitting ninja build file /home/leegyuwon/.cache/torch_extensions/py38_cu117/gymtorch/build.ninja...
+Building extension module gymtorch...
+Allowing ninja to set a default number of workers... (overridable by setting the environment variable MAX_JOBS=N)
+ninja: no work to do.
+task: 
+    name: ResDexHandRH
+    physics_engine: physx
+    seed: 42
+    env: 
+        numEnvs: 256
+        dexhand: dg5fs
+        episodeLength: 1200
+        training: True
+        usePIDControl: True
+        rolloutStateInit: False
+        randomStateInit: True
+        dataIndices: ['97fc3@1']
+        obsFutureLength: 1
+        rolloutLen: None
+        rolloutBegin: None
+        clipObservations: 5.0
+        clipActions: 1.0
+        furniture: just_one_leg
+        frankaDofNoise: 0.25
+        targetLiftHeight: 0.05
+        distanceReward: 0.1
+        liftReward: 1.0
+        successReward: 1.0
+        aggregateMode: 3
+        tightenMethod: exp_decay
+        tightenFactor: 0.7
+        tightenSteps: 3200
+        actionScale: 1.0
+        useQuatRot: False
+        propDumpInfo: 
+            q_rh: 20
+            q_lh: 20
+            dq_rh: 20
+            dq_lh: 20
+            state_rh: 13
+            state_lh: 13
+            state_manip_obj_rh: 13
+            state_manip_obj_lh: 13
+            joint_state_rh: 338
+            joint_state_lh: 338
+            tip_force_rh: 15
+            tip_force_lh: 15
+            reward: 1
+        actionsMovingAverage: 0.4
+        translationScale: 1.0
+        orientationScale: 0.1
+        bimanual_mode: united
+        trajectory_dropout: 
+            enabled: False
+            mode: full_trajectory_free
+            schedule: linear
+            start_progress: 0.2
+            end_progress: 0.6
+            final_probability: 1.0
+            mask_scope: episode
+            append_availability_flag: False
+            curriculum_total_frames: 0
+            force_probability: -1.0
+            performance_gate: 
+                enabled: False
+                success_threshold: 0.7
+        trajectory_tracking_annealing: 
+            enabled: False
+            schedule: linear
+            start_progress: 0.3
+            end_progress: 0.7
+            final_scale: 0.0
+        observation: 
+            use_normalized_phase: False
+        propObsDim: 73
+        obsKeys: ['q', 'cos_q', 'sin_q', 'base_state']
+        privilegedObsDim: 57
+        privilegedObsKeys: ['dq', 'manip_obj_pos', 'manip_obj_quat', 'manip_obj_vel', 'manip_obj_ang_vel', 'tip_force', 'manip_obj_com', 'manip_obj_weight']
+        enableCameraSensors: False
+    sim: 
+        dt: 0.0166667
+        substeps: 2
+        up_axis: z
+        use_gpu_pipeline: True
+        gravity: [0.0, 0.0, -9.81]
+        physx: 
+            num_threads: 4
+            solver_type: 1
+            use_gpu: True
+            num_position_iterations: 8
+            num_velocity_iterations: 1
+            contact_offset: 0.005
+            rest_offset: 0.0
+            bounce_threshold_velocity: 0.2
+            max_depenetration_velocity: 1000.0
+            default_buffer_size_multiplier: 5.0
+            max_gpu_contact_pairs: 1048576
+            num_subscenes: 4
+            contact_collection: 1
+    task: 
+        randomize: True
+        randomization_params: 
+            frequency: 32
+            sim_params: 
+                gravity: 
+                    operation: scaling
+                    schedule: linear_decay
+                    schedule_steps: 1920
+                    external_sample: 
+                        type: const_scale
+                        init_value: 0
+            actor_params: 
+                manip_obj: 
+                    color: True
+                    rigid_shape_properties: 
+                        friction: 
+                            num_buckets: 250
+                            operation: scaling
+                            schedule: linear_decay
+                            schedule_steps: 1920
+                            external_sample: 
+                                type: const_scale
+                                init_value: 3
+                                upper_bound: 6.0
+                                lower_bound: 1.0
+                manip_obj_rh: 
+                    color: True
+                    rigid_shape_properties: 
+                        friction: 
+                            num_buckets: 250
+                            operation: scaling
+                            schedule: linear_decay
+                            schedule_steps: 1920
+                            external_sample: 
+                                type: const_scale
+                                init_value: 3
+                                upper_bound: 6.0
+                                lower_bound: 1.0
+                manip_obj_lh: 
+                    color: True
+                    rigid_shape_properties: 
+                        friction: 
+                            num_buckets: 250
+                            operation: scaling
+                            schedule: linear_decay
+                            schedule_steps: 1920
+                            external_sample: 
+                                type: const_scale
+                                init_value: 3
+                                upper_bound: 6.0
+                                lower_bound: 1.0
+rl_train: 
+    params: 
+        seed: 42
+        algo: 
+            name: ppo
+        model: 
+            name: my_continuous_a2c_logstd
+        network: 
+            name: dict_obs_actor_critic
+            separate: False
+            space: 
+                continuous: 
+                    mu_activation: None
+                    sigma_activation: None
+                    mu_init: 
+                        name: default
+                    sigma_init: 
+                        name: const_initializer
+                        val: 0
+                    fixed_sigma: True
+            dict_feature_encoder: 
+                _target_: lib.nn.features.SimpleFeatureFusion
+                extractors: 
+                    privileged: 
+                        _target_: lib.nn.features.Identity
+                        input_dim: 57
+                    proprioception: 
+                        _target_: lib.nn.features.Identity
+                        input_dim: 73
+                    target: 
+                        _target_: lib.nn.features.Identity
+                        input_dim: 200
+                hidden_depth: 3
+                hidden_dim: 512
+                output_dim: 256
+                activation: swish
+                add_input_activation: False
+                add_output_activation: False
+            mlp: 
+                units: [256, 512, 128, 64]
+                activation: elu
+                d2rl: False
+                initializer: 
+                    name: default
+                regularizer: 
+                    name: None
+        load_checkpoint: False
+        load_path: 
+        dexhand: dg5fs
+        config: 
+            name: ObjDexUnscrew_97fc3_servo
+            full_experiment_name: ObjDexUnscrew_97fc3_servo
+            env_name: rlgpu
+            multi_gpu: False
+            ppo: True
+            mixed_precision: False
+            normalize_input: True
+            normalize_input_excluded_keys: []
+            normalize_value: True
+            use_pid_control: True
+            value_bootstrap: True
+            num_actors: 256
+            reward_shaper: 
+                scale_value: 1.0
+            normalize_advantage: True
+            gamma: 0.99
+            tau: 0.95
+            learning_rate: 0.0005
+            lr_schedule: adaptive
+            schedule_type: standard
+            kl_threshold: 0.008
+            score_to_win: 10000
+            max_epochs: 20000
+            early_stop_epochs: 9999999999999
+            save_best_after: 10
+            save_frequency: 200
+            print_stats: True
+            grad_norm: 1.0
+            entropy_coef: 0.0
+            truncate_grads: True
+            e_clip: 0.2
+            horizon_length: 32
+            minibatch_size: 1024
+            mini_epochs: 5
+            critic_coef: 4
+            clip_value: True
+            seq_len: 4
+            bounds_loss_coef: 0.0001
+            use_soft_clamp: True
+task_name: ResDexHandRH
+experiment: ObjDexUnscrew_97fc3_servo
+side: RH
+bimanual_mode: united
+dexhand: dg5fs
+rh_base_model_checkpoint: assets/imitator_rh_inspire.pth
+lh_base_model_checkpoint: assets/imitator_lh_inspire.pth
+num_envs: 256
+[Warning] [carb.gym.plugin] useGpu is set, forcing single scene (0 subscenes)
+Not connected to PVD
++++ Using GPU PhysX
+Physics Engine: PhysX
+Physics Device: cuda:0
+GPU Pipeline: enabled
+Loading extension module gymtorch...
+/home/leegyuwon/Documents/isaacgym/python/isaacgym/torch_utils.py:135: DeprecationWarning: `np.float` is a deprecated alias for the builtin `float`. To silence this warning, use `float` by itself. Doing this will not modify any behavior and is safe. If you specifically wanted the numpy scalar type, use `np.float64` here.
+Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
+  def get_axis_params(value, axis_idx, x_value=0., dtype=np.float, n_dims=3):
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/networkx/classes/graph.py:23: DeprecationWarning: Using or importing the ABCs from 'collections' instead of from 'collections.abc' is deprecated since Python 3.3, and in 3.10 it will stop working
+  from collections import Mapping
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/networkx/classes/reportviews.py:95: DeprecationWarning: Using or importing the ABCs from 'collections' instead of from 'collections.abc' is deprecated since Python 3.3, and in 3.10 it will stop working
+  from collections import Mapping, Set, Iterable
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/networkx/readwrite/graphml.py:346: DeprecationWarning: `np.int` is a deprecated alias for the builtin `int`. To silence this warning, use `int` by itself. Doing this will not modify any behavior and is safe. When replacing `np.int`, you may wish to use e.g. `np.int64` or `np.int32` to specify the precision. If you wish to review your current use, check the release note link for additional information.
+Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
+  (np.int, "int"), (np.int8, "int"),
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/wandb/util.py:116: SentryHubDeprecationWarning: `sentry_sdk.Hub` is deprecated and will be removed in a future major release. Please consult our 1.x to 2.x migration guide for details on how to migrate `Hub` usage to the new API: https://docs.sentry.io/platforms/python/migration/1.x-to-2.x
+  sentry_hub = sentry_sdk.Hub(sentry_client)
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/torch/utils/tensorboard/__init__.py:4: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+  if not hasattr(tensorboard, "__version__") or LooseVersion(
+/home/leegyuwon/Documents/miniconda3/envs/maniptrans/lib/python3.8/site-packages/gym/spaces/box.py:84: UserWarning: [33mWARN: Box bound precision lowered by casting to float32[0m
+  logger.warn(f"Box bound precision lowered by casting to {self.dtype}")
+/home/leegyuwon/Documents/ManipTrans/maniptrans_envs/lib/envs/tasks/dexhandmanip_sh.py:340: DeprecationWarning: an integer is required (got type isaacgym._bindings.linux-x86_64.gym_38.DofDriveMode).  Implicit conversion to integers using __int__ is deprecated, and may be removed in a future version of Python.
+  asset_options.default_dof_drive_mode = gymapi.DOF_MODE_POS
+rolloutStateInit: False
+randomStateInit: True
+rolloutLen: None
+rolloutBegin: None
+learning_rate: 0.0005
+actionsMovingAverage: 0.4
+usePIDControl: True
+dataIndices: ['97fc3@1']
+seed: 42
+torch_deterministic: False
+max_iterations: 20000
+early_stop_epochs: 9999999999999
+physics_engine: physx
+pipeline: gpu
+sim_device: cuda:0
+rl_device: cuda:0
+graphics_device_id: 0
+num_threads: 4
+solver_type: 1
+num_subscenes: 4
+test: False
+save_rollouts: False
+save_successful_rollouts_only: True
+num_rollouts_to_save: 20000
+num_rollouts_to_run: 9999999999999
+min_episode_length: 20
+checkpoint: 
+from_ckpt_epoch: False
+sigma: 
+multi_gpu: False
+wandb_activate: False
+wandb_group: 
+wandb_name: ObjDexUnscrew_97fc3_servo
+wandb_entity: None
+wandb_project: None
+wandb_tags: []
+wandb_logcode_dir: 
+capture_video: False
+n_parallel_recorders: 8
+n_successful_videos_to_record: 50
+display: False
+headless: True
+Setting seed: 42
+Using rl_device: cuda:0
+Using sim_device: cuda:0
+{'name': 'ObjDexUnscrew_97fc3_servo', 'full_experiment_name': None, 'env_name': 'rlgpu', 'multi_gpu': False, 'ppo': True, 'mixed_precision': False, 'normalize_input': True, 'normalize_input_excluded_keys': [], 'normalize_value': True, 'use_pid_control': True, 'value_bootstrap': True, 'num_actors': 256, 'reward_shaper': {'scale_value': 1.0}, 'normalize_advantage': True, 'gamma': 0.99, 'tau': 0.95, 'learning_rate': 0.0005, 'lr_schedule': 'adaptive', 'schedule_type': 'standard', 'kl_threshold': 0.008, 'score_to_win': 10000, 'max_epochs': 20000, 'early_stop_epochs': 9999999999999, 'save_best_after': 10, 'save_frequency': 200, 'print_stats': True, 'grad_norm': 1.0, 'entropy_coef': 0.0, 'truncate_grads': True, 'e_clip': 0.2, 'horizon_length': 32, 'minibatch_size': 1024, 'mini_epochs': 5, 'critic_coef': 4, 'clip_value': True, 'seq_len': 4, 'bounds_loss_coef': 0.0001, 'use_soft_clamp': True, 'device': 'cuda:0', 'population_based_training': False, 'pbt_idx': None}
+self.seed = 42
+Started to train
+Exact experiment name requested from command line: ObjDexUnscrew_97fc3_servo__07-25-18-25-47
+Num dexhand Bodies: 26
+Num dexhand DOFs: 20
+  0%|          | 0/256 [00:00<?, ?it/s]  0%|          | 1/256 [00:22<1:36:34, 22.72s/it]100%|██████████| 256/256 [00:22<00:00, 11.26it/s][imitate_retarget] Stage-2 손 타겟 = 리타겟 결과(opt_*) (B방식, 물체 궤적은 원본)
+[wrist_planner] 손목 타겟 = 플래너 출력 override (97fc3@1_pred.npz, E=256 T=482, RH 손목이동=23.6cm)
+[cap_rot_only] trajectory 트림 → seq_len ≤ 370 (돌리는 구간까지)
+[cap_rot_only] 뚜껑 위치 고정 + 나사축 1-DOF 회전 구속, 텀블러 몸체 없음
+[cap_axial_trans] 나사축 z이동 허용(max_lift=0.1m, lin_damp=5.0) | free_lift=0.03m 넘으면 구속해제
+[cap_unscrew_rew] 풀림방향 회전 보상 활성 (기준 각속도=1.48 rad/s, obj_rot_w=0.5, unscrew_w=5.0)
+WARNING: seq_len is deprecated, use seq_length instead
+seq_length: 4
+current training device: cuda:0
+build mlp: 256
+RunningMeanStd:  (1,)
+RunningMeanStd:  (57,)
+RunningMeanStd:  (73,)
+RunningMeanStd:  (200,)
+[traj_dropout] target dim=200, trajectory cols=46, keep(obj/bps)=154, mode=full_trajectory_free
+fps step: 3308 fps step and policy inference: 2857 fps total: 2176 epoch: 1/20000 frames: 0
+fps step: 5834 fps step and policy inference: 4564 fps total: 3068 epoch: 2/20000 frames: 8192
+fps step: 5804 fps step and policy inference: 4556 fps total: 3066 epoch: 3/20000 frames: 16384
+fps step: 5756 fps step and policy inference: 4519 fps total: 3049 epoch: 4/20000 frames: 24576
+fps step: 5771 fps step and policy inference: 4522 fps total: 3040 epoch: 5/20000 frames: 32768
+fps step: 5790 fps step and policy inference: 4534 fps total: 3051 epoch: 6/20000 frames: 40960
+fps step: 5595 fps step and policy inference: 4344 fps total: 2902 epoch: 7/20000 frames: 49152
+fps step: 5443 fps step and policy inference: 4260 fps total: 2888 epoch: 8/20000 frames: 57344
+fps step: 5732 fps step and policy inference: 4478 fps total: 3022 epoch: 9/20000 frames: 65536
+fps step: 5565 fps step and policy inference: 4352 fps total: 2964 epoch: 10/20000 frames: 73728
+saving next best rewards:  [45.24]
+=> saving checkpoint 'runs/ObjDexUnscrew_97fc3_servo__07-25-18-25-47/nn/ObjDexUnscrew_97fc3_servo.pth'
+fps step: 5741 fps step and policy inference: 4503 fps total: 3026 epoch: 11/20000 frames: 81920
+fps step: 5686 fps step and policy inference: 4467 fps total: 3011 epoch: 12/20000 frames: 90112
+saving next best rewards:  [46.]
+=> saving checkpoint 'runs/ObjDexUnscrew_97fc3_servo__07-25-18-25-47/nn/ObjDexUnscrew_97fc3_servo.pth'
+fps step: 5736 fps step and policy inference: 4517 fps total: 3024 epoch: 13/20000 frames: 98304
+fps step: 5681 fps step and policy inference: 4463 fps total: 3024 epoch: 14/20000 frames: 106496
+fps step: 5733 fps step and policy inference: 4507 fps total: 3036 epoch: 15/20000 frames: 114688
+saving next best rewards:  [49.2]
+=> saving checkpoint 'runs/ObjDexUnscrew_97fc3_servo__07-25-18-25-47/nn/ObjDexUnscrew_97fc3_servo.pth'
+fps step: 5716 fps step and policy inference: 4485 fps total: 3026 epoch: 16/20000 frames: 122880
+saving next best rewards:  [53.64]
+=> saving checkpoint 'runs/ObjDexUnscrew_97fc3_servo__07-25-18-25-47/nn/ObjDexUnscrew_97fc3_servo.pth'
+fps step: 5771 fps step and policy inference: 4537 fps total: 3050 epoch: 17/20000 frames: 131072
+fps step: 5718 fps step and policy inference: 4482 fps total: 3016 epoch: 18/20000 frames: 139264
+saving next best rewards:  [56.96]
+=> saving checkpoint 'runs/ObjDexUnscrew_97fc3_servo__07-25-18-25-47/nn/ObjDexUnscrew_97fc3_servo.pth'
+fps step: 5725 fps step and policy inference: 4510 fps total: 3019 epoch: 19/20000 frames: 147456
+fps step: 5798 fps step and policy inference: 4542 fps total: 3053 epoch: 20/20000 frames: 155648
+fps step: 5781 fps step and policy inference: 4541 fps total: 3031 epoch: 21/20000 frames: 163840
+fps step: 5773 fps step and policy inference: 4531 fps total: 3044 epoch: 22/20000 frames: 172032
+fps step: 5757 fps step and policy inference: 4516 fps total: 3001 epoch: 23/20000 frames: 180224
+saving next best rewards:  [64.93]
+=> saving checkpoint 'runs/ObjDexUnscrew_97fc3_servo__07-25-18-25-47/nn/ObjDexUnscrew_97fc3_servo.pth'
+fps step: 5733 fps step and policy inference: 4500 fps total: 3063 epoch: 24/20000 frames: 188416
+fps step: 5751 fps step and policy inference: 4481 fps total: 3050 epoch: 25/20000 frames: 196608
+fps step: 5735 fps step and policy inference: 4469 fps total: 2991 epoch: 26/20000 frames: 204800
+fps step: 5740 fps step and policy inference: 4455 fps total: 2983 epoch: 27/20000 frames: 212992
+fps step: 5751 fps step and policy inference: 4488 fps total: 3036 epoch: 28/20000 frames: 221184
+fps step: 5798 fps step and policy inference: 4537 fps total: 3060 epoch: 29/20000 frames: 229376
+fps step: 5759 fps step and policy inference: 4503 fps total: 3012 epoch: 30/20000 frames: 237568
+fps step: 5747 fps step and policy inference: 4481 fps total: 3000 epoch: 31/20000 frames: 245760
+fps step: 5736 fps step and policy inference: 4482 fps total: 3003 epoch: 32/20000 frames: 253952
+saving next best rewards:  [67.33]
+=> saving checkpoint 'runs/ObjDexUnscrew_97fc3_servo__07-25-18-25-47/nn/ObjDexUnscrew_97fc3_servo.pth'
+fps step: 5775 fps step and policy inference: 4533 fps total: 3049 epoch: 33/20000 frames: 262144
+saving next best rewards:  [68.6]
+=> saving checkpoint 'runs/ObjDexUnscrew_97fc3_servo__07-25-18-25-47/nn/ObjDexUnscrew_97fc3_servo.pth'
+fps step: 5717 fps step and policy inference: 4483 fps total: 3014 epoch: 34/20000 frames: 270336
+fps step: 5759 fps step and policy inference: 4514 fps total: 3039 epoch: 35/20000 frames: 278528
+saving next best rewards:  [70.38]
+=> saving checkpoint 'runs/ObjDexUnscrew_97fc3_servo__07-25-18-25-47/nn/ObjDexUnscrew_97fc3_servo.pth'
+fps step: 5754 fps step and policy inference: 4506 fps total: 3041 epoch: 36/20000 frames: 286720
+fps step: 5738 fps step and policy inference: 4497 fps total: 3034 epoch: 37/20000 frames: 294912
+saving next best rewards:  [71.14]
+=> saving checkpoint 'runs/ObjDexUnscrew_97fc3_servo__07-25-18-25-47/nn/ObjDexUnscrew_97fc3_servo.pth'
+fps step: 5737 fps step and policy inference: 4508 fps total: 3035 epoch: 38/20000 frames: 303104
+fps step: 6054 fps step and policy inference: 4730 fps total: 3150 epoch: 39/20000 frames: 311296
+fps step: 5852 fps step and policy inference: 4578 fps total: 3043 epoch: 40/20000 frames: 319488
+fps step: 5993 fps step and policy inference: 4659 fps total: 3084 epoch: 41/20000 frames: 327680
+fps step: 6026 fps step and policy inference: 4683 fps total: 3096 epoch: 42/20000 frames: 335872
+saving next best rewards:  [75.7]
+=> saving checkpoint 'runs/ObjDexUnscrew_97fc3_servo__07-25-18-25-47/nn/ObjDexUnscrew_97fc3_servo.pth'
+fps step: 6012 fps step and policy inference: 4669 fps total: 3091 epoch: 43/20000 frames: 344064
+fps step: 5996 fps step and policy inference: 4658 fps total: 3089 epoch: 44/20000 frames: 352256
+fps step: 6080 fps step and policy inference: 4728 fps total: 3092 epoch: 45/20000 frames: 360448
+fps step: 6063 fps step and policy inference: 4724 fps total: 3126 epoch: 46/20000 frames: 368640
+fps step: 6015 fps step and policy inference: 4674 fps total: 3101 epoch: 47/20000 frames: 376832
+fps step: 6002 fps step and policy inference: 4652 fps total: 3095 epoch: 48/20000 frames: 385024
+fps step: 6015 fps step and policy inference: 4671 fps total: 3068 epoch: 49/20000 frames: 393216
+fps step: 5979 fps step and policy inference: 4647 fps total: 3081 epoch: 50/20000 frames: 401408
+saving next best rewards:  [83.26]
+=> saving checkpoint 'runs/ObjDexUnscrew_97fc3_servo__07-25-18-25-47/nn/ObjDexUnscrew_97fc3_servo.pth'
+fps step: 6061 fps step and policy inference: 4724 fps total: 3100 epoch: 51/20000 frames: 409600
+fps step: 6139 fps step and policy inference: 4773 fps total: 3155 epoch: 52/20000 frames: 417792
+fps step: 6209 fps step and policy inference: 4827 fps total: 3175 epoch: 53/20000 frames: 425984
+fps step: 6155 fps step and policy inference: 4772 fps total: 3145 epoch: 54/20000 frames: 434176
+fps step: 6191 fps step and policy inference: 4838 fps total: 3178 epoch: 55/20000 frames: 442368
+saving next best rewards:  [83.9]
+=> saving checkpoint 'runs/ObjDexUnscrew_97fc3_servo__07-25-18-25-47/nn/ObjDexUnscrew_97fc3_servo.pth'
+fps step: 6214 fps step and policy inference: 4869 fps total: 3194 epoch: 56/20000 frames: 450560
+fps step: 6205 fps step and policy inference: 4846 fps total: 3212 epoch: 57/20000 frames: 458752
+fps step: 6219 fps step and policy inference: 4833 fps total: 3203 epoch: 58/20000 frames: 466944
+saving next best rewards:  [87.51]
+=> saving checkpoint 'runs/ObjDexUnscrew_97fc3_servo__07-25-18-25-47/nn/ObjDexUnscrew_97fc3_servo.pth'
+fps step: 6096 fps step and policy inference: 4737 fps total: 3152 epoch: 59/20000 frames: 475136
+saving next best rewards:  [90.37]
+=> saving checkpoint 'runs/ObjDexUnscrew_97fc3_servo__07-25-18-25-47/nn/ObjDexUnscrew_97fc3_servo.pth'
+fps step: 6038 fps step and policy inference: 4704 fps total: 3113 epoch: 60/20000 frames: 483328
+fps step: 6033 fps step and policy inference: 4692 fps total: 3134 epoch: 61/20000 frames: 491520
+fps step: 6077 fps step and policy inference: 4735 fps total: 3145 epoch: 62/20000 frames: 499712
+fps step: 6085 fps step and policy inference: 4748 fps total: 3147 epoch: 63/20000 frames: 507904
+fps step: 6005 fps step and policy inference: 4662 fps total: 3115 epoch: 64/20000 frames: 516096
+fps step: 6176 fps step and policy inference: 4818 fps total: 3180 epoch: 65/20000 frames: 524288
+saving next best rewards:  [91.28]
+=> saving checkpoint 'runs/ObjDexUnscrew_97fc3_servo__07-25-18-25-47/nn/ObjDexUnscrew_97fc3_servo.pth'
+fps step: 6044 fps step and policy inference: 4707 fps total: 3128 epoch: 66/20000 frames: 532480
+fps step: 6104 fps step and policy inference: 4738 fps total: 3114 epoch: 67/20000 frames: 540672
+fps step: 5810 fps step and policy inference: 4505 fps total: 2998 epoch: 68/20000 frames: 548864
+fps step: 6148 fps step and policy inference: 4789 fps total: 3171 epoch: 69/20000 frames: 557056
+fps step: 6021 fps step and policy inference: 4670 fps total: 3097 epoch: 70/20000 frames: 565248
+fps step: 6005 fps step and policy inference: 4657 fps total: 3081 epoch: 71/20000 frames: 573440
+fps step: 6103 fps step and policy inference: 4727 fps total: 3111 epoch: 72/20000 frames: 581632
+fps step: 6020 fps step and policy inference: 4670 fps total: 3091 epoch: 73/20000 frames: 589824
+fps step: 6036 fps step and policy inference: 4671 fps total: 3086 epoch: 74/20000 frames: 598016
+saving next best rewards:  [98.35]
+=> saving checkpoint 'runs/ObjDexUnscrew_97fc3_servo__07-25-18-25-47/nn/ObjDexUnscrew_97fc3_servo.pth'
+fps step: 6063 fps step and policy inference: 4687 fps total: 3106 epoch: 75/20000 frames: 606208
+fps step: 6040 fps step and policy inference: 4685 fps total: 3099 epoch: 76/20000 frames: 614400
+fps step: 6019 fps step and policy inference: 4661 fps total: 3089 epoch: 77/20000 frames: 622592
+fps step: 6040 fps step and policy inference: 4697 fps total: 3105 epoch: 78/20000 frames: 630784
+fps step: 6057 fps step and policy inference: 4709 fps total: 3101 epoch: 79/20000 frames: 638976
+fps step: 6012 fps step and policy inference: 4650 fps total: 3098 epoch: 80/20000 frames: 647168
+saving next best rewards:  [99.97]
+=> saving checkpoint 'runs/ObjDexUnscrew_97fc3_servo__07-25-18-25-47/nn/ObjDexUnscrew_97fc3_servo.pth'
+fps step: 6059 fps step and policy inference: 4718 fps total: 3109 epoch: 81/20000 frames: 655360
+saving next best rewards:  [102.71]
+=> saving checkpoint 'runs/ObjDexUnscrew_97fc3_servo__07-25-18-25-47/nn/ObjDexUnscrew_97fc3_servo.pth'
+fps step: 6060 fps step and policy inference: 4721 fps total: 3099 epoch: 82/20000 frames: 663552
+fps step: 5911 fps step and policy inference: 4587 fps total: 3050 epoch: 83/20000 frames: 671744
+fps step: 5987 fps step and policy inference: 4653 fps total: 3029 epoch: 84/20000 frames: 679936
+fps step: 5969 fps step and policy inference: 4609 fps total: 3043 epoch: 85/20000 frames: 688128
+fps step: 5995 fps step and policy inference: 4637 fps total: 3062 epoch: 86/20000 frames: 696320
+fps step: 5990 fps step and policy inference: 4659 fps total: 3105 epoch: 87/20000 frames: 704512
+fps step: 6119 fps step and policy inference: 4759 fps total: 3158 epoch: 88/20000 frames: 712704
+fps step: 6054 fps step and policy inference: 4695 fps total: 3127 epoch: 89/20000 frames: 720896
+fps step: 6135 fps step and policy inference: 4769 fps total: 3159 epoch: 90/20000 frames: 729088
+fps step: 6174 fps step and policy inference: 4796 fps total: 3147 epoch: 91/20000 frames: 737280
+saving next best rewards:  [109.18]
+=> saving checkpoint 'runs/ObjDexUnscrew_97fc3_servo__07-25-18-25-47/nn/ObjDexUnscrew_97fc3_servo.pth'
+fps step: 6160 fps step and policy inference: 4805 fps total: 3171 epoch: 92/20000 frames: 745472
+fps step: 6146 fps step and policy inference: 4794 fps total: 3179 epoch: 93/20000 frames: 753664
+fps step: 6122 fps step and policy inference: 4769 fps total: 3150 epoch: 94/20000 frames: 761856
+saving next best rewards:  [110.28]
+=> saving checkpoint 'runs/ObjDexUnscrew_97fc3_servo__07-25-18-25-47/nn/ObjDexUnscrew_97fc3_servo.pth'
+fps step: 6110 fps step and policy inference: 4766 fps total: 3150 epoch: 95/20000 frames: 770048
+saving next best rewards:  [112.34]
+=> saving checkpoint 'runs/ObjDexUnscrew_97fc3_servo__07-25-18-25-47/nn/ObjDexUnscrew_97fc3_servo.pth'
+fps step: 6044 fps step and policy inference: 4695 fps total: 3114 epoch: 96/20000 frames: 778240
+fps step: 6121 fps step and policy inference: 4771 fps total: 3144 epoch: 97/20000 frames: 786432
+fps step: 6107 fps step and policy inference: 4761 fps total: 3158 epoch: 98/20000 frames: 794624
+fps step: 6191 fps step and policy inference: 4832 fps total: 3173 epoch: 99/20000 frames: 802816
+fps step: 6109 fps step and policy inference: 4757 fps total: 3152 epoch: 100/20000 frames: 811008
+fps step: 6163 fps step and policy inference: 4796 fps total: 3161 epoch: 101/20000 frames: 819200
+fps step: 6098 fps step and policy inference: 4742 fps total: 3124 epoch: 102/20000 frames: 827392
+fps step: 6120 fps step and policy inference: 4758 fps total: 3158 epoch: 103/20000 frames: 835584
+saving next best rewards:  [116.84]
+=> saving checkpoint 'runs/ObjDexUnscrew_97fc3_servo__07-25-18-25-47/nn/ObjDexUnscrew_97fc3_servo.pth'
+fps step: 6045 fps step and policy inference: 4724 fps total: 3141 epoch: 104/20000 frames: 843776
+fps step: 6220 fps step and policy inference: 4843 fps total: 3201 epoch: 105/20000 frames: 851968
+fps step: 6173 fps step and policy inference: 4806 fps total: 3188 epoch: 106/20000 frames: 860160
+fps step: 6239 fps step and policy inference: 4840 fps total: 3193 epoch: 107/20000 frames: 868352
+saving next best rewards:  [118.86]
+=> saving checkpoint 'runs/ObjDexUnscrew_97fc3_servo__07-25-18-25-47/nn/ObjDexUnscrew_97fc3_servo.pth'
+fps step: 6188 fps step and policy inference: 4828 fps total: 3175 epoch: 108/20000 frames: 876544
+saving next best rewards:  [121.08]
+=> saving checkpoint 'runs/ObjDexUnscrew_97fc3_servo__07-25-18-25-47/nn/ObjDexUnscrew_97fc3_servo.pth'
+fps step: 6174 fps step and policy inference: 4799 fps total: 3134 epoch: 109/20000 frames: 884736
+fps step: 6216 fps step and policy inference: 4812 fps total: 3148 epoch: 110/20000 frames: 892928
+fps step: 5942 fps step and policy inference: 4613 fps total: 3069 epoch: 111/20000 frames: 901120
+fps step: 5905 fps step and policy inference: 4581 fps total: 3055 epoch: 112/20000 frames: 909312
+fps step: 5930 fps step and policy inference: 4599 fps total: 3044 epoch: 113/20000 frames: 917504
+saving next best rewards:  [121.83]
+=> saving checkpoint 'runs/ObjDexUnscrew_97fc3_servo__07-25-18-25-47/nn/ObjDexUnscrew_97fc3_servo.pth'
+fps step: 5878 fps step and policy inference: 4556 fps total: 3053 epoch: 114/20000 frames: 925696
+fps step: 5959 fps step and policy inference: 4633 fps total: 3060 epoch: 115/20000 frames: 933888
+fps step: 5876 fps step and policy inference: 4553 fps total: 3034 epoch: 116/20000 frames: 942080
+fps step: 5852 fps step and policy inference: 4527 fps total: 3024 epoch: 117/20000 frames: 950272
+fps step: 5982 fps step and policy inference: 4634 fps total: 3096 epoch: 118/20000 frames: 958464
+fps step: 5900 fps step and policy inference: 4575 fps total: 3056 epoch: 119/20000 frames: 966656
+fps step: 5892 fps step and policy inference: 4560 fps total: 3044 epoch: 120/20000 frames: 974848
+fps step: 5840 fps step and policy inference: 4523 fps total: 3028 epoch: 121/20000 frames: 983040
+fps step: 5925 fps step and policy inference: 4613 fps total: 3050 epoch: 122/20000 frames: 991232
+fps step: 5883 fps step and policy inference: 4561 fps total: 3043 epoch: 123/20000 frames: 999424
+fps step: 5909 fps step and policy inference: 4559 fps total: 3030 epoch: 124/20000 frames: 1007616
+fps step: 5957 fps step and policy inference: 4629 fps total: 3099 epoch: 125/20000 frames: 1015808
+fps step: 5941 fps step and policy inference: 4615 fps total: 3096 epoch: 126/20000 frames: 1024000
+saving next best rewards:  [126.43]
+=> saving checkpoint 'runs/ObjDexUnscrew_97fc3_servo__07-25-18-25-47/nn/ObjDexUnscrew_97fc3_servo.pth'
+fps step: 5863 fps step and policy inference: 4543 fps total: 3034 epoch: 127/20000 frames: 1032192
+fps step: 5861 fps step and policy inference: 4525 fps total: 3030 epoch: 128/20000 frames: 1040384
+Terminated
