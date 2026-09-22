@@ -1,0 +1,94 @@
+"""초기자세 투입 게이트 판정 (MLP 재학습 목적함수용 기준 일괄 검사).
+
+사용:
+  LD_LIBRARY_PATH=<maniptrans env>/lib python pose_gate.py <pose22.json> [...]
+  # 16축 손 자세 + rb5 6축을 합친 22축 JSON ({"dof_pos":[...22]})
+  # rh_init export(16축+rb5 dict)는 아래 to22() 참고
+
+판정 항목(전부 PASS 여야 학습 투입):
+  1 팁 z 밴드      4지 팁 중심 z ∈ [225, 243]mm  (셰이핑 명목 [227,245], 목표 ~229 중앙)
+  2 캡벽 갭        (팁중심반경 - 패드10.5mm) - 44mm ∈ [-8, +4]mm  (정본 x04 실측 -6.3~+2.9 포함)
+  3 팜 높이        palm(base_link) z - 캡윗면(231mm) >= +125mm      ★ A82 3연속 실패 원인
+  4 폄(감쌈 금지)   손가락 굴곡합(J1~J3 절대합) <= 360deg
+  5 손목 R 정렬     rot115 기준 R 과의 회전차 <= 20deg (정본 17.0, 이상 3deg)
+  6 엄지 대향       엄지-중지 팁 방위각 간격 >= 140deg  (A81 보상 항 문턱과 동일)
+  7 엘보우업        link3.z > tcp.z + 30mm
+"""
+import json, math, sys
+import numpy as np
+from isaacgym import gymapi
+
+RD = "/home/leegyuwon/Documents/task1/assets/rb5_allegro"
+RU = "rb5_allegro_vmount_siltip2.urdf"
+REF_POSE = "/home/leegyuwon/Documents/task1/tools2_allegro/poses/rhinit2_rot115.json"  # 손목 R 기준
+CAP_XY = np.array([0.4, 0.0]); CAP_R = 0.044; PAD = 0.0105; CAP_TOP = 0.231
+BAND = (0.225, 0.243); GAP = (-8.0, 4.0); PALM_MIN = 125.0; FLEX_MAX = 360.0
+WRIST_MAX = 20.0; OPPOSE_MIN = 140.0; ELBOW_MARGIN = 0.03
+
+gym = gymapi.acquire_gym(); sp = gymapi.SimParams(); sp.up_axis = gymapi.UP_AXIS_Z
+sp.gravity = gymapi.Vec3(0, 0, 0)
+sim = gym.create_sim(0, 0, gymapi.SIM_PHYSX, sp)
+o = gymapi.AssetOptions(); o.fix_base_link = True; o.disable_gravity = True; o.collapse_fixed_joints = False
+asset = gym.load_asset(sim, RD, RU, o)
+env = gym.create_env(sim, gymapi.Vec3(-1, -1, 0), gymapi.Vec3(1, 1, 1), 1)
+act = gym.create_actor(env, asset, gymapi.Transform(), "r", 0, 0)
+NAMES = gym.get_actor_rigid_body_names(env, act)
+TIPS = {"link_3.0_tip": "검지", "link_7.0_tip": "중지", "link_11.0_tip": "약지", "link_15.0_tip": "엄지"}
+# 굴곡 관절 인덱스(22축 기준, URDF DOF 순서: 팔6 + 검지4 + 엄지4 + 중지4 + 약지4)
+FLEX_IDX = [(7, 8, 9), (11, 12, 13), (15, 16, 17), (19, 20, 21)]
+
+
+def fk(q):
+    st = gym.get_actor_dof_states(env, act, gymapi.STATE_ALL)
+    st["pos"] = np.asarray(q, dtype=np.float32); st["vel"] = 0
+    gym.set_actor_dof_states(env, act, st, gymapi.STATE_ALL)
+    gym.simulate(sim); gym.fetch_results(sim, True)
+    return gym.get_actor_rigid_body_states(env, act, gymapi.STATE_POS)
+
+
+def wrist_R(bs):
+    r = bs["pose"]["r"][NAMES.index("base_link")]
+    x, y, z, w = [float(v) for v in (r[0], r[1], r[2], r[3])]
+    return np.array([[1-2*(y*y+z*z), 2*(x*y-z*w), 2*(x*z+y*w)],
+                     [2*(x*y+z*w), 1-2*(x*x+z*z), 2*(y*z-x*w)],
+                     [2*(x*z-y*w), 2*(y*z+x*w), 1-2*(x*x+y*y)]])
+
+
+R_REF = wrist_R(fk(json.load(open(REF_POSE))["dof_pos"]))
+
+
+def check(path):
+    q = json.load(open(path))["dof_pos"]
+    assert len(q) == 22, f"22축 필요 (현재 {len(q)}) — rh_init export 는 rb5.q + dof_pos 로 합칠 것"
+    bs = fk(q); ok_all = True
+    def line(name, val, ok, crit):
+        nonlocal ok_all
+        ok_all &= ok
+        print(f"  [{'PASS' if ok else 'FAIL'}] {name:<12} {val:<34} 기준: {crit}")
+    tz, gaps, az = {}, {}, {}
+    for n, lbl in TIPS.items():
+        p = bs["pose"]["p"][NAMES.index(n)]
+        X, Y, Z = float(p[0]), float(p[1]), float(p[2])
+        rr = math.hypot(X - CAP_XY[0], Y - CAP_XY[1])
+        tz[lbl] = Z * 1000; gaps[lbl] = (rr - PAD) * 1000 - CAP_R * 1000
+        az[lbl] = math.degrees(math.atan2(Y - CAP_XY[1], X - CAP_XY[0]))
+    line("1 팁z밴드", " ".join(f"{k}{v:.0f}" for k, v in tz.items()),
+         all(BAND[0] * 1000 <= v <= BAND[1] * 1000 for v in tz.values()), f"4지 ∈[{BAND[0]*1000:.0f},{BAND[1]*1000:.0f}]mm")
+    line("2 캡벽갭", " ".join(f"{k}{v:+.1f}" for k, v in gaps.items()),
+         all(GAP[0] <= v <= GAP[1] for v in gaps.values()), f"4지 ∈[{GAP[0]:+.0f},{GAP[1]:+.0f}]mm")
+    palm = (float(bs["pose"]["p"][NAMES.index("base_link")][2]) - CAP_TOP) * 1000
+    line("3 팜높이", f"{palm:+.1f}mm", palm >= PALM_MIN, f">= +{PALM_MIN:.0f}mm")
+    flex = sum(sum(abs(math.degrees(q[i])) for i in idx) for idx in FLEX_IDX)
+    line("4 폄(굴곡합)", f"{flex:.0f}deg", flex <= FLEX_MAX, f"<= {FLEX_MAX:.0f}deg")
+    Rd = R_REF.T @ wrist_R(bs)
+    ang = math.degrees(math.acos(max(-1, min(1, (np.trace(Rd) - 1) / 2))))
+    line("5 손목R", f"{ang:.1f}deg", ang <= WRIST_MAX, f"<= {WRIST_MAX:.0f}deg (이상 3)")
+    sep = abs((az["엄지"] - az["중지"] + 180) % 360 - 180)
+    line("6 엄지대향", f"{sep:.0f}deg", sep >= OPPOSE_MIN, f">= {OPPOSE_MIN:.0f}deg")
+    e = float(bs["pose"]["p"][NAMES.index("link3")][2]); t = float(bs["pose"]["p"][NAMES.index("tcp")][2])
+    line("7 엘보우업", f"link3 {e*1000:.0f} vs tcp {t*1000:.0f}mm", e > t + ELBOW_MARGIN, "link3 > tcp+30mm")
+    print(f"  => {'투입 가능' if ok_all else '투입 불가'}")
+
+
+for p in sys.argv[1:]:
+    print(p.split("/")[-1]); check(p)

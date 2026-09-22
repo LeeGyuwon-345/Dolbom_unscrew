@@ -54,7 +54,35 @@ mode_args=(headless=True)
 # (rb5_allegro=22dof/29body) 에서 계산되므로, 관측을 hand-only(allegro=16/21)
 # 로 줄일 때는 여기서도 맞춰줘야 한다. target = 46+21+128+PHASE_DIM(11)=206.
 # 팔 모드는 obj_to_joints 에서 팔 몸체 8개를 항상 제외하므로 target=206.
-handobs_args=(rl_train.params.network.dict_feature_encoder.extractors.target.input_dim=206)
+# CAP_OBS_TIP_FORCE6=1 이면 env 가 target 말미에 4지×6존 FSR 24dim 을 붙인다.
+# 46+21+128 = 195 고정분 + PHASE_DIM. PHASE_DIM 은 아래 CAP_GRASP_PHASE_DIM 과
+# 같은 기본값(11)을 써야 한다 -- 하드코딩 206 은 PHASE_DIM=12(J6 누적) 에서 어긋난다.
+target_dim=$((195 + ${PHASE_DIM:-11}))
+if [[ "${CAP_OBS_TIP_FORCE6:-0}" == "1" ]]; then
+  target_dim=$((target_dim + 24))
+fi
+# CAP_OBS_COMPACT=1: 상수 채널(손목vel/angvel/quat 10 + 물체목표 23 + bps 128 +
+# rel_quat 4 = 165)을 env 가 차원째 제거한다. 네트워크 입력차원과 propObsDim 도
+# 같이 줄여야 한다. target = 13(delta_wrist) + 21(obj_to_joints) + (PHASE_DIM-4) + 24
+compact_args=()
+# CAP_PRIV_RESIST=1: privileged 에 저항값 1채널 추가(critic 전용) -> 59 -> 60.
+# actor 는 privileged 앞 22 만 보므로 배포 사양에는 영향 없음.
+if [[ "${CAP_PRIV_RESIST:-0}" == "1" ]]; then
+  # env 가 privilegedObsDim 을 스스로 +1 하므로(cfg 오버라이드하면 이중 계산),
+  # 네트워크 인코더 입력차원만 맞춘다.
+  compact_args+=(
+    rl_train.params.network.dict_feature_encoder.extractors.privileged.input_dim=60
+  )
+fi
+if [[ "${CAP_OBS_COMPACT:-0}" == "1" ]]; then
+  target_dim=$((13 + 21 + ${PHASE_DIM:-11} - 4))
+  if [[ "${CAP_OBS_TIP_FORCE6:-0}" == "1" ]]; then target_dim=$((target_dim + 24)); fi
+  compact_args+=(
+    task.env.propObsDim=76
+    rl_train.params.network.dict_feature_encoder.extractors.proprioception.input_dim=76
+  )
+fi
+handobs_args=(rl_train.params.network.dict_feature_encoder.extractors.target.input_dim=${target_dim} "${compact_args[@]}")
 if [[ "${ARM_HAND_OBS:-0}" == "1" ]]; then
   handobs_args+=(
     rl_train.params.network.dict_feature_encoder.extractors.privileged.input_dim=53
@@ -121,7 +149,20 @@ exec env \
   `# free6: 해제 후 캡이 완전 자유(수평·기울임·계속 회전). 2자유도 판은 z만 가능.` \
   `# 기본 = 원기둥 근사(캡 r50.2/h30, 몸체 R50/H239.4, 64각) + 나사 저항 0.8Nm.` \
   `# 실물 mesh 판은 tumbler_free6.urdf (Main12 재현용).` \
-  CAP_GRASP_TUMBLER_URDF="${TUMBLER_URDF:-/home/leegyuwon/Documents/task1/assets/tumbler/tumbler_cyl_fric08.urdf}" \
+  `# 2026-08-21 기준 치수 = 실물 실측 r44 (cap r44/h16, body R44/H215, 캡 215~231mm).` \
+  `# 구 r50 자산 재생 시에는 TUMBLER_URDF 와 CAP_RADIUS_* 등을 명시로 되돌릴 것.` \
+  CAP_GRASP_TUMBLER_URDF="${TUMBLER_URDF:-/home/leegyuwon/Documents/task1/assets/tumbler/tumbler_cyl_r44_fric02.urdf}" \
+  CAP_RADIUS_LO="${CAP_RADIUS_LO:-0.044}" \
+  CAP_RADIUS_HI="${CAP_RADIUS_HI:-0.044}" \
+  CAP_HEIGHT_M="${CAP_HEIGHT_M:-0.016}" \
+  CAP_BAND_LO="${CAP_BAND_LO:-0.002}" \
+  CAP_PROFILE="${CAP_PROFILE:-0}" \
+  CAP_CLOUD_RADIUS="${CAP_CLOUD_RADIUS:-0.044}" \
+  CAP_CLOUD_HEIGHT="${CAP_CLOUD_HEIGHT:-0.016}" \
+  `# FSR 24ch 불균일 격자 (2026-08-22 개정: 존 단위 힘 0~12N 대역 세분화,` \
+  `# 상단 압축 — 존 실측 최대 ~20N. A48/A49 재생은 구 표를 명시로 넘길 것:` \
+  `# 1,2,3.5,5.5,8,12,17,24,32).` \
+  CAP_TIP_FORCE_BINS="${CAP_TIP_FORCE_BINS:-1,2,3.5,5,6.5,8.5,11,15,21}" \
   CAP_GRASP_LOG="${CAP_LOG:-0}" \
   CAP_DIAG_EVERY="${DIAG_EVERY:-0}" \
   CAP_GRASP_LOG_DIR="${LOG_DIR}" \
@@ -155,9 +196,9 @@ exec env \
   `# base 참조 = 손목 몸체. IK 래퍼와 함께 쓰면 Al9 체크포인트 웜스타트 가능.` \
   CAP_ARM_HAND_OBS="${ARM_HAND_OBS:-0}" \
   CAP_GRASP_PHASE_DIM="${PHASE_DIM:-11}" \
-  CAP_GRASP_CAP_Z="${CAP_Z:-0.225}" \
+  CAP_GRASP_CAP_Z="${CAP_Z:-0.215}" \
   `# 텀블러 바닥 = RB5 base 와 같은 z 레벨(0), base 기준 x 600mm (팔 통합 배치)` \
-  CAP_GRASP_TUMBLER_POS="${TUMBLER_POS:-0.6,0,0}" \
+  CAP_GRASP_TUMBLER_POS="${TUMBLER_POS:-0.4,0,0}" \
   `# 팔은 손목보다 느리고 재파지 사이클 여지도 필요 -- 2배 (12초)` \
   CAP_GRASP_EPISODE_STEPS="${EPISODE_STEPS:-720}" \
   CAP_GRASP_RESAMPLE_WRIST_ON_RESET="${RESAMPLE_WRIST:-0}" \
@@ -237,11 +278,11 @@ exec env \
   `#     real exposure as the cap rises: a band that widens with progress` \
   `#     flips the same finger placement from rejected to accepted without` \
   `#     the hand doing anything. ---` \
-  CAP_RADIUS_LO=0.0469 \
-  CAP_RADIUS_HI=0.0500 \
-  CAP_RADIUS_KNEE=0.017 \
-  CAP_HEIGHT_M=0.0300 \
-  CAP_BAND_LO=0.0143 \
+  CAP_RADIUS_LO="${CAP_RADIUS_LO:-0.0469}" \
+  CAP_RADIUS_HI="${CAP_RADIUS_HI:-0.0500}" \
+  CAP_RADIUS_KNEE="${CAP_RADIUS_KNEE:-0.017}" \
+  CAP_HEIGHT_M="${CAP_HEIGHT_M:-0.0300}" \
+  CAP_BAND_LO="${CAP_BAND_LO:-0.0143}" \
   `# link_X_tip.STL measures 16.1mm across its palmar axis, so the pad sits` \
   `# 8.1mm off the link origin. At 9.0mm dist bottomed out with the finger` \
   `# still ~1mm clear of the wall, where the contact force is exactly zero.` \
@@ -249,8 +290,8 @@ exec env \
   CAP_FINGER_RADIUS="${FINGER_RADIUS:-0.012}" \
   CAP_BAND_MARGIN=0.002 \
   CAP_RADIAL_MARGIN=0.010 \
-  CAP_PROBE_STEPS=4 \
-  CAP_TIP_EXTENSION=0.018 \
+  CAP_PROBE_STEPS="${PROBE_STEPS:-4}" \
+  CAP_TIP_EXTENSION="${TIP_EXTENSION:-0.018}" \
   \
   `# --- contact gating. closure_err 0.75 admits >=82 deg of separation;` \
   `#     without it, contacts bunched on one side scored as a grasp. ---` \
@@ -261,7 +302,7 @@ exec env \
   `# 접촉은 link_X_tip 하나만. link_X_4 까지 세면 깊게 감싸 중위마디로만` \
   `# 누르는 자세가 손끝 파지와 같은 점수를 받는다 (실측 중위 3.36 : 손끝 2.68).` \
   CAP_CONTACT_TIP_ONLY="${TIP_ONLY:-1}" \
-  CAP_MIN_CONTACT_TIPS=2 \
+  CAP_MIN_CONTACT_TIPS="${MIN_CONTACT_TIPS:-2}" \
   CAP_CONTACT_REF="${CONTACT_REF:-4}" \
   `# 방향 가중 접촉 (tools2): cos^2 를 가중치로, 0.8 계단은 진단 정의로만.` \
   CAP_PALM_GRADE="${PALM_GRADE:-1}" \
@@ -321,6 +362,7 @@ exec env \
   `# palm-down is enforced by a hard clamp on the wrist orientation` \
   `# (_clamp_unscrew_wrist), not by a penalty. Weight 0 keeps the readout.` \
   CAP_PALM_DOWN_W="${PALM_DOWN_W:-0.0}" \
+  CAP_PALM_DOWN_SR_RAMP="${PALM_DOWN_SR_RAMP:-0}" \
   CAP_PALM_DOWN_MAX="${PALM_DOWN_MAX:-40}" \
   CAP_PALM_DOWN_REF=40 \
   CAP_WRIST_CLAMP_R=0.25 \

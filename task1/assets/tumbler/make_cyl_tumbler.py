@@ -58,6 +58,9 @@ def main():
     ap.add_argument("--segments", type=int, default=64)
     ap.add_argument("--spin-friction", type=float, default=0.0,
                     help="cap_spin 쿨롱 마찰 토크 Nm. 실물 나사 저항 근사 (0.1~0.5 권장)")
+    ap.add_argument("--capz", type=float, default=CAPZ,
+                    help="cap_spin 조인트 원점 z (m). 몸체 높이가 바뀌면 캡 안착 "
+                         "높이도 같이 옮겨야 한다. 기본 0.225 = 기존 자산.")
     ap.add_argument("--out", default="tumbler_cyl.urdf")
     args = ap.parse_args()
 
@@ -85,6 +88,10 @@ def main():
     if args.spin_friction > 0:
         src = src.replace('<dynamics damping="0.001" friction="0.0"/>',
                           '<dynamics damping="0.001" friction="%.3f"/>' % args.spin_friction)
+    if abs(args.capz - CAPZ) > 1e-9:
+        assert '<origin xyz="0 0 0.225000"/>' in src, "free6 템플릿의 cap_spin 원점을 찾지 못함"
+        src = src.replace('<origin xyz="0 0 0.225000"/>',
+                          '<origin xyz="0 0 %.6f"/>' % args.capz)
     out = src.replace("meshes/body_visual.obj", body_mesh)
     out = out.replace("meshes/body_collision.obj", body_mesh)
     out = out.replace("meshes/cap_visual.obj", cap_mesh)
@@ -98,7 +105,7 @@ def main():
     with open(os.path.join(HERE, args.out), "w") as f:
         f.write(out)
     print(f"저장: {args.out} + {cap_mesh} + {body_mesh}")
-    print(f"캡 원점 z={CAPZ}m (기존과 동일), 캡 벽 z 범위 {CAPZ*1000:.0f}~{(CAPZ+args.h)*1000:.0f}mm")
+    print(f"캡 원점 z={args.capz}m, 캡 벽 z 범위 {args.capz*1000:.0f}~{(args.capz+args.h)*1000:.0f}mm")
 
 
 if __name__ == "__main__":

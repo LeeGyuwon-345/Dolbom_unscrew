@@ -20,6 +20,8 @@ thumb sweep 으로 cap 옆면에 닿을 수 있는 wrist pose 만 통과시킨�
 
 from __future__ import annotations
 
+import os
+
 import numpy as np
 import torch
 
@@ -47,8 +49,10 @@ DORSAL_LOCAL = -PALM_LOCAL
 
 # task1/assets/tumbler/meshes/cap_visual.obj bounds:
 #   xy radius max ~= 0.0514 m, z ~= 0.0000~0.0308 m.
-CAP_RADIUS = 0.052
-CAP_HEIGHT = 0.031
+# 캡 포인트클라우드(_cap_grasp_cap_points)가 이 치수를 쓴다. 텀블러 자산을
+# 바꿀 때 env 변수로 함께 맞춘다 (미설정 = 기존 실측값 그대로).
+CAP_RADIUS = float(os.environ.get("CAP_CLOUD_RADIUS", "0.052"))
+CAP_HEIGHT = float(os.environ.get("CAP_CLOUD_HEIGHT", "0.031"))
 CAP_TARGET_MARGIN = 0.002
 # task1/assets/dg5fs_hand/meshes/dg5fs_right/link_base.STL bounds.
 PALM_BASE_AABB_MIN = torch.tensor([-0.0192112, -0.0410000, 0.0])

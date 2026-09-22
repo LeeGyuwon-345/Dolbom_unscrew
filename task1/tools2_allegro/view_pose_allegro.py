@@ -65,6 +65,15 @@ else:
     if not cands:
         raise SystemExit("poses/ 에 자세 파일이 없다. optimize_pose.py -o 로 먼저 만들 것")
     POSE = cands[-1]
+# 자세 note 의 "r=.. h=.."(mm) 로 원기둥 치수 재설정 -- 뷰어 기본(r50) 과 다른 크기도 정확히 그린다.
+try:
+    import re as _re
+    _note = json.load(open(POSE)).get("note", "")
+    _rm, _hm = _re.search(r"r=([0-9.]+)", _note), _re.search(r"h=([0-9.]+)", _note)
+    if _rm and _hm:
+        CAP = CapShape(float(_rm.group(1)) / 1000.0, float(_hm.group(1)) / 1000.0)
+except Exception:
+    pass
 print(f"자세: {os.path.basename(POSE)}", flush=True)
 print("충돌 %s" % ("켬 (--collide)" if COLLIDE else "끔 -- 캡·자기충돌 모두 없음"), flush=True)
 print("노란 와이어프레임 = 최적화가 실제로 푼 원기둥 (r %.0fmm h %.0fmm), 월드 z %.3f~%.3f"

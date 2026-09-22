@@ -90,6 +90,10 @@ class CapUnscrewConfig:
     # Slack on the exposed band so a finger right at the rim still counts.
     band_margin: float = 0.002
     radial_margin: float = 0.010
+    # cap_wall_radius 프로파일 선택: 1 = 실물 STL 프로파일 테이블(기본, 구
+    # 50mm 텀블러 실측), 0 = cap_radius_lo→hi 원뿔/원기둥 해석식. 원기둥
+    # 근사 텀블러(r44 등)로 바꿀 때는 반드시 0 — 테이블은 구 형상 고정값이다.
+    cap_profile: int = 1
 
     # --- contact ---------------------------------------------------------
     contact_force_threshold: float = 0.05
@@ -281,7 +285,10 @@ def wall_distance_and_contact(
     radial_out = (radial - r_wall).abs()
     dist = (torch.sqrt(radial_out * radial_out + z_out * z_out) - r).clamp_min(0.0)
 
-    on_band = (z >= lo - r) & (z <= hi + r) & ((radial_out - r) <= cfg.radial_margin)
+    # band_lo_slack: 하한 슬랙 [m]. 0 이면 기존 동작(finger_radius). 캡 밑이
+    # 몸통과 flush 인 텀블러에서 몸통 오인정을 막기 위해 좁힌다 (A73).
+    _r_lo = float(getattr(cfg, "band_lo_slack", 0.0)) or r
+    on_band = (z >= lo - _r_lo) & (z <= hi + r) & ((radial_out - r) <= cfg.radial_margin)
 
     inside = (radial < r_wall + r) & (z > -r) & (z < cfg.cap_height + r)
     depth = torch.where(

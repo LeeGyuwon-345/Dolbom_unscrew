@@ -114,7 +114,18 @@
       <inertia ixx="0.000147823" ixy="2.46e-07" ixz="6.43e-07" iyy="0.000243703" iyz="-5.54e-07" izz="0.000142339"/>
     </inertial>
   </link>
-  <link name="tcp"/>
+  <!-- 실물 90도 마운트 (mount.STL, mm -> scale 0.001) -- 시각화 전용.
+       별도 link/collision 없이 tcp visual 로만 넣어 body 수(29)/DOF(22)/물리 불변.
+       배치: 플랜지면(y77 원판, PCD50 4xM6)을 tcp 면에 밀착, 축(x40,z40)을 플랜지 축에 정렬.
+       실측 손바닥 중심 (0,-57,95) vs 본 URDF vmount (0,-60,95): y 3mm 차이(손 밑면 3mm 뜸). -->
+  <link name="tcp">
+    <visual>
+      <origin xyz="0.040 -0.077 -0.040" rpy="0 -1.5707963 0"/>
+      <geometry>
+        <mesh filename="mount/mount.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </visual>
+  </link>
   <joint name="base" type="revolute">
     <origin rpy="0 0 0" xyz="0 0 0.1692"/>
     <parent link="link0"/>

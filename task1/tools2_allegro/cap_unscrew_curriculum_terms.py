@@ -241,7 +241,26 @@ class CapUnscrewCurriculumConfig:
     # well clear -- the fifth finger simply had no value once contact_frac had
     # topped out at four.
     contact_ref: int = 4
+    # 접촉밴드 하한 슬랙 [m] (0 = finger_radius 사용 = 기존 동작)
+    band_lo_slack: float = 0.0
+    # 회전 수입의 연속 게이트(grasp_ok_f) 분모만 별도로 올리는 참조값.
+    # 0 = 기존 동작(min_contact_tips 사용). 하드 분기(closure 분기, grasped,
+    # grasp_ok)는 건드리지 않으므로 부트스트랩을 보존한 채 "접촉수/참조" 비례
+    # 수입만 만든다 (A64: min_contact_tips=4 직접 상향은 형성 붕괴 — 3지
+    # 수입이 사실상 0이 되는 순환). A65 처방.
+    income_tips_ref: int = 0
     grip_force_ref: float = 0.5
+    # 손가락별 파지력 하한 [N] (MANO 순: 엄지,검지,중지,약지 — 5번째 중복
+    # 슬롯은 약지 값 재사용). 설정 시 grip 점수 = clamp((F-하한)/ramp, 0, 1)
+    # — 하한 밑은 0점이라 "살짝 쥐기"(임펄스 전략의 저힘 기조)가 크레딧을
+    # 못 받는다. 기준은 A51 롤 정책 실측 중앙값 (μ5x1.8, 2026-08-24).
+    # 빈 문자열 = 기존 (F/grip_force_ref) 비례 그대로.
+    grip_floor: tuple = ()
+    grip_floor_ramp: float = 4.0
+    # grip 평균을 실제 손가락 4개로만 낸다. 팁 슬롯은 MANO 5칸이라 5번째가
+    # 약지 중복인데, 5로 나누면 엄지·중지를 최대로 눌러도 상한이 2/5=0.4 에
+    # 묶이고 검지·약지를 붙여 얻는 증분도 0.2 로 희석된다. 기본 False = 기존 동작.
+    grip_mean4: bool = False
 
     # --- objective (never scaled by kc) -----------------------------------
     unscrew_weight: float = 10.0
@@ -598,7 +617,8 @@ def cap_unscrew_curriculum_reward(
     if cfg.palm_grade:
         # "엄지 AND 2접촉" 계단을 연속 곱으로. 계단으로 남기면 가중 합이
         # 문턱을 지날 때 새 절벽이 생긴다.
-        grasp_ok_f = thumb_w * (contact_count / max(cfg.min_contact_tips, 1)).clamp(0.0, 1.0)
+        _income_ref = cfg.income_tips_ref if cfg.income_tips_ref > 0 else cfg.min_contact_tips
+        grasp_ok_f = thumb_w * (contact_count / max(_income_ref, 1)).clamp(0.0, 1.0)
     else:
         grasp_ok_f = grasp_ok.to(dtype=cap_pos_w.dtype)
 
@@ -715,9 +735,17 @@ def cap_unscrew_curriculum_reward(
     lift_frac = ((cap_rise - cfg.lift_release_height) / lift_span).clamp(0.0, 1.0)
     reward_lift = lift_frac * grasp_quality * grasp_hold * grasp_ok_f
 
-    grip = (force_mag / cfg.grip_force_ref).clamp(0.0, 1.0) * (
-        contact_w if cfg.palm_grade else tip_contact.to(dtype=force_mag.dtype))
-    reward_grip = grip.mean(dim=-1) * grasp_ok_f
+    if cfg.grip_floor:
+        _fl = torch.as_tensor(
+            list(cfg.grip_floor) + [cfg.grip_floor[-1]] * (force_mag.shape[-1] - len(cfg.grip_floor)),
+            device=force_mag.device, dtype=force_mag.dtype,
+        )
+        grip = ((force_mag - _fl) / max(cfg.grip_floor_ramp, 1e-6)).clamp(0.0, 1.0) * (
+            contact_w if cfg.palm_grade else tip_contact.to(dtype=force_mag.dtype))
+    else:
+        grip = (force_mag / cfg.grip_force_ref).clamp(0.0, 1.0) * (
+            contact_w if cfg.palm_grade else tip_contact.to(dtype=force_mag.dtype))
+    reward_grip = (grip[..., :4] if cfg.grip_mean4 else grip).mean(dim=-1) * grasp_ok_f
     # near is the exception, and deliberately so: it is the only term that pays
     # before any contact exists, so gating it on contact would leave nothing to
     # bring the hand to the cap in the first place. It is squeezed by grip
